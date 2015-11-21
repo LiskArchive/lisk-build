@@ -1,0 +1,25 @@
+From 340544e9b5d8a88664eae548a6b8fd67fb8013ea Mon Sep 17 00:00:00 2001
+From: Oliver Beddows <oliver.beddows@googlemail.com>
+Date: Sat, 21 Nov 2015 16:27:54 +0000
+Subject: [PATCH 2/4] Patching platform-posix.cc.
+
+---
+ deps/v8/src/base/platform/platform-posix.cc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/deps/v8/src/base/platform/platform-posix.cc b/deps/v8/src/base/platform/platform-posix.cc
+index a5128d0..1126259 100644
+--- a/deps/v8/src/base/platform/platform-posix.cc
++++ b/deps/v8/src/base/platform/platform-posix.cc
+@@ -328,7 +328,7 @@ int OS::GetCurrentThreadId() {
+ #elif V8_OS_ANDROID
+   return static_cast<int>(gettid());
+ #else
+-  return static_cast<int>(pthread_self());
++  return static_cast<int>(reinterpret_cast<intptr_t>(pthread_self()));
+ #endif
+ }
+ 
+-- 
+2.6.3
+

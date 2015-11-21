@@ -46,6 +46,7 @@ if [ ! -f "$CRYPTI_NODE_DIR/$CRYPTI_NODE_OUT" ]; then
   exec_cmd "rm -rf $CRYPTI_NODE_DIR"
   exec_cmd "unzip $CRYPTI_NODE_FILE"
   cd "$CRYPTI_NODE_DIR"
+  apply_patches "node"
   exec_cmd "./configure --without-npm"
   exec_cmd "make"
   cd ../
@@ -62,6 +63,7 @@ if [ ! -f "$NODE_DIR/$NODE_OUT" ]; then
   exec_cmd "rm -rf $NODE_DIR"
   exec_cmd "tar -zxvf $NODE_FILE"
   cd "$NODE_DIR"
+  apply_patches "node"
   exec_cmd "./configure --without-npm --prefix=$(pwd)/compiled"
   exec_cmd "make"
   exec_cmd "make install"
