@@ -12,7 +12,7 @@ mkdir -p src
 cd src
 
 apply_patches() {
-  patches="../../patches/$(uname -s)/$1"
+  local patches="../../patches/$(uname -s)/$1"
   if [ -d $patches ]; then
     for i in "$patches"/*.patch; do patch -p1 < $i; done
   fi
