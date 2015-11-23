@@ -3,7 +3,7 @@
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 . "$(pwd)/../shared.sh"
 
-if [ ! $(uname -s) = "FreeBSD" ]; then
+if [ ! $(uname -s) == "FreeBSD" ]; then
   echo "Invalid operating system. Aborting."
   exit 1
 fi

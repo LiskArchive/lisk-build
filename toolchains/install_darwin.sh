@@ -3,7 +3,7 @@
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 . "$(pwd)/../shared.sh"
 
-if [ ! $(uname -s) = "Darwin" ]; then
+if [ ! $(uname -s) == "Darwin" ]; then
   echo "Invalid operating system. Aborting."
   exit 1
 fi
