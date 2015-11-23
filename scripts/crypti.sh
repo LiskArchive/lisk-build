@@ -84,11 +84,11 @@ check_status() {
   fi
   if [ ! -z $PID ]; then
     ps -p "$PID" > /dev/null 2>&1
-    local status=$?
+    local STATUS=$?
   else
-    local status=1
+    local STATUS=1
   fi
-  if [ -f $PID_FILE ] && [ -n "$PID" ] && [ $status -eq 0 ]; then
+  if [ -f $PID_FILE ] && [ -n "$PID" ] && [ $STATUS -eq 0 ]; then
     echo "Crypti is running (as process $PID)."
   else
     echo "Crypti is not running."
