@@ -89,6 +89,10 @@ fi
 exec_cmd "mkdir -p $BUILD_NAME/bin"
 exec_cmd "cp -f $SQLITE_DIR/$SQLITE_OUT $BUILD_NAME/bin/"
 
+echo "Stamping build..."
+echo "--------------------------------------------------------------------------"
+exec_cmd "echo v`date '+%H:%M:%S %d/%m/%Y'` > $BUILD_NAME/package.build";
+
 echo "Creating archive..."
 echo "--------------------------------------------------------------------------"
 exec_cmd "zip -qr $BUILD_NAME.zip $BUILD_NAME"
