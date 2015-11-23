@@ -28,7 +28,7 @@ start_forever() {
 }
 
 stop_forever() {
-  PID=$(cat "$PID_FILE")
+  local PID=$(cat "$PID_FILE")
   if [ -n "$PID" ]; then
     kill -- -$(ps -o pgid= "$PID" | grep -o '[0-9]\+') > /dev/null 2>&1
     if [ $? -eq 0 ]; then
@@ -80,7 +80,7 @@ rebuild_crypti() {
 
 check_status() {
   if [ -f "$PID_FILE" ]; then
-    PID=$(cat "$PID_FILE")
+    local PID=$(cat "$PID_FILE")
   fi
   if [ ! -z $PID ]; then
     ps -p "$PID" > /dev/null 2>&1
