@@ -82,10 +82,13 @@ check_status() {
   if [ -f "$PID_FILE" ]; then
     PID=$(cat "$PID_FILE")
   fi
-  if [ -n "$PID" ]; then
-    ps -p "$PID" > /dev/null 2>&1 &
+  if [ ! -z $PID ]; then
+    ps -p "$PID" > /dev/null 2>&1
+    local status=$?
+  else
+    local status=1
   fi
-  if [ -f $PID_FILE ] && [ -n "$PID" ] && [ $? = 0 ]; then
+  if [ -f $PID_FILE ] && [ -n "$PID" ] && [ $status -eq 0 ]; then
     echo "Crypti is running (as process $PID)."
   else
     echo "Crypti is not running."
