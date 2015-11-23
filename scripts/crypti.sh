@@ -31,7 +31,7 @@ stop_forever() {
   PID=$(cat "$PID_FILE")
   if [ -n "$PID" ]; then
     kill -- -$(ps -o pgid= "$PID" | grep -o '[0-9]\+') > /dev/null 2>&1
-    if [ $? = 0 ]; then
+    if [ $? -eq 0 ]; then
       echo "Stopped process $PID"
     else
       echo "Failed to stop process $PID"
@@ -56,8 +56,8 @@ download_blockchain() {
   if [ ! -f "blockchain.db" ]; then
     echo "Downloading blockchain snapshot..."
     curl -o blockchain.db.zip "http://downloads.cryptichain.me/blockchain.db.zip"
-    [ $? = 1 ] || unzip blockchain.db.zip
-    [ $? = 0 ] || rm -f blockchain.db
+    [ $? -eq 1 ] || unzip blockchain.db.zip
+    [ $? -eq 0 ] || rm -f blockchain.db
     rm -f blockchain.db.zip
   fi
 }
