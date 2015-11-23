@@ -82,7 +82,7 @@ check_status() {
   if [ -f "$PID_FILE" ]; then
     local PID=$(cat "$PID_FILE")
   fi
-  if [ ! -z $PID ]; then
+  if [ ! -z "$PID" ]; then
     ps -p "$PID" > /dev/null 2>&1
     local STATUS=$?
   else
