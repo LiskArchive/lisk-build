@@ -29,7 +29,7 @@ start_forever() {
 
 stop_forever() {
   local PID=$(cat "$PID_FILE")
-  if [ -n "$PID" ]; then
+  if [ ! -z "$PID" ]; then
     kill -- -$(ps -o pgid= "$PID" | grep -o '[0-9]\+') > /dev/null 2>&1
     if [ $? -eq 0 ]; then
       echo "Stopped process $PID"
@@ -88,7 +88,7 @@ check_status() {
   else
     local STATUS=1
   fi
-  if [ -f $PID_FILE ] && [ -n "$PID" ] && [ $STATUS -eq 0 ]; then
+  if [ -f $PID_FILE ] && [ ! -z "$PID" ] && [ $STATUS -eq 0 ]; then
     echo "Crypti is running (as process $PID)."
   else
     echo "Crypti is not running."
