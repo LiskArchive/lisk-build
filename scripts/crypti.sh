@@ -147,6 +147,7 @@ case $1 in
   ;;
 "autostart")
   autostart_crypti
+  start_crypti
   ;;
 "rebuild")
   stop_crypti
