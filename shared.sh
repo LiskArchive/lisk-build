@@ -17,7 +17,7 @@ exec_cmd() {
 check_cmds() {
   local cmds=("${!1}")
   for i in "${cmds[@]}"; do
-    command -v "$i" >/dev/null 2>&1 || {
+    command -v "$i" > /dev/null 2>&1 || {
       echo "Error: $i command was not found. Aborting." >&2; exit 1;
     }
   done
