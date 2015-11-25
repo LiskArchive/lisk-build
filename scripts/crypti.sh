@@ -100,7 +100,7 @@ autostart_cron() {
 	EOF
   )
 
-  printf "$crontab" | $cmd - 2> /dev/null
+  printf "$crontab\n" | $cmd - 2> /dev/null
 
   if [ $? -eq 0 ]; then
     echo "Crontab updated successfully."
