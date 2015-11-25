@@ -96,7 +96,7 @@ autostart_cron() {
 
   crontab=$(cat <<-EOF
 	$crontab
-	@reboot $(command -v "bash") $(pwd)/crypti.sh start
+	@reboot $(command -v "bash") $(pwd)/crypti.sh start > $(pwd)/cron.log 2>&1
 	EOF
   )
 
