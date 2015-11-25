@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="0.5.2"
+VERSION="0.5.3"
 OS=`uname`
 ARCH=`uname -m`
 BUILD_NAME="crypti-$VERSION-$OS-$ARCH"
