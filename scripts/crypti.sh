@@ -8,7 +8,7 @@ if [ ! -f "$(pwd)/app.js" ]; then
   exit 1
 fi
 
-PATH="$(pwd)/bin:$PATH"
+PATH="$(pwd)/bin:/usr/bin:/bin:/usr/local/bin"
 LOG_FILE="$(pwd)/app.log"
 PID_FILE="$(pwd)/app.pid"
 
@@ -78,6 +78,39 @@ rebuild_crypti() {
   rm -f blockchain.db*
 }
 
+autostart_crypti() {
+  autostart_cron
+}
+
+autostart_cron() {
+  local cmd="crontab"
+
+  command -v "$cmd" &> /dev/null
+
+  if [ $? -eq 1 ]; then
+    echo "Failed to execute crontab."
+    return 1
+  fi
+
+  crontab=$($cmd -l 2> /dev/null | sed '/crypti\.sh start/d' 2> /dev/null)
+
+  crontab=$(cat <<-EOF
+	$crontab
+	@reboot $(command -v "bash") $(pwd)/crypti.sh start
+	EOF
+  )
+
+  printf "$crontab" | $cmd - 2> /dev/null
+
+  if [ $? -eq 0 ]; then
+    echo "Crontab updated successfully."
+    return 0
+  else
+    echo "Failed to update crontab."
+    return 1
+  fi
+}
+
 check_status() {
   if [ -f "$PID_FILE" ]; then
     local PID=$(cat "$PID_FILE")
@@ -112,6 +145,9 @@ case $1 in
   stop_crypti
   start_crypti
   ;;
+"autostart")
+  autostart_crypti
+  ;;
 "rebuild")
   stop_crypti
   rebuild_crypti
@@ -126,6 +162,6 @@ case $1 in
 *)
   echo "Error: Unrecognized command."
   echo ""
-  echo "Available commands are: start stop restart rebuild status logs"
+  echo "Available commands are: start stop restart autostart rebuild status logs"
   ;;
 esac
