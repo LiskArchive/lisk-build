@@ -2,6 +2,7 @@
 
 if [ ! -z $1 ]; then
   echo "Overriding architecture with: $1"
+  echo "--------------------------------------------------------------------------"
   ARCH=$1
 fi
 
