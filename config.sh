@@ -44,7 +44,7 @@ if [ "$ARCH" == "armv6l" ]; then
   SQLITE_CONFIG="--host=arm"
 fi
 
-if [ $TARGET != "" ]; then
+if [ "$TARGET" != "" ]; then
   export CC="${TARGET}-gcc"
   export CXX="${TARGET}-g++"
   export AR="${TARGET}-ar"
