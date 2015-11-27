@@ -34,7 +34,7 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "rm -rf $BUILD_NAME"
   exec_cmd "unzip crypti-linux.zip -d $BUILD_NAME"
   cd "$BUILD_NAME"
-  exec_cmd "npm install --production"
+  exec_cmd "npm install --production $CRYPTI_CONFIG"
   cd ../
 fi
 
@@ -52,7 +52,7 @@ if [ ! -f "$CRYPTI_NODE_DIR/$CRYPTI_NODE_OUT" ]; then
   exec_cmd "unzip $CRYPTI_NODE_FILE"
   cd "$CRYPTI_NODE_DIR"
   apply_patches "node"
-  exec_cmd "./configure --without-npm"
+  exec_cmd "./configure --without-npm $CRYPTI_NODE_CONFIG"
   exec_cmd "make"
   cd ../
 fi
@@ -69,7 +69,7 @@ if [ ! -f "$NODE_DIR/$NODE_OUT" ]; then
   exec_cmd "tar -zxvf $NODE_FILE"
   cd "$NODE_DIR"
   apply_patches "node"
-  exec_cmd "./configure --without-npm --prefix=$(pwd)/compiled"
+  exec_cmd "./configure --without-npm --prefix=$(pwd)/compiled $NODE_CONFIG"
   exec_cmd "make"
   exec_cmd "make install"
   cd ../
@@ -86,7 +86,7 @@ if [ ! -f "$SQLITE_DIR/$SQLITE_OUT" ]; then
   exec_cmd "rm -rf $SQLITE_DIR"
   exec_cmd "tar -zxvf $SQLITE_FILE"
   cd "$SQLITE_DIR"
-  exec_cmd "./configure --enable-fts5 --prefix=$(pwd)/compiled"
+  exec_cmd "./configure --enable-fts5 --prefix=$(pwd)/compiled $SQLITE_CONFIG"
   exec_cmd "make"
   exec_cmd "make install"
   cd ../
