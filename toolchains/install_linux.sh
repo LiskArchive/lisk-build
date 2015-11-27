@@ -8,7 +8,7 @@ if [ ! $(uname -s) == "Linux" ]; then
   exit 1
 fi
 
-CMDS=("apt-get" "curl")
+CMDS=("apt-get" "curl" "sudo")
 check_cmds CMDS[@]
 
 exec_cmd "curl -sL https://deb.nodesource.com/setup_0.12 | sudo -E bash -"
