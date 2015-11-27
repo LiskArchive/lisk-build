@@ -15,17 +15,8 @@ mkdir -p src
 cd src
 
 exec_cmd "rm -vrf crypti-$VERSION-*"
-
-if [ -d "$CRYPTI_NODE_DIR" ]; then
-  exec_cmd "cd $CRYPTI_NODE_DIR; make distclean"
-fi
-
-if [ -d "$NODE_DIR" ]; then
-  exec_cmd "cd $NODE_DIR; make distclean"
-fi
-
-if [ -d "$SQLITE_DIR" ]; then
-  exec_cmd "cd $SQLITE_DIR; make distclean"
-fi
+exec_cmd "rm -vrf $CRYPTI_NODE_DIR"
+exec_cmd "rm -vrf $NODE_DIR"
+exec_cmd "rm -vrf $SQLITE_DIR"
 
 cd ../
