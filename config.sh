@@ -29,16 +29,31 @@ SQLITE_URL="https://www.sqlite.org/2015/$SQLITE_FILE"
 SQLITE_OUT="compiled/bin/sqlite3"
 SQLITE_CONFIG=""
 
-if [ "$TARGET" != "" ]; then
-  export CC="${CROSS_COMPILER}-gcc"
-  export CXX="${CROSS_COMPILER}-g++"
-  export AR="${CROSS_COMPILER}-ar"
-  export RANLIB="${CROSS_COMPILER}-ranlib"
-  export LD="${CROSS_COMPILER}-ld"
-  export CPP="${CROSS_COMPILER}-gcc -E"
-  export STRIP="${CROSS_COMPILER}-strip"
-  export OBJCOPY="${CROSS_COMPILER}-objcopy"
-  export OBJDUMP="${CROSS_COMPILER}-objdump"
-  export NM="${CROSS_COMPILER}-nm"
-  export AS="${CROSS_COMPILER}-as"
+if [ "$ARCH" == "armv6l" ]; then
+  export TARGET="arm-linux-gnueabihf"
+  export CCFLAGS="-marm -march=armv6 -mfpu=vfp -mfloat-abi=hard"
+  export CXXFLAGS="${CCFLAGS}"
+
+  export GYPFLAGS="-Darmeabi=hard -Dv8_use_arm_eabi_hardfloat=true -Dv8_can_use_vfp3_instructions=false -Dv8_can_use_vfp2_instructions=true -Darm7=0 -Darm_vfp=vfp"
+  export VFP3="off"
+  export VFP2="on"
+
+  CRYPTI_CONFIG="--target_arch=arm"
+  CRYPTI_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
+  NODE_CONFIG="${CRYPTI_NODE_CONFIG}"
+  SQLITE_CONFIG="--host=arm"
+fi
+
+if [ $TARGET != "" ]; then
+  export CC="${TARGET}-gcc"
+  export CXX="${TARGET}-g++"
+  export AR="${TARGET}-ar"
+  export RANLIB="${TARGET}-ranlib"
+  export LD="${TARGET}-ld"
+  export CPP="${TARGET}-gcc -E"
+  export STRIP="${TARGET}-strip"
+  export OBJCOPY="${TARGET}-objcopy"
+  export OBJDUMP="${TARGET}-objdump"
+  export NM="${TARGET}-nm"
+  export AS="${TARGET}-as"
 fi
