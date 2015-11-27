@@ -31,6 +31,7 @@ SQLITE_CONFIG=""
 
 if [ "$ARCH" == "armv6l" ]; then
   export TARGET="arm-linux-gnueabihf"
+  export PATH="$PATH:$(pwd)/toolchains/rpi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin"
   export CCFLAGS="-marm -march=armv6 -mfpu=vfp -mfloat-abi=hard"
   export CXXFLAGS="${CCFLAGS}"
 
