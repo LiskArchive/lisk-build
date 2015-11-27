@@ -48,7 +48,7 @@ if [ ! -f "$CRYPTI_NODE_DIR/$CRYPTI_NODE_OUT" ]; then
   cd "$CRYPTI_NODE_DIR"
   apply_patches "node"
   exec_cmd "./configure --without-npm $CRYPTI_NODE_CONFIG"
-  exec_cmd "make"
+  exec_cmd "make --jobs=$JOBS"
   cd ../
 fi
 exec_cmd "mkdir -p $BUILD_NAME/nodejs"
@@ -65,7 +65,7 @@ if [ ! -f "$NODE_DIR/$NODE_OUT" ]; then
   cd "$NODE_DIR"
   apply_patches "node"
   exec_cmd "./configure --without-npm --prefix=$(pwd)/compiled $NODE_CONFIG"
-  exec_cmd "make"
+  exec_cmd "make --jobs=$JOBS"
   exec_cmd "make install"
   cd ../
 fi
@@ -82,7 +82,7 @@ if [ ! -f "$SQLITE_DIR/$SQLITE_OUT" ]; then
   exec_cmd "tar -zxvf $SQLITE_FILE"
   cd "$SQLITE_DIR"
   exec_cmd "./configure --enable-fts5 --prefix=$(pwd)/compiled $SQLITE_CONFIG"
-  exec_cmd "make"
+  exec_cmd "make --jobs=$JOBS"
   exec_cmd "make install"
   cd ../
 fi

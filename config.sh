@@ -11,6 +11,7 @@ OS=`uname`
 [ ! -z "$ARCH" ] || ARCH=`uname -m`
 BUILD_NAME="crypti-$VERSION-$OS-$ARCH"
 TARGET=""
+JOBS="2"
 
 CRYPTI_DIR="crypti-linux"
 CRYPTI_FILE="$CRYPTI_DIR.zip"
