@@ -11,7 +11,7 @@ fi
 CMDS=("pkg sudo")
 check_cmds CMDS[@]
 
-sudo pkg install -y autoconf automake curl gcc gmake node012 npm012 python security/ca_root_nss wget unzip zip
+sudo pkg install -y autoconf automake curl gcc git gmake node012 npm012 python security/ca_root_nss wget unzip zip
 
 if [ ! -e "/usr/local/bin/make" ] && [ -e "/usr/bin/make" ]; then
   sudo mv /usr/bin/make /usr/bin/make.moved

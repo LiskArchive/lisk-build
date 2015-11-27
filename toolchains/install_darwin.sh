@@ -12,4 +12,4 @@ CMDS=("ruby" "curl")
 check_cmds CMDS[@]
 
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-exec_cmd "brew install autoconf automake homebrew/versions/node012 wget"
+exec_cmd "brew install autoconf automake git homebrew/versions/node012 wget"
