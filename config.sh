@@ -51,6 +51,23 @@ if [ "$ARCH" == "armv6l" ]; then
   SQLITE_CONFIG="--host=arm"
 fi
 
+if [ "$ARCH" == "armv7-a" ]; then
+  export TARGET="arm-linux-gnueabihf"
+  export PATH="$(pwd)/toolchains/rpi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin:$PATH"
+  export CCFLAGS="-marm -march=armv7-a -mfpu=vfp -mfloat-abi=hard"
+  export CXXFLAGS="${CCFLAGS}"
+
+  export OPENSSL_armcap=7
+  export GYPFLAGS="-Darmeabi=hard -Dv8_use_arm_eabi_hardfloat=true -Dv8_can_use_vfp3_instructions=true -Dv8_can_use_vfp2_instructions=true -Darm7=1"
+  export VFP3="on"
+  export VFP2="on"
+
+  CRYPTI_CONFIG="--target_arch=arm"
+  CRYPTI_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
+  NODE_CONFIG="${CRYPTI_NODE_CONFIG}"
+  SQLITE_CONFIG="--host=arm"
+fi
+
 if [ "$TARGET" != "" ]; then
   export CC="${TARGET}-gcc"
   export CXX="${TARGET}-g++"
