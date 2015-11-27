@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ ! -z $1 ]; then
+  echo "Overriding architecture with: $1"
+  ARCH=$1
+fi
+
 VERSION="0.5.3"
 OS=`uname`
 [ ! -z "$ARCH" ] || ARCH=`uname -m`

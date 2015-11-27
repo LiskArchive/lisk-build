@@ -2,11 +2,6 @@
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 
-if [ ! -z $1 ]; then
-  echo "Overriding architecture with: $1"
-  ARCH=$1
-fi
-
 . "$(pwd)/shared.sh"
 . "$(pwd)/config.sh"
 
