@@ -2,7 +2,7 @@
 
 VERSION="0.5.3"
 OS=`uname`
-ARCH=`uname -m`
+[ ! -z "$ARCH" ] || ARCH=`uname -m`
 BUILD_NAME="crypti-$VERSION-$OS-$ARCH"
 
 CRYPTI_DIR="crypti-linux"
