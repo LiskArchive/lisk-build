@@ -7,8 +7,8 @@ if [ ! -z $1 ]; then
   ARCH=$1
 fi
 
-. "$(pwd)/config.sh"
 . "$(pwd)/shared.sh"
+. "$(pwd)/config.sh"
 
 CMDS=("autoconf" "gcc" "g++" "make" "node" "npm" "python" "tar" "unzip" "wget" "zip");
 check_cmds CMDS[@]
