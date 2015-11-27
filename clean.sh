@@ -14,9 +14,7 @@ echo "--------------------------------------------------------------------------
 mkdir -p src
 cd src
 
-if [ -d "$BUILD_NAME" ]; then
-  exec_cmd "rm -vrf $BUILD_NAME"
-fi
+exec_cmd "rm -vrf crypti-$VERSION-*"
 
 if [ -d "$CRYPTI_NODE_DIR" ]; then
   exec_cmd "cd $CRYPTI_NODE_DIR; make distclean"
