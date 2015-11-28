@@ -52,7 +52,7 @@ if [ "$ARCH" == "armv6l" ]; then
   SQLITE_CONFIG="--host=arm"
 fi
 
-if [ "$ARCH" == "armv7-a" ]; then
+if [ "$ARCH" == "armv7l" ]; then
   export TARGET="arm-linux-gnueabihf"
   export PATH="$(pwd)/toolchains/rpi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin:$PATH"
   export CCFLAGS="-marm -march=armv7-a -mfpu=vfp -mfloat-abi=hard"
