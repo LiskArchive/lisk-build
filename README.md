@@ -199,3 +199,11 @@ To build a package, perform the following on an x86 machine, that has a Debian/U
   ```
   bash build.sh
   ```
+
+## Authors
+
+- Olivier Beddows <olivier@lisk.io>
+
+## License
+
+MIT
