@@ -1,8 +1,8 @@
-# Crypti Build
+# Lisk Build
 
-A native package building tool for the Crypti - Delegate & Developer Edition. Allows automated compilation of binary packages, with support for multiple posix-based operating systems.
+A native package building tool for the Lisk - Delegate & Developer Edition. Allows automated compilation of binary packages, with support for multiple posix-based operating systems.
 
-Please read [Installing Crypti (from Binaries)](https://github.com/crypti/crypti-docs/blob/master/BinaryInstall.md) if you are merely looking to install Crypti, onto an already supported operating system / architecture.
+Please read [Installing Lisk (from Binaries)](https://github.com/lisk/lisk-docs/blob/master/BinaryInstall.md) if you are merely looking to install Lisk, onto an already supported operating system / architecture.
 
 ## Platforms
 
@@ -12,7 +12,7 @@ Please read [Installing Crypti (from Binaries)](https://github.com/crypti/crypti
 - [Darwin (native)](#darwin)
 - [FreeBSD (native)](#freebsd)
 
-**NOTE:** For each platform, the resulting packages are placed within the `src` directory, using the following naming convention: `crypti-{version}-{os}-{architecture}.zip`.
+**NOTE:** For each platform, the resulting packages are placed within the `src` directory, using the following naming convention: `lisk-{version}-{os}-{architecture}.zip`.
 
 ## Linux
 
@@ -27,13 +27,13 @@ To build a package, perform the following on a machine matching your target arch
 2. Clone repository:
 
   ```
-  git clone https://github.com/karmacoma/crypti-build.git
+  git clone https://github.com/karmacoma/lisk-build.git
   ```
 
-3. Change into `crypti-build` directory:
+3. Change into `lisk-build` directory:
 
   ```
-  cd crypti-build
+  cd lisk-build
   ```
 
 4. Install build toolchain:
@@ -65,13 +65,13 @@ To build a package, perform the following on an x86 machine, that has a Debian/U
 2. Clone repository:
 
   ```
-  git clone https://github.com/karmacoma/crypti-build.git
+  git clone https://github.com/karmacoma/lisk-build.git
   ```
 
-3. Change into `crypti-build` directory:
+3. Change into `lisk-build` directory:
 
   ```
-  cd crypti-build
+  cd lisk-build
   ```
 
 4. Install build toolchain:
@@ -109,13 +109,13 @@ To build a package, perform the following on an x86 machine, that has a Debian/U
 2. Clone repository:
 
   ```
-  git clone https://github.com/karmacoma/crypti-build.git
+  git clone https://github.com/karmacoma/lisk-build.git
   ```
 
-3. Change into `crypti-build` directory:
+3. Change into `lisk-build` directory:
 
   ```
-  cd crypti-build
+  cd lisk-build
   ```
 
 4. Install build toolchain:
@@ -147,13 +147,13 @@ To build a package, perform the following on an x86 machine, that has a Debian/U
 2. Clone repository:
 
   ```
-  git clone https://github.com/karmacoma/crypti-build.git
+  git clone https://github.com/karmacoma/lisk-build.git
   ```
 
-3. Change into `crypti-build` directory:
+3. Change into `lisk-build` directory:
 
   ```
-  cd crypti-build
+  cd lisk-build
   ```
 
 4. Install build toolchain:
@@ -179,13 +179,13 @@ To build a package, perform the following on an x86 machine, that has a Debian/U
 2. Clone repository:
 
   ```
-  git clone https://github.com/karmacoma/crypti-build.git
+  git clone https://github.com/karmacoma/lisk-build.git
   ```
 
-3. Change into `crypti-build` directory:
+3. Change into `lisk-build` directory:
 
   ```
-  cd crypti-build
+  cd lisk-build
   ```
 
 4. Install build toolchain:

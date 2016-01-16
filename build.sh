@@ -20,14 +20,14 @@ apply_patches() {
 
 ################################################################################
 
-echo "Building crypti..."
+echo "Building lisk..."
 echo "--------------------------------------------------------------------------"
 if [ ! -f "$CRYPTI_FILE" ]; then
   exec_cmd "wget $CRYPTI_URL -O $CRYPTI_FILE"
 fi
 if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "rm -rf $BUILD_NAME"
-  exec_cmd "unzip crypti-linux.zip -d $BUILD_NAME"
+  exec_cmd "unzip lisk-linux.zip -d $BUILD_NAME"
   cd "$BUILD_NAME"
   exec_cmd "npm install --production $CRYPTI_CONFIG"
   cd ../
@@ -37,7 +37,7 @@ echo "Copying scripts..."
 echo "--------------------------------------------------------------------------"
 exec_cmd "cp -f ../shared.sh ../scripts/* $BUILD_NAME/"
 
-echo "Building crypti-node..."
+echo "Building lisk-node..."
 echo "--------------------------------------------------------------------------"
 if [ ! -f "$CRYPTI_NODE_FILE" ]; then
   exec_cmd "wget $CRYPTI_NODE_URL -O $CRYPTI_NODE_FILE"

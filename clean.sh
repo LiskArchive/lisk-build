@@ -14,7 +14,7 @@ echo "--------------------------------------------------------------------------
 mkdir -p src
 cd src
 
-exec_cmd "rm -vrf crypti-$VERSION-*/"
+exec_cmd "rm -vrf lisk-$VERSION-*/"
 exec_cmd "rm -vrf $CRYPTI_NODE_DIR"
 exec_cmd "rm -vrf $NODE_DIR"
 exec_cmd "rm -vrf $SQLITE_DIR"

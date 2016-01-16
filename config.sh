@@ -9,18 +9,18 @@ fi
 VERSION="0.5.3"
 OS=`uname`
 [ ! -z "$ARCH" ] || ARCH=`uname -m`
-BUILD_NAME="crypti-$VERSION-$OS-$ARCH"
+BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
 TARGET=""
 JOBS="2"
 
-CRYPTI_DIR="crypti-linux"
+CRYPTI_DIR="lisk-source"
 CRYPTI_FILE="$CRYPTI_DIR.zip"
-CRYPTI_URL="http://downloads.cryptichain.me/$CRYPTI_FILE"
+CRYPTI_URL="http://downloads.lisk.io/$CRYPTI_FILE"
 CRYPTI_CONFIG=""
 
-CRYPTI_NODE_DIR="crypti-node-0.12.2-release"
+CRYPTI_NODE_DIR="lisk-node-0.12.2-release"
 CRYPTI_NODE_FILE="$CRYPTI_NODE_DIR.zip"
-CRYPTI_NODE_URL="https://github.com/crypti/crypti-node/archive/v0.12.2-release.zip"
+CRYPTI_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v0.12.2-release.zip"
 CRYPTI_NODE_OUT="out/Release/node"
 CRYPTI_NODE_CONFIG=""
 

@@ -4,7 +4,7 @@ cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 . "$(pwd)/shared.sh"
 
 if [ ! -f "$(pwd)/app.js" ]; then
-  echo "Error: Crypti installation was not found. Aborting."
+  echo "Error: Lisk installation was not found. Aborting."
   exit 1
 fi
 
@@ -21,7 +21,7 @@ start_forever() {
   (
     download_blockchain
     until node app.js; do
-      echo "Crypti exited with code $?. Respawning..." >&2
+      echo "Lisk exited with code $?. Respawning..." >&2
       sleep 3
     done
   )
@@ -40,8 +40,8 @@ stop_forever() {
   rm -f "$PID_FILE"
 }
 
-start_crypti() {
-  echo "Starting crypti..."
+start_lisk() {
+  echo "Starting lisk..."
   if [ -f "$PID_FILE" ]; then
     stop_forever
   fi
@@ -55,30 +55,30 @@ start_crypti() {
 download_blockchain() {
   if [ ! -f "blockchain.db" ]; then
     echo "Downloading blockchain snapshot..."
-    curl -o blockchain.db.zip "http://downloads.cryptichain.me/blockchain.db.zip"
+    curl -o blockchain.db.zip "http://downloads.liskchain.me/blockchain.db.zip"
     [ $? -eq 1 ] || unzip blockchain.db.zip
     [ $? -eq 0 ] || rm -f blockchain.db
     rm -f blockchain.db.zip
   fi
 }
 
-stop_crypti() {
-  echo "Stopping crypti..."
+stop_lisk() {
+  echo "Stopping lisk..."
   if [ -f "$PID_FILE" ]; then
     stop_forever
   else
-    echo "Crypti is not running."
+    echo "Lisk is not running."
   fi
 }
 
-rebuild_crypti() {
-  echo "Rebuilding crypti..."
+rebuild_lisk() {
+  echo "Rebuilding lisk..."
   rm -f "$LOG_FILE" logs.log
   touch "$LOG_FILE" logs.log
   rm -f blockchain.db*
 }
 
-autostart_crypti() {
+autostart_lisk() {
   autostart_cron
 }
 
@@ -92,11 +92,11 @@ autostart_cron() {
     return 1
   fi
 
-  crontab=$($cmd -l 2> /dev/null | sed '/crypti\.sh start/d' 2> /dev/null)
+  crontab=$($cmd -l 2> /dev/null | sed '/lisk\.sh start/d' 2> /dev/null)
 
   crontab=$(cat <<-EOF
 	$crontab
-	@reboot $(command -v "bash") $(pwd)/crypti.sh start > $(pwd)/cron.log 2>&1
+	@reboot $(command -v "bash") $(pwd)/lisk.sh start > $(pwd)/cron.log 2>&1
 	EOF
   )
 
@@ -122,9 +122,9 @@ check_status() {
     local STATUS=1
   fi
   if [ -f $PID_FILE ] && [ ! -z "$PID" ] && [ $STATUS -eq 0 ]; then
-    echo "Crypti is running (as process $PID)."
+    echo "Lisk is running (as process $PID)."
   else
-    echo "Crypti is not running."
+    echo "Lisk is not running."
   fi
 }
 
@@ -136,23 +136,23 @@ tail_logs() {
 
 case $1 in
 "start")
-  start_crypti
+  start_lisk
   ;;
 "stop")
-  stop_crypti
+  stop_lisk
   ;;
 "restart")
-  stop_crypti
-  start_crypti
+  stop_lisk
+  start_lisk
   ;;
 "autostart")
-  autostart_crypti
-  start_crypti
+  autostart_lisk
+  start_lisk
   ;;
 "rebuild")
-  stop_crypti
-  rebuild_crypti
-  start_crypti
+  stop_lisk
+  rebuild_lisk
+  start_lisk
   ;;
 "status")
   check_status
