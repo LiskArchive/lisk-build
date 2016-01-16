@@ -1,6 +1,6 @@
 # Lisk Build
 
-A native package building tool for the Lisk - Delegate & Developer Edition. Allows automated compilation of binary packages, with support for multiple posix-based operating systems.
+A binary package building tool for [Lisk](https://lisk.io/). Allows automated compilation of binary packages, with support for multiple posix-based operating systems.
 
 Please read [Installing Lisk (from Binaries)](https://github.com/lisk/lisk-docs/blob/master/BinaryInstall.md) if you are merely looking to install Lisk, onto an already supported operating system / architecture.
 
@@ -27,7 +27,7 @@ To build a package, perform the following on a machine matching your target arch
 2. Clone repository:
 
   ```
-  git clone https://github.com/karmacoma/lisk-build.git
+  git clone https://github.com/LiskHQ/lisk-build.git
   ```
 
 3. Change into `lisk-build` directory:
@@ -65,7 +65,7 @@ To build a package, perform the following on an x86 machine, that has a Debian/U
 2. Clone repository:
 
   ```
-  git clone https://github.com/karmacoma/lisk-build.git
+  git clone https://github.com/LiskHQ/lisk-build.git
   ```
 
 3. Change into `lisk-build` directory:
@@ -109,7 +109,7 @@ To build a package, perform the following on an x86 machine, that has a Debian/U
 2. Clone repository:
 
   ```
-  git clone https://github.com/karmacoma/lisk-build.git
+  git clone https://github.com/LiskHQ/lisk-build.git
   ```
 
 3. Change into `lisk-build` directory:
@@ -147,7 +147,7 @@ To build a package, perform the following on an x86 machine, that has a Debian/U
 2. Clone repository:
 
   ```
-  git clone https://github.com/karmacoma/lisk-build.git
+  git clone https://github.com/LiskHQ/lisk-build.git
   ```
 
 3. Change into `lisk-build` directory:
@@ -179,7 +179,7 @@ To build a package, perform the following on an x86 machine, that has a Debian/U
 2. Clone repository:
 
   ```
-  git clone https://github.com/karmacoma/lisk-build.git
+  git clone https://github.com/LiskHQ/lisk-build.git
   ```
 
 3. Change into `lisk-build` directory:
