@@ -2,7 +2,7 @@
 
 A binary package building tool for [Lisk](https://lisk.io/). Allows automated compilation of binary packages, with support for multiple posix-based operating systems.
 
-Please read [Installing Lisk (from Binaries)](https://github.com/lisk/lisk-docs/blob/master/BinaryInstall.md) if you are merely looking to install Lisk, onto an already supported operating system / architecture.
+Please read [Installing Lisk (from Binaries)](https://github.com/lisk/lisk-docs/blob/master/BinaryInstall.md) if you are merely looking to install Lisk onto an already supported operating system / architecture.
 
 ## Platforms
 
