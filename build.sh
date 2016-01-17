@@ -22,15 +22,15 @@ apply_patches() {
 
 echo "Building lisk..."
 echo "--------------------------------------------------------------------------"
-if [ ! -f "$CRYPTI_FILE" ]; then
-  exec_cmd "wget $CRYPTI_URL -O $CRYPTI_FILE"
+if [ ! -f "$LISK_FILE" ]; then
+  exec_cmd "wget $LISK_URL -O $LISK_FILE"
 fi
 if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "rm -rf $BUILD_NAME"
   exec_cmd "unzip lisk-source.zip"
   exec_cmd "mv -f $VERSION $BUILD_NAME"
   cd "$BUILD_NAME"
-  exec_cmd "npm install --production $CRYPTI_CONFIG"
+  exec_cmd "npm install --production $LISK_CONFIG"
   cd ../
 fi
 
@@ -40,20 +40,20 @@ exec_cmd "cp -f ../shared.sh ../scripts/* $BUILD_NAME/"
 
 echo "Building lisk-node..."
 echo "--------------------------------------------------------------------------"
-if [ ! -f "$CRYPTI_NODE_FILE" ]; then
-  exec_cmd "wget $CRYPTI_NODE_URL -O $CRYPTI_NODE_FILE"
+if [ ! -f "$LISK_NODE_FILE" ]; then
+  exec_cmd "wget $LISK_NODE_URL -O $LISK_NODE_FILE"
 fi
-if [ ! -f "$CRYPTI_NODE_DIR/$CRYPTI_NODE_OUT" ]; then
-  exec_cmd "rm -rf $CRYPTI_NODE_DIR"
-  exec_cmd "unzip $CRYPTI_NODE_FILE"
-  cd "$CRYPTI_NODE_DIR"
+if [ ! -f "$LISK_NODE_DIR/$LISK_NODE_OUT" ]; then
+  exec_cmd "rm -rf $LISK_NODE_DIR"
+  exec_cmd "unzip $LISK_NODE_FILE"
+  cd "$LISK_NODE_DIR"
   apply_patches "node"
-  exec_cmd "./configure --without-npm $CRYPTI_NODE_CONFIG"
+  exec_cmd "./configure --without-npm $LISK_NODE_CONFIG"
   exec_cmd "make --jobs=$JOBS"
   cd ../
 fi
 exec_cmd "mkdir -p $BUILD_NAME/nodejs"
-exec_cmd "cp -f $CRYPTI_NODE_DIR/$CRYPTI_NODE_OUT $BUILD_NAME/nodejs/"
+exec_cmd "cp -f $LISK_NODE_DIR/$LISK_NODE_OUT $BUILD_NAME/nodejs/"
 
 echo "Building node..."
 echo "--------------------------------------------------------------------------"

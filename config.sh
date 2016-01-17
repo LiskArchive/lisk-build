@@ -13,16 +13,16 @@ BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
 TARGET=""
 JOBS="2"
 
-CRYPTI_DIR="lisk-source"
-CRYPTI_FILE="$CRYPTI_DIR.zip"
-CRYPTI_URL="http://downloads.lisk.io/$CRYPTI_FILE"
-CRYPTI_CONFIG=""
+LISK_DIR="lisk-source"
+LISK_FILE="$LISK_DIR.zip"
+LISK_URL="http://downloads.lisk.io/$LISK_FILE"
+LISK_CONFIG=""
 
-CRYPTI_NODE_DIR="lisk-node-0.12.9-lisk"
-CRYPTI_NODE_FILE="$CRYPTI_NODE_DIR.zip"
-CRYPTI_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v0.12.9-lisk.zip"
-CRYPTI_NODE_OUT="out/Release/node"
-CRYPTI_NODE_CONFIG=""
+LISK_NODE_DIR="lisk-node-0.12.9-lisk"
+LISK_NODE_FILE="$LISK_NODE_DIR.zip"
+LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v0.12.9-lisk.zip"
+LISK_NODE_OUT="out/Release/node"
+LISK_NODE_CONFIG=""
 
 NODE_DIR="node-v0.12.7"
 NODE_FILE="$NODE_DIR.tar.gz"
@@ -46,9 +46,9 @@ if [ "$ARCH" == "armv6l" ]; then
   export VFP3="off"
   export VFP2="on"
 
-  CRYPTI_CONFIG="--target_arch=arm"
-  CRYPTI_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
-  NODE_CONFIG="${CRYPTI_NODE_CONFIG}"
+  LISK_CONFIG="--target_arch=arm"
+  LISK_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
+  NODE_CONFIG="${LISK_NODE_CONFIG}"
   SQLITE_CONFIG="--host=arm"
 fi
 
@@ -63,9 +63,9 @@ if [ "$ARCH" == "armv7l" ]; then
   export VFP3="on"
   export VFP2="on"
 
-  CRYPTI_CONFIG="--target_arch=arm"
-  CRYPTI_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
-  NODE_CONFIG="${CRYPTI_NODE_CONFIG}"
+  LISK_CONFIG="--target_arch=arm"
+  LISK_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
+  NODE_CONFIG="${LISK_NODE_CONFIG}"
   SQLITE_CONFIG="--host=arm"
 fi
 
