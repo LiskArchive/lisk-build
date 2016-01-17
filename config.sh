@@ -24,9 +24,9 @@ LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v0.12.9-lisk.zip"
 LISK_NODE_OUT="out/Release/node"
 LISK_NODE_CONFIG=""
 
-NODE_DIR="node-v0.12.7"
+NODE_DIR="node-v0.12.9"
 NODE_FILE="$NODE_DIR.tar.gz"
-NODE_URL="https://nodejs.org/download/release/v0.12.7/$NODE_FILE"
+NODE_URL="https://nodejs.org/download/release/v0.12.9/$NODE_FILE"
 NODE_OUT="compiled/bin/node"
 NODE_CONFIG=""
 
