@@ -27,7 +27,7 @@ if [ ! -f "$CRYPTI_FILE" ]; then
 fi
 if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "rm -rf $BUILD_NAME"
-  exec_cmd "unzip lisk-linux.zip"
+  exec_cmd "unzip lisk-source.zip"
   exec_cmd "mv -f $VERSION $BUILD_NAME"
   cd "$BUILD_NAME"
   exec_cmd "npm install --production $CRYPTI_CONFIG"
