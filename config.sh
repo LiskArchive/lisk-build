@@ -18,9 +18,9 @@ CRYPTI_FILE="$CRYPTI_DIR.zip"
 CRYPTI_URL="http://downloads.lisk.io/$CRYPTI_FILE"
 CRYPTI_CONFIG=""
 
-CRYPTI_NODE_DIR="lisk-node-0.12.2-release"
+CRYPTI_NODE_DIR="lisk-node-0.12.9-lisk"
 CRYPTI_NODE_FILE="$CRYPTI_NODE_DIR.zip"
-CRYPTI_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v0.12.2-release.zip"
+CRYPTI_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v0.12.9-lisk.zip"
 CRYPTI_NODE_OUT="out/Release/node"
 CRYPTI_NODE_CONFIG=""
 
