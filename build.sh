@@ -60,18 +60,18 @@ echo "--------------------------------------------------------------------------
 if [ ! -f "$NODE_FILE" ]; then
   exec_cmd "wget $NODE_URL -O $NODE_FILE"
 fi
-if [ ! -f "$NODE_DIR/$NODE_OUT" ]; then
+if [ ! -f "$NODE_DIR/$NODE_OUT/bin/node" ] || [ ! -f "$NODE_DIR/$NODE_OUT/bin/npm" ]; then
   exec_cmd "rm -rf $NODE_DIR"
   exec_cmd "tar -zxvf $NODE_FILE"
   cd "$NODE_DIR"
   apply_patches "node"
-  exec_cmd "./configure --without-npm --prefix=$(pwd)/compiled $NODE_CONFIG"
+  exec_cmd "./configure --prefix=$(pwd)/compiled $NODE_CONFIG"
   exec_cmd "make --jobs=$JOBS"
   exec_cmd "make install"
   cd ../
 fi
 exec_cmd "mkdir -p $BUILD_NAME/bin"
-exec_cmd "cp -f $NODE_DIR/$NODE_OUT $BUILD_NAME/bin/"
+exec_cmd "cp -vR $NODE_DIR/$NODE_OUT/* $BUILD_NAME/"
 
 echo "Building sqlite3..."
 echo "--------------------------------------------------------------------------"

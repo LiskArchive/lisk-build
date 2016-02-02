@@ -27,7 +27,7 @@ LISK_NODE_CONFIG=""
 NODE_DIR="node-v0.12.9"
 NODE_FILE="$NODE_DIR.tar.gz"
 NODE_URL="https://nodejs.org/download/release/v0.12.9/$NODE_FILE"
-NODE_OUT="compiled/bin/node"
+NODE_OUT="compiled"
 NODE_CONFIG=""
 
 SQLITE_DIR="sqlite-autoconf-3090200"
@@ -48,7 +48,7 @@ if [ "$ARCH" == "armv6l" ]; then
 
   LISK_CONFIG="--target_arch=arm"
   LISK_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
-  NODE_CONFIG="${LISK_NODE_CONFIG}"
+  NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --with-arm-float-abi=hard"
   SQLITE_CONFIG="--host=arm"
 fi
 
@@ -65,7 +65,7 @@ if [ "$ARCH" == "armv7l" ]; then
 
   LISK_CONFIG="--target_arch=arm"
   LISK_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
-  NODE_CONFIG="${LISK_NODE_CONFIG}"
+  NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --with-arm-float-abi=hard"
   SQLITE_CONFIG="--host=arm"
 fi
 
