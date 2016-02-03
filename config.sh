@@ -30,6 +30,8 @@ NODE_URL="https://nodejs.org/download/release/v0.12.9/$NODE_FILE"
 NODE_OUT="compiled"
 NODE_CONFIG=""
 
+NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
+
 SQLITE_DIR="sqlite-autoconf-3090200"
 SQLITE_FILE="$SQLITE_DIR.tar.gz"
 SQLITE_URL="https://www.sqlite.org/2015/$SQLITE_FILE"
