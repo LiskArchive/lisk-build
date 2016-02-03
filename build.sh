@@ -96,5 +96,5 @@ exec_cmd "echo v`date '+%H:%M:%S %d/%m/%Y'` > $BUILD_NAME/package.build";
 
 echo "Creating archive..."
 echo "--------------------------------------------------------------------------"
-exec_cmd "zip -qr $BUILD_NAME.zip $BUILD_NAME"
+exec_cmd "zip -qr --symlinks $BUILD_NAME.zip $BUILD_NAME"
 cd ../
