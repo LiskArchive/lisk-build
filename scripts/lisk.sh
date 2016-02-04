@@ -55,7 +55,7 @@ start_lisk() {
 download_blockchain() {
   if [ ! -f "blockchain.db" ]; then
     echo "Downloading blockchain snapshot..."
-    curl -o blockchain.db.zip "http://downloads.liskchain.me/blockchain.db.zip"
+    curl -o blockchain.db.zip "https://downloads.lisk.io/blockchain.db.zip"
     [ $? -eq 1 ] || unzip blockchain.db.zip
     [ $? -eq 0 ] || rm -f blockchain.db
     rm -f blockchain.db.zip
