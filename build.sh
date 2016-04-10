@@ -72,7 +72,7 @@ if [ ! -f "$NODE_DIR/$NODE_OUT/bin/node" ] || [ ! -f "$NODE_DIR/$NODE_OUT/bin/np
 fi
 exec_cmd "mkdir -p $BUILD_NAME/bin"
 exec_cmd "cp -vR $NODE_DIR/$NODE_OUT/* $BUILD_NAME/"
-exec_cmd "sed -i '' \"s%$(head -1 $NPM_CLI)%#\!.\/bin\/node%g\" $NPM_CLI"
+exec_cmd "sed $SED_OPTS \"s%$(head -1 $NPM_CLI)%#\!.\/bin\/node%g\" $NPM_CLI"
 
 echo "Building sqlite3..."
 echo "--------------------------------------------------------------------------"

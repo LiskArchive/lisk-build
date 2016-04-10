@@ -6,7 +6,7 @@ if [ ! -z $1 ]; then
   ARCH=$1
 fi
 
-VERSION="0.1.2"
+VERSION="0.1.3"
 OS=`uname`
 [ ! -z "$ARCH" ] || ARCH=`uname -m`
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
@@ -32,11 +32,17 @@ NODE_CONFIG=""
 
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
-SQLITE_DIR="sqlite-autoconf-3090200"
+SQLITE_DIR="sqlite-autoconf-3120000"
 SQLITE_FILE="$SQLITE_DIR.tar.gz"
-SQLITE_URL="https://www.sqlite.org/2015/$SQLITE_FILE"
+SQLITE_URL="https://www.sqlite.org/2016/$SQLITE_FILE"
 SQLITE_OUT="compiled/bin/sqlite3"
 SQLITE_CONFIG=""
+
+if [ $(uname -s) == "Darwin" ]; then
+  SED_OPTS="-i ''"
+else
+  SED_OPTS="-i"
+fi
 
 if [ "$ARCH" == "armv6l" ]; then
   export TARGET="arm-linux-gnueabihf"
