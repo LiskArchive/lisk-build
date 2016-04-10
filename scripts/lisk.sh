@@ -22,7 +22,7 @@ start_forever() {
     download_blockchain
     until node app.js; do
       echo "Lisk exited with code $?. Respawning..." >&2
-      sleep 3
+      sleep 10
     done
   )
 }
@@ -143,6 +143,7 @@ case $1 in
   ;;
 "restart")
   stop_lisk
+  sleep 10
   start_lisk
   ;;
 "autostart")
@@ -151,6 +152,7 @@ case $1 in
   ;;
 "rebuild")
   stop_lisk
+  sleep 10
   rebuild_lisk
   start_lisk
   ;;
