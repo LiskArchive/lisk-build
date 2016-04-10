@@ -38,6 +38,12 @@ SQLITE_URL="https://www.sqlite.org/2016/$SQLITE_FILE"
 SQLITE_OUT="compiled/bin/sqlite3"
 SQLITE_CONFIG=""
 
+if [ $(uname -s) == "Darwin" ]; then
+  SED_OPTS="-i ''"
+else
+  SED_OPTS="-i"
+fi
+
 if [ "$ARCH" == "armv6l" ]; then
   export TARGET="arm-linux-gnueabihf"
   export PATH="$PATH:$(pwd)/toolchains/rpi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin"
