@@ -31,7 +31,7 @@ stop_forever() {
   local PID=$(cat "$PID_FILE")
   if [ ! -z "$PID" ]; then
     kill -- -$(ps -o pgid= "$PID" | grep -o '[0-9]\+') > /dev/null 2>&1
-    wait
+    wait; sleep 10
     if [ $? -eq 0 ]; then
       echo "Stopped process $PID"
     else
