@@ -38,7 +38,7 @@ SQLITE_URL="https://www.sqlite.org/2016/$SQLITE_FILE"
 SQLITE_OUT="compiled/bin/sqlite3"
 SQLITE_CONFIG=""
 
-if [ $(uname -s) == "Darwin" ]; then
+if [ $(uname -s) == "Darwin" ] || [ $(uname -s) == "FreeBSD" ]; then
   SED_OPTS="-i ''"
 else
   SED_OPTS="-i"
