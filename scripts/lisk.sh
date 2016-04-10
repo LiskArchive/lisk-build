@@ -22,7 +22,7 @@ start_forever() {
     download_blockchain
     until node app.js; do
       echo "Lisk exited with code $?. Respawning..." >&2
-      wait
+      sleep 60
     done
   )
 }
