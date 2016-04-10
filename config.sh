@@ -32,9 +32,9 @@ NODE_CONFIG=""
 
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
-SQLITE_DIR="sqlite-autoconf-3090200"
+SQLITE_DIR="sqlite-autoconf-3120000"
 SQLITE_FILE="$SQLITE_DIR.tar.gz"
-SQLITE_URL="https://www.sqlite.org/2015/$SQLITE_FILE"
+SQLITE_URL="https://www.sqlite.org/2016/$SQLITE_FILE"
 SQLITE_OUT="compiled/bin/sqlite3"
 SQLITE_CONFIG=""
 
