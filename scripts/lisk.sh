@@ -22,7 +22,7 @@ start_forever() {
     download_blockchain
     until node app.js; do
       echo "Lisk exited with code $?. Respawning..." >&2
-      sleep 60
+      sleep 10
     done
   )
 }
@@ -31,7 +31,7 @@ stop_forever() {
   local PID=$(cat "$PID_FILE")
   if [ ! -z "$PID" ]; then
     kill -- -$(ps -o pgid= "$PID" | grep -o '[0-9]\+') > /dev/null 2>&1
-    wait; sleep 10
+    wait
     if [ $? -eq 0 ]; then
       echo "Stopped process $PID"
     else
@@ -144,6 +144,7 @@ case $1 in
   ;;
 "restart")
   stop_lisk
+  sleep 3
   start_lisk
   ;;
 "autostart")
