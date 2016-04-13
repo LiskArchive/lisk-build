@@ -202,7 +202,7 @@ To build a package, perform the following on an x86 machine, that has a Debian/U
 
 ## Authors
 
-- Olivier Beddows <olivier@lisk.io>
+- Oliver Beddows <oliver@lisk.io>
 
 ## License
 
