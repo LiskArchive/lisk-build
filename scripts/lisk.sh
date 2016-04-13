@@ -20,37 +20,19 @@ check_cmds CMDS[@]
 start_forever() {
   (
     download_blockchain
-    until node app.js; do
-      echo "Lisk exited with code $?. Respawning..." >&2
-      sleep 10
-    done
+    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js
   )
 }
 
 stop_forever() {
-  local PID=$(cat "$PID_FILE")
-  if [ ! -z "$PID" ]; then
-    kill -- -$(ps -o pgid= "$PID" | grep -o '[0-9]\+') > /dev/null 2>&1
-    wait
-    if [ $? -eq 0 ]; then
-      echo "Stopped process $PID"
-    else
-      echo "Failed to stop process $PID"
-    fi
-  fi
-  rm -f "$PID_FILE"
+  forever stop lisk
 }
 
 start_lisk() {
   echo "Starting lisk..."
-  if [ -f "$PID_FILE" ]; then
-    stop_forever
-  fi
   rm -f "$LOG_FILE" logs.log
   touch "$LOG_FILE" logs.log
-  start_forever > "$LOG_FILE" 2>&1 &
-  echo $! > "$PID_FILE"
-  echo "Started process $!"
+  start_forever
 }
 
 download_blockchain() {
@@ -65,11 +47,7 @@ download_blockchain() {
 
 stop_lisk() {
   echo "Stopping lisk..."
-  if [ -f "$PID_FILE" ]; then
-    stop_forever
-  else
-    echo "Lisk is not running."
-  fi
+  stop_forever
 }
 
 rebuild_lisk() {
@@ -144,7 +122,6 @@ case $1 in
   ;;
 "restart")
   stop_lisk
-  sleep 3
   start_lisk
   ;;
 "autostart")
