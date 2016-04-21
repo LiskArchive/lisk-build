@@ -18,9 +18,7 @@ check_cmds CMDS[@]
 ################################################################################
 
 start_forever() {
-  (
-    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js
-  )
+  forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js
 }
 
 stop_forever() {
