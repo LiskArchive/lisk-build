@@ -19,7 +19,6 @@ check_cmds CMDS[@]
 
 start_forever() {
   (
-    download_blockchain
     forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js
   )
 }
@@ -35,16 +34,6 @@ start_lisk() {
   start_forever
 }
 
-download_blockchain() {
-  if [ ! -f "blockchain.db" ]; then
-    echo "Downloading blockchain snapshot..."
-    curl -o blockchain.db.zip "https://downloads.lisk.io/blockchain.db.zip"
-    [ $? -eq 1 ] || unzip blockchain.db.zip
-    [ $? -eq 0 ] || rm -f blockchain.db
-    rm -f blockchain.db.zip
-  fi
-}
-
 stop_lisk() {
   echo "Stopping lisk..."
   stop_forever
@@ -54,7 +43,6 @@ rebuild_lisk() {
   echo "Rebuilding lisk..."
   rm -f "$LOG_FILE" logs.log
   touch "$LOG_FILE" logs.log
-  rm -f blockchain.db*
 }
 
 autostart_lisk() {

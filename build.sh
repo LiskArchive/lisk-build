@@ -78,23 +78,6 @@ cd "$BUILD_NAME"
 exec_cmd "bin/npm install -g forever"
 cd ../
 
-echo "Building sqlite3..."
-echo "--------------------------------------------------------------------------"
-if [ ! -f "$SQLITE_FILE" ]; then
-  exec_cmd "wget $SQLITE_URL -O $SQLITE_FILE"
-fi
-if [ ! -f "$SQLITE_DIR/$SQLITE_OUT" ]; then
-  exec_cmd "rm -rf $SQLITE_DIR"
-  exec_cmd "tar -zxvf $SQLITE_FILE"
-  cd "$SQLITE_DIR"
-  exec_cmd "./configure --enable-fts5 --prefix=$(pwd)/compiled $SQLITE_CONFIG"
-  exec_cmd "make --jobs=$JOBS"
-  exec_cmd "make install"
-  cd ../
-fi
-exec_cmd "mkdir -p $BUILD_NAME/bin"
-exec_cmd "cp -f $SQLITE_DIR/$SQLITE_OUT $BUILD_NAME/bin/"
-
 echo "Stamping build..."
 echo "--------------------------------------------------------------------------"
 exec_cmd "echo v`date '+%H:%M:%S %d/%m/%Y'` > $BUILD_NAME/package.build";

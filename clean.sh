@@ -17,6 +17,5 @@ cd src
 exec_cmd "rm -vrf lisk-$VERSION-*/"
 exec_cmd "rm -vrf $LISK_NODE_DIR"
 exec_cmd "rm -vrf $NODE_DIR"
-exec_cmd "rm -vrf $SQLITE_DIR"
 
 cd ../

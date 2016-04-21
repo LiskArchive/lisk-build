@@ -32,12 +32,6 @@ NODE_CONFIG=""
 
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
-SQLITE_DIR="sqlite-autoconf-3120100"
-SQLITE_FILE="$SQLITE_DIR.tar.gz"
-SQLITE_URL="https://www.sqlite.org/2016/$SQLITE_FILE"
-SQLITE_OUT="compiled/bin/sqlite3"
-SQLITE_CONFIG=""
-
 if [ $(uname -s) == "Darwin" ] || [ $(uname -s) == "FreeBSD" ]; then
   SED_OPTS="-i ''"
 else
@@ -57,7 +51,6 @@ if [ "$ARCH" == "armv6l" ]; then
   LISK_CONFIG="--target_arch=arm"
   LISK_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
   NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --with-arm-float-abi=hard"
-  SQLITE_CONFIG="--host=arm"
 fi
 
 if [ "$ARCH" == "armv7l" ]; then
@@ -74,7 +67,6 @@ if [ "$ARCH" == "armv7l" ]; then
   LISK_CONFIG="--target_arch=arm"
   LISK_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
   NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --with-arm-float-abi=hard"
-  SQLITE_CONFIG="--host=arm"
 fi
 
 if [ "$TARGET" != "" ]; then
