@@ -12,7 +12,7 @@ PATH="$(pwd)/bin:/usr/bin:/bin:/usr/local/bin"
 LOG_FILE="$(pwd)/app.log"
 PID_FILE="$(pwd)/app.pid"
 
-CMDS=("curl" "node" "sqlite3" "unzip")
+CMDS=("curl" "node" "psql" "unzip")
 check_cmds CMDS[@]
 
 ################################################################################
