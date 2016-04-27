@@ -8,43 +8,92 @@ if [ ! -f "$(pwd)/app.js" ]; then
   exit 1
 fi
 
+NETWORK="test"
+DB_USER=$USER
+DB_NAME="lisk_test"
+DB_PASS="password"
+
 PATH="$(pwd)/bin:/usr/bin:/bin:/usr/local/bin"
 LOG_FILE="$(pwd)/app.log"
 PID_FILE="$(pwd)/app.pid"
 
-CMDS=("curl" "node" "psql" "unzip")
+CMDS=("curl" "createdb" "createuser" "dropdb" "dropuser" "forever" "node" "psql" "sudo" "unzip")
 check_cmds CMDS[@]
 
 ################################################################################
 
-start_forever() {
-  forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js
+create_user() {
+  stop_lisk &> /dev/null
+  drop_database &> /dev/null
+  sudo -u postgres dropuser --if-exists "$DB_USER" &> /dev/null
+  if [ $? -eq 1 ]; then
+    echo "X Failed to drop postgres user."
+    exit 0
+  fi
+  sudo -u postgres createuser --createdb "$DB_USER" &> /dev/null
+  if [ $? -eq 1 ]; then
+    echo "X Failed to create postgres user."
+    exit 0
+  fi
+  sudo -u postgres psql -c "ALTER USER "$DB_USER" WITH PASSWORD '$DB_PASS';" &> /dev/null
+  if [ $? -eq 1 ]; then
+    echo "X Failed to set postgres user password."
+    exit 0
+  else
+    echo "√ Postgres user created successfully."
+  fi
 }
 
-stop_forever() {
-  forever stop lisk
+drop_database() {
+  dropdb --if-exists "$DB_NAME" &> /dev/null
 }
 
-start_lisk() {
-  echo "Starting lisk..."
-  rm -f "$LOG_FILE" logs.log
-  touch "$LOG_FILE" logs.log
-  start_forever
+create_database() {
+  drop_database
+  createdb "$DB_NAME" &> /dev/null
+  if [ $? -eq 1 ]; then
+    echo "X Failed to create postgres database."
+    exit 0
+  else
+    echo "√ Postgres database created successfully."
+  fi
 }
 
-stop_lisk() {
-  echo "Stopping lisk..."
-  stop_forever
+populate_database() {
+  psql -ltAq | grep -q "^$DB_NAME|" &> /dev/null
+  if [ $? -eq 1 ]; then
+    download_blockchain
+    restore_blockchain
+  fi
 }
 
-rebuild_lisk() {
-  echo "Rebuilding lisk..."
-  rm -f "$LOG_FILE" logs.log
-  touch "$LOG_FILE" logs.log
+download_blockchain() {
+  echo "Downloading blockchain snapshot..."
+  curl -o blockchain.db.zip "https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.zip"
+  if [ $? -eq 1 ] && [ -f blockchain.db.zip ]; then
+    unzip blockchain.db.zip
+  fi
+  if [ $? -eq 0 ]; then
+    rm -f blockchain.db.*
+    echo "X Failed to download blockchain snapshot."
+    exit 0
+  else
+    echo "√ Blockchain snapshot downloaded successfully."
+  fi
 }
 
-autostart_lisk() {
-  autostart_cron
+restore_blockchain() {
+  echo "Restoring blockchain..."
+  if [ -f blockchain.db ]; then
+    psql -q -U "$DB_USER" -d "$DB_NAME" < blockchain.db
+  fi
+  rm -f blockchain.db.*
+  if [ $? -eq 0 ]; then
+    echo "X Failed to restore blockchain."
+    exit 0
+  else
+    echo "√ Blockchain restored successfully."
+  fi
 }
 
 autostart_cron() {
@@ -53,7 +102,7 @@ autostart_cron() {
   command -v "$cmd" &> /dev/null
 
   if [ $? -eq 1 ]; then
-    echo "Failed to execute crontab."
+    echo "X Failed to execute crontab."
     return 1
   fi
 
@@ -68,12 +117,44 @@ autostart_cron() {
   printf "$crontab\n" | $cmd - 2> /dev/null
 
   if [ $? -eq 0 ]; then
-    echo "Crontab updated successfully."
+    echo "√ Crontab updated successfully."
     return 0
   else
-    echo "Failed to update crontab."
+    echo "X Failed to update crontab."
     return 1
   fi
+}
+
+coldstart_lisk() {
+  create_user
+  create_database
+  populate_database
+  autostart_cron
+  start_lisk
+}
+
+start_lisk() {
+  forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js &> /dev/null
+  if [ $? -eq 0 ]; then
+    echo "√ Lisk started successfully."
+  else
+    echo "X Failed to start lisk."
+  fi
+}
+
+stop_lisk() {
+  forever stop lisk &> /dev/null
+  if [ $? -eq 0 ]; then
+    echo "√ Lisk stopped successfully."
+  else
+    echo "X Failed to stop lisk."
+  fi
+}
+
+rebuild_lisk() {
+  create_database
+  download_blockchain
+  restore_blockchain
 }
 
 check_status() {
@@ -87,9 +168,9 @@ check_status() {
     local STATUS=1
   fi
   if [ -f $PID_FILE ] && [ ! -z "$PID" ] && [ $STATUS -eq 0 ]; then
-    echo "Lisk is running (as process $PID)."
+    echo "√ Lisk is running (as process $PID)."
   else
-    echo "Lisk is not running."
+    echo "X Lisk is not running."
   fi
 }
 
@@ -100,6 +181,9 @@ tail_logs() {
 }
 
 case $1 in
+"coldstart")
+  coldstart_lisk
+  ;;
 "start")
   start_lisk
   ;;
@@ -108,10 +192,6 @@ case $1 in
   ;;
 "restart")
   stop_lisk
-  start_lisk
-  ;;
-"autostart")
-  autostart_lisk
   start_lisk
   ;;
 "rebuild")
@@ -128,6 +208,6 @@ case $1 in
 *)
   echo "Error: Unrecognized command."
   echo ""
-  echo "Available commands are: start stop restart autostart rebuild status logs"
+  echo "Available commands are: coldstart start stop restart rebuild status logs"
   ;;
 esac
