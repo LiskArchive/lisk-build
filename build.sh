@@ -84,5 +84,5 @@ exec_cmd "echo v`date '+%H:%M:%S %d/%m/%Y'` > $BUILD_NAME/package.build";
 
 echo "Creating archive..."
 echo "--------------------------------------------------------------------------"
-exec_cmd "tar -czvf $BUILD_NAME.tar.gz $BUILD_NAME"
+exec_cmd "GZIP=-6 tar -czvf $BUILD_NAME.tar.gz $BUILD_NAME"
 cd ../
