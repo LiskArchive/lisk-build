@@ -27,7 +27,7 @@ if [ "$1" != "coldstart" ]; then
 fi
 
 case "$UNAME" in
-"Dariwn")
+"Darwin")
   DB_SUPER=$USER
   ;;
 "FreeBSD")
