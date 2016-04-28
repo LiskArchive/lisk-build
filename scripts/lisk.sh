@@ -52,7 +52,7 @@ install_psql() {
     echo "Installing postgres..."
     echo "Using: https://downloads.lisk.io/scripts/setup_postgres.$UNAME"
     echo ""
-    curl -sL "https://downloads.lisk.io/scripts/setup_postgres.$UNAME" | sudo -E bash - &> /dev/null
+    curl -sL "https://downloads.lisk.io/scripts/setup_postgres.$UNAME" | bash - &> /dev/null
     if [ $? -eq 1 ]; then
       echo "X Failed to install postgres."
       exit 0
