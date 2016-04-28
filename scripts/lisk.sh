@@ -18,7 +18,7 @@ PATH="$(pwd)/bin:/usr/bin:/bin:/usr/local/bin"
 LOG_FILE="$(pwd)/app.log"
 PID_FILE="$(pwd)/app.pid"
 
-CMDS=("curl" "forever" "node" "sudo" "tar")
+CMDS=("curl" "forever" "gunzip" "node" "sudo" "tar")
 check_cmds CMDS[@]
 
 if [ "$1" != "coldstart" ]; then
@@ -109,9 +109,9 @@ populate_database() {
 
 download_blockchain() {
   echo "Downloading blockchain snapshot..."
-  curl -o blockchain.tar.gz "https://downloads.lisk.io/lisk/$NETWORK/blockchain.tar.gz"
-  if [ $? -eq 1 ] && [ -f blockchain.tar.gz ]; then
-    tar -zxf blockchain.tar.gz
+  curl -o blockchain.db.gz "https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.gz"
+  if [ $? -eq 1 ] && [ -f blockchain.db.gz ]; then
+    gunzip blockchain.db.gz
   fi
   if [ $? -eq 0 ]; then
     rm -f blockchain.*
