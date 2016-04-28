@@ -18,7 +18,7 @@ PATH="$(pwd)/bin:/usr/bin:/bin:/usr/local/bin"
 LOG_FILE="$(pwd)/app.log"
 PID_FILE="$(pwd)/app.pid"
 
-CMDS=("curl" "createdb" "createuser" "dropdb" "dropuser" "forever" "node" "psql" "sudo" "unzip")
+CMDS=("curl" "createdb" "createuser" "dropdb" "dropuser" "forever" "node" "psql" "sudo" "tar")
 check_cmds CMDS[@]
 
 ################################################################################
@@ -70,12 +70,12 @@ populate_database() {
 
 download_blockchain() {
   echo "Downloading blockchain snapshot..."
-  curl -o blockchain.db.zip "https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.zip"
-  if [ $? -eq 1 ] && [ -f blockchain.db.zip ]; then
-    unzip blockchain.db.zip
+  curl -o blockchain.tar.gz "https://downloads.lisk.io/lisk/$NETWORK/blockchain.tar.gz"
+  if [ $? -eq 1 ] && [ -f blockchain.tar.gz ]; then
+    tar -zxf blockchain.tar.gz
   fi
   if [ $? -eq 0 ]; then
-    rm -f blockchain.db.*
+    rm -f blockchain.*
     echo "X Failed to download blockchain snapshot."
     exit 0
   else
@@ -88,7 +88,7 @@ restore_blockchain() {
   if [ -f blockchain.db ]; then
     psql -q -U "$DB_USER" -d "$DB_NAME" < blockchain.db
   fi
-  rm -f blockchain.db.*
+  rm -f blockchain.*
   if [ $? -eq 0 ]; then
     echo "X Failed to restore blockchain."
     exit 0

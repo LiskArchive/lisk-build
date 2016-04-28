@@ -5,7 +5,7 @@ cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 . "$(pwd)/shared.sh"
 . "$(pwd)/config.sh"
 
-CMDS=("autoconf" "gcc" "g++" "make" "node" "npm" "python" "tar" "unzip" "wget" "zip");
+CMDS=("autoconf" "gcc" "g++" "make" "node" "npm" "python" "tar" "wget");
 check_cmds CMDS[@]
 
 mkdir -p src
@@ -27,7 +27,7 @@ if [ ! -f "$LISK_FILE" ]; then
 fi
 if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "rm -rf $BUILD_NAME"
-  exec_cmd "unzip lisk-source.zip"
+  exec_cmd "tar -xvf lisk-source.tar.gz"
   exec_cmd "mv -f $VERSION $BUILD_NAME"
   cd "$BUILD_NAME"
   exec_cmd "npm install --production $LISK_CONFIG"
@@ -45,7 +45,7 @@ if [ ! -f "$LISK_NODE_FILE" ]; then
 fi
 if [ ! -f "$LISK_NODE_DIR/$LISK_NODE_OUT" ]; then
   exec_cmd "rm -rf $LISK_NODE_DIR"
-  exec_cmd "unzip $LISK_NODE_FILE"
+  exec_cmd "tar -zxvf $LISK_NODE_FILE"
   cd "$LISK_NODE_DIR"
   apply_patches "node"
   exec_cmd "./configure --without-npm $LISK_NODE_CONFIG"
@@ -84,5 +84,5 @@ exec_cmd "echo v`date '+%H:%M:%S %d/%m/%Y'` > $BUILD_NAME/package.build";
 
 echo "Creating archive..."
 echo "--------------------------------------------------------------------------"
-exec_cmd "zip -qr --symlinks $BUILD_NAME.zip $BUILD_NAME"
+exec_cmd "tar -czvf $BUILD_NAME.tar.gz $BUILD_NAME"
 cd ../

@@ -14,13 +14,13 @@ TARGET=""
 JOBS="2"
 
 LISK_DIR="lisk-source"
-LISK_FILE="$LISK_DIR.zip"
+LISK_FILE="$LISK_DIR.tar.gz"
 LISK_URL="http://downloads.lisk.io/$LISK_FILE"
 LISK_CONFIG=""
 
 LISK_NODE_DIR="lisk-node-0.12.13-lisk"
 LISK_NODE_FILE="$LISK_NODE_DIR.zip"
-LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v0.12.13-lisk.zip"
+LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v0.12.13-lisk.tar.gz"
 LISK_NODE_OUT="out/Release/node"
 LISK_NODE_CONFIG=""
 
