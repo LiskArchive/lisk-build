@@ -44,20 +44,20 @@ esac
 
 ################################################################################
 
-install_psql() {
+install_postgresql() {
   if [ $(command -v "psql") ]; then
-    echo "Existing postgres installation found."
+    echo "Existing postgresql installation found."
     echo ""
   else
-    echo "Installing postgres..."
-    echo "Using: https://downloads.lisk.io/scripts/setup_postgres.$UNAME"
+    echo "Installing postgresql..."
+    echo "Using: https://downloads.lisk.io/scripts/setup_postgresql.$UNAME"
     echo ""
-    curl -sL "https://downloads.lisk.io/scripts/setup_postgres.$UNAME" | bash - &> /dev/null
+    curl -sL "https://downloads.lisk.io/scripts/setup_postgresql.$UNAME" | bash - &> /dev/null
     if [ $? -eq 1 ]; then
-      echo "X Failed to install postgres."
+      echo "X Failed to install postgresql."
       exit 0
     else
-      echo "√ Postgres installed successfully."
+      echo "√ Postgresql installed successfully."
     fi
   fi
 }
@@ -158,7 +158,7 @@ autostart_cron() {
 }
 
 coldstart_lisk() {
-  install_psql
+  install_postgresql
   create_user
   create_database
   populate_database
