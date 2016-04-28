@@ -18,10 +18,34 @@ PATH="$(pwd)/bin:/usr/bin:/bin:/usr/local/bin"
 LOG_FILE="$(pwd)/app.log"
 PID_FILE="$(pwd)/app.pid"
 
-CMDS=("curl" "createdb" "createuser" "dropdb" "dropuser" "forever" "node" "psql" "sudo" "tar")
+CMDS=("curl" "forever" "node" "sudo" "tar")
 check_cmds CMDS[@]
 
+if [ "$1" != "coldstart" ]; then
+  CMDS=("psql" "createdb" "createuser" "dropdb" "dropuser")
+  check_cmds CMDS[@]
+fi
+
 ################################################################################
+
+install_psql() {
+  if [ $(command -v "psql") ]; then
+    echo "Existing postgres installation found."
+    echo ""
+  else
+    local uname=`uname`
+    echo "Installing postgres..."
+    echo "Using: https://downloads.lisk.io/scripts/setup_postgres.$uname"
+    echo ""
+    curl -sL "https://downloads.lisk.io/scripts/setup_postgres.$uname" | sudo -E bash - &> /dev/null
+    if [ $? -eq 1 ]; then
+      echo "X Failed to install postgres."
+      exit 0
+    else
+      echo "√ Postgres installed successfully."
+    fi
+  fi
+}
 
 create_user() {
   stop_lisk &> /dev/null
@@ -127,6 +151,7 @@ autostart_cron() {
 }
 
 coldstart_lisk() {
+  install_psql
   create_user
   create_database
   populate_database
