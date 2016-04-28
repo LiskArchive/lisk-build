@@ -8,8 +8,8 @@ if [ ! -f "$(pwd)/app.js" ]; then
   exit 1
 fi
 
+UNAME=$(uname)
 NETWORK="test"
-DB_SUPER="postgres"
 DB_USER=$USER
 DB_NAME="lisk_test"
 DB_PASS="password"
@@ -26,6 +26,22 @@ if [ "$1" != "coldstart" ]; then
   check_cmds CMDS[@]
 fi
 
+case "$UNAME" in
+"Dariwn")
+  DB_SUPER=$USER
+  ;;
+"FreeBSD")
+  DB_SUPER="pgsql"
+  ;;
+"Linux")
+  DB_SUPER="postgres"
+  ;;
+*)
+  echo "Error: Failed to detect platform."
+  exit 0
+  ;;
+esac
+
 ################################################################################
 
 install_psql() {
@@ -33,11 +49,10 @@ install_psql() {
     echo "Existing postgres installation found."
     echo ""
   else
-    local uname=`uname`
     echo "Installing postgres..."
-    echo "Using: https://downloads.lisk.io/scripts/setup_postgres.$uname"
+    echo "Using: https://downloads.lisk.io/scripts/setup_postgres.$UNAME"
     echo ""
-    curl -sL "https://downloads.lisk.io/scripts/setup_postgres.$uname" | sudo -E bash - &> /dev/null
+    curl -sL "https://downloads.lisk.io/scripts/setup_postgres.$UNAME" | sudo -E bash - &> /dev/null
     if [ $? -eq 1 ]; then
       echo "X Failed to install postgres."
       exit 0
