@@ -101,9 +101,9 @@ populate_database() {
 
 download_blockchain() {
   echo "Downloading blockchain snapshot..."
-  curl -o blockchain.db.gz "https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.gz"
+  curl -o blockchain.db.gz "https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.gz" &> /dev/null
   if [ $? == 0 ] && [ -f blockchain.db.gz ]; then
-    gunzip -q blockchain.db.gz
+    gunzip -q blockchain.db.gz &> /dev/null
   fi
   if [ $? != 0 ]; then
     rm -f blockchain.*
@@ -117,7 +117,7 @@ download_blockchain() {
 restore_blockchain() {
   echo "Restoring blockchain..."
   if [ -f blockchain.db ]; then
-    psql -q -U "$DB_USER" -d "$DB_NAME" < blockchain.db
+    psql -q -U "$DB_USER" -d "$DB_NAME" < blockchain.db &> /dev/null
   fi
   rm -f blockchain.*
   if [ $? != 0 ]; then
@@ -146,7 +146,7 @@ autostart_cron() {
 	EOF
   )
 
-  printf "$crontab\n" | $cmd - 2> /dev/null
+  printf "$crontab\n" | $cmd - &> /dev/null
 
   if [ $? == 0 ]; then
     echo "√ Crontab updated successfully."
