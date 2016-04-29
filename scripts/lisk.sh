@@ -67,7 +67,7 @@ create_user() {
   drop_database &> /dev/null
   sudo -u $DB_SUPER dropuser --if-exists "$DB_USER" &> /dev/null
   sudo -u $DB_SUPER createuser --createdb "$DB_USER" &> /dev/null
-  sudo -u $DB_SUPER psql -c "ALTER USER "$DB_USER" WITH PASSWORD '$DB_PASS';" &> /dev/null
+  sudo -u $DB_SUPER psql -d postgres -c "ALTER USER "$DB_USER" WITH PASSWORD '$DB_PASS';" &> /dev/null
   if [ $? != 0 ]; then
     echo "X Failed to create postgres user."
     exit 0
