@@ -53,7 +53,7 @@ install_postgresql() {
     echo "Using: https://downloads.lisk.io/scripts/setup_postgresql.$UNAME"
     echo ""
     curl -sL "https://downloads.lisk.io/scripts/setup_postgresql.$UNAME" | bash - &> /dev/null
-    if [ $? -eq 1 ]; then
+    if [ $? != 0 ]; then
       echo "X Failed to install postgresql."
       exit 0
     else
@@ -68,7 +68,7 @@ create_user() {
   sudo -u $DB_SUPER dropuser --if-exists "$DB_USER" &> /dev/null
   sudo -u $DB_SUPER createuser --createdb "$DB_USER" &> /dev/null
   sudo -u $DB_SUPER psql -c "ALTER USER "$DB_USER" WITH PASSWORD '$DB_PASS';" &> /dev/null
-  if [ $? -eq 1 ]; then
+  if [ $? != 0 ]; then
     echo "X Failed to create postgres user."
     exit 0
   else
@@ -83,7 +83,7 @@ drop_database() {
 create_database() {
   drop_database
   createdb "$DB_NAME" &> /dev/null
-  if [ $? -eq 1 ]; then
+  if [ $? != 0 ]; then
     echo "X Failed to create postgres database."
     exit 0
   else
@@ -93,7 +93,7 @@ create_database() {
 
 populate_database() {
   psql -ltAq | grep -q "^$DB_NAME|" &> /dev/null
-  if [ $? -eq 1 ]; then
+  if [ $? != 0 ]; then
     download_blockchain
     restore_blockchain
   fi
@@ -102,10 +102,10 @@ populate_database() {
 download_blockchain() {
   echo "Downloading blockchain snapshot..."
   curl -o blockchain.db.gz "https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.gz"
-  if [ $? -eq 1 ] && [ -f blockchain.db.gz ]; then
+  if [ $? == 0 ] && [ -f blockchain.db.gz ]; then
     gunzip -q blockchain.db.gz
   fi
-  if [ $? -eq 0 ]; then
+  if [ $? != 0 ]; then
     rm -f blockchain.*
     echo "X Failed to download blockchain snapshot."
     exit 0
@@ -120,7 +120,7 @@ restore_blockchain() {
     psql -q -U "$DB_USER" -d "$DB_NAME" < blockchain.db
   fi
   rm -f blockchain.*
-  if [ $? -eq 0 ]; then
+  if [ $? != 0 ]; then
     echo "X Failed to restore blockchain."
     exit 0
   else
@@ -133,7 +133,7 @@ autostart_cron() {
 
   command -v "$cmd" &> /dev/null
 
-  if [ $? -eq 1 ]; then
+  if [ $? != 0 ]; then
     echo "X Failed to execute crontab."
     return 1
   fi
@@ -148,7 +148,7 @@ autostart_cron() {
 
   printf "$crontab\n" | $cmd - 2> /dev/null
 
-  if [ $? -eq 0 ]; then
+  if [ $? == 0 ]; then
     echo "√ Crontab updated successfully."
     return 0
   else
@@ -168,7 +168,7 @@ coldstart_lisk() {
 
 start_lisk() {
   forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js &> /dev/null
-  if [ $? -eq 0 ]; then
+  if [ $? == 0 ]; then
     echo "√ Lisk started successfully."
   else
     echo "X Failed to start lisk."
@@ -177,7 +177,7 @@ start_lisk() {
 
 stop_lisk() {
   forever stop lisk &> /dev/null
-  if [ $? -eq 0 ]; then
+  if [ $? ==  0 ]; then
     echo "√ Lisk stopped successfully."
   else
     echo "X Failed to stop lisk."
@@ -200,7 +200,7 @@ check_status() {
   else
     local STATUS=1
   fi
-  if [ -f $PID_FILE ] && [ ! -z "$PID" ] && [ $STATUS -eq 0 ]; then
+  if [ -f $PID_FILE ] && [ ! -z "$PID" ] && [ $STATUS == 0 ]; then
     echo "√ Lisk is running (as process $PID)."
   else
     echo "X Lisk is not running."
