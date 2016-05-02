@@ -20,6 +20,21 @@ apply_patches() {
 
 ################################################################################
 
+echo "Building postgresql..."
+echo "--------------------------------------------------------------------------"
+if [ ! -f "$POSTGRESQL_FILE" ]; then
+  exec_cmd "wget $POSTGRESQL_URL -O $POSTGRESQL_FILE"
+fi
+if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
+  exec_cmd "rm -rf $POSTGRESQL_DIR"
+  exec_cmd "tar -zxvf $POSTGRESQL_FILE"
+  cd "$POSTGRESQL_DIR"
+  exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT"
+  exec_cmd "make --jobs=$JOBS"
+  exec_cmd "make install"
+  cd ../
+fi
+
 echo "Building lisk..."
 echo "--------------------------------------------------------------------------"
 if [ ! -f "$LISK_FILE" ]; then
@@ -29,6 +44,8 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "rm -rf $BUILD_NAME"
   exec_cmd "tar -xvf lisk-source.tar.gz"
   exec_cmd "mv -f $VERSION $BUILD_NAME"
+  exec_cmd "cp -vR $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
+  exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
   cd "$BUILD_NAME"
   exec_cmd "npm install --production $LISK_CONFIG"
   cd ../
@@ -73,22 +90,6 @@ fi
 exec_cmd "mkdir -p $BUILD_NAME/bin"
 exec_cmd "cp -vR $NODE_DIR/$NODE_OUT/* $BUILD_NAME/"
 exec_cmd "sed $SED_OPTS \"s%$(head -1 $NPM_CLI)%#\!.\/bin\/node%g\" $NPM_CLI"
-
-echo "Building postgresql..."
-echo "--------------------------------------------------------------------------"
-if [ ! -f "$POSTGRESQL_FILE" ]; then
-  exec_cmd "wget $POSTGRESQL_URL -O $POSTGRESQL_FILE"
-fi
-if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
-  exec_cmd "rm -rf $POSTGRESQL_DIR"
-  exec_cmd "tar -zxvf $POSTGRESQL_FILE"
-  cd "$POSTGRESQL_DIR"
-  exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT"
-  exec_cmd "make --jobs=$JOBS"
-  exec_cmd "make install"
-  cd ../
-fi
-exec_cmd "cp -vR $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
 
 cd "$BUILD_NAME"
 exec_cmd "bin/npm install -g forever"
