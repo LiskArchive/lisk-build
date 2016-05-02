@@ -8,6 +8,11 @@ if [ ! -f "$(pwd)/app.js" ]; then
   exit 1
 fi
 
+if [ "$USER" == "root" ]; then
+  echo "Error: Lisk cannot be run as root. Aborting."
+  exit 1
+fi
+
 UNAME=$(uname)
 NETWORK="test"
 
