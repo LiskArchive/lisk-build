@@ -79,7 +79,7 @@ echo "--------------------------------------------------------------------------
 if [ ! -f "$POSTGRESQL_FILE" ]; then
   exec_cmd "wget $POSTGRESQL_URL -O $POSTGRESQL_FILE"
 fi
-if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT" ]; then
+if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
   exec_cmd "rm -rf $POSTGRESQL_DIR"
   exec_cmd "tar -zxvf $POSTGRESQL_FILE"
   cd "$POSTGRESQL_DIR"
