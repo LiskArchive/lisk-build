@@ -22,8 +22,9 @@ DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
 DB_LOG_FILE="$(pwd)/pgsql.log"
 
-PATH="$(pwd)/bin:$(pwd)/pgsql/bin:/usr/bin:/bin:/usr/local/bin"
-LD_LIBRARY_PATH="$(pwd)/pgsql/lib:$LD_LIBRARY_PATH"
+export PATH="$(pwd)/bin:$(pwd)/pgsql/bin:/usr/bin:/bin:/usr/local/bin"
+export LD_LIBRARY_PATH="$(pwd)/pgsql/lib"
+
 LOG_FILE="$(pwd)/app.log"
 PID_FILE="$(pwd)/app.pid"
 
