@@ -56,6 +56,7 @@ if [ "$ARCH" == "armv6l" ]; then
   LISK_CONFIG="--target_arch=arm"
   LISK_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
   NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --with-arm-float-abi=hard"
+  POSTGRESQL_CONFIG="--without-readline --without-zlib --disable-spinlocks"
 fi
 
 if [ "$ARCH" == "armv7l" ]; then
@@ -72,6 +73,7 @@ if [ "$ARCH" == "armv7l" ]; then
   LISK_CONFIG="--target_arch=arm"
   LISK_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
   NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --with-arm-float-abi=hard"
+  POSTGRESQL_CONFIG="--without-readline --without-zlib --disable-spinlocks"
 fi
 
 if [ "$TARGET" != "" ]; then

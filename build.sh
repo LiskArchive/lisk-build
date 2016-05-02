@@ -29,7 +29,7 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
   exec_cmd "rm -rf $POSTGRESQL_DIR"
   exec_cmd "tar -zxvf $POSTGRESQL_FILE"
   cd "$POSTGRESQL_DIR"
-  exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT"
+  exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT $POSTGRESQL_CONFIG"
   exec_cmd "make --jobs=$JOBS"
   exec_cmd "make install"
   cd ../
