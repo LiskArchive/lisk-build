@@ -12,4 +12,4 @@ CMDS=("apt-get" "curl" "sudo")
 check_cmds CMDS[@]
 
 exec_cmd "curl -sL https://deb.nodesource.com/setup_0.12 | sudo -E bash -"
-exec_cmd "sudo apt-get install -y autoconf automake build-essential curl git libpq-dev nodejs python wget unzip"
+exec_cmd "sudo apt-get install -y autoconf automake build-essential curl git libreadline6-dev zlib1g-dev libssl-dev libpq-dev nodejs python wget"
