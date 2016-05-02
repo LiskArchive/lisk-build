@@ -36,7 +36,7 @@ create_user() {
   psql -qd postgres -c "ALTER USER "$DB_USER" WITH PASSWORD '$DB_PASS';" &> /dev/null
   if [ $? != 0 ]; then
     echo "X Failed to create postgres user."
-    exit 0
+    exit 1
   else
     echo "√ Postgres user created successfully."
   fi
@@ -51,7 +51,7 @@ create_database() {
   createdb "$DB_NAME" &> /dev/null
   if [ $? != 0 ]; then
     echo "X Failed to create postgres database."
-    exit 0
+    exit 1
   else
     echo "√ Postgres database created successfully."
   fi
@@ -74,7 +74,7 @@ download_blockchain() {
   if [ $? != 0 ]; then
     rm -f blockchain.*
     echo "X Failed to download blockchain snapshot."
-    exit 0
+    exit 1
   else
     echo "√ Blockchain snapshot downloaded successfully."
   fi
@@ -88,7 +88,7 @@ restore_blockchain() {
   rm -f blockchain.*
   if [ $? != 0 ]; then
     echo "X Failed to restore blockchain."
-    exit 0
+    exit 1
   else
     echo "√ Blockchain restored successfully."
   fi
