@@ -10,64 +10,24 @@ fi
 
 UNAME=$(uname)
 NETWORK="test"
-DB_USER=$USER
-DB_NAME="lisk_test"
-DB_PASS="password"
 
-PATH="$(pwd)/bin:/usr/bin:/bin:/usr/local/bin"
+DB_NAME="lisk_$NETWORK"
+DB_USER=$USER
+DB_PASS="password"
+DB_DATA="$(pwd)/pgsql/data"
+DB_LOG_FILE="$(pwd)/pgsql.log"
+
+PATH="$(pwd)/bin:$(pwd)/pgsql/bin:/usr/bin:/bin:/usr/local/bin"
 LOG_FILE="$(pwd)/app.log"
 PID_FILE="$(pwd)/app.pid"
 
-CMDS=("curl" "forever" "gunzip" "node" "sudo" "tar")
+CMDS=("curl" "forever" "gunzip" "node" "tar" "psql" "createdb" "createuser" "dropdb" "dropuser" "psql" "createdb" "createuser" "dropdb" "dropuser")
 check_cmds CMDS[@]
-
-if [ "$1" != "coldstart" ]; then
-  CMDS=("psql" "createdb" "createuser" "dropdb" "dropuser")
-  check_cmds CMDS[@]
-fi
-
-case "$UNAME" in
-"Darwin")
-  DB_SUPER=$USER
-  ;;
-"FreeBSD")
-  DB_SUPER="pgsql"
-  ;;
-"Linux")
-  DB_SUPER="postgres"
-  ;;
-*)
-  echo "Error: Failed to detect platform."
-  exit 0
-  ;;
-esac
 
 ################################################################################
 
-install_postgresql() {
-  if [ $(command -v "psql") ]; then
-    echo "Existing postgresql installation found."
-    echo ""
-  else
-    echo "Installing postgresql..."
-    echo "Using: https://downloads.lisk.io/scripts/setup_postgresql.$UNAME"
-    echo ""
-    curl -sL "https://downloads.lisk.io/scripts/setup_postgresql.$UNAME" | bash - &> /dev/null
-    if [ $? != 0 ]; then
-      echo "X Failed to install postgresql."
-      exit 0
-    else
-      echo "√ Postgresql installed successfully."
-    fi
-  fi
-}
-
 create_user() {
-  stop_lisk &> /dev/null
-  drop_database &> /dev/null
-  sudo -u $DB_SUPER dropuser --if-exists "$DB_USER" &> /dev/null
-  sudo -u $DB_SUPER createuser --createdb "$DB_USER" &> /dev/null
-  sudo -u $DB_SUPER psql -d postgres -c "ALTER USER "$DB_USER" WITH PASSWORD '$DB_PASS';" &> /dev/null
+  psql -qd postgres -c "ALTER USER "$DB_USER" WITH PASSWORD '$DB_PASS';" &> /dev/null
   if [ $? != 0 ]; then
     echo "X Failed to create postgres user."
     exit 0
@@ -117,7 +77,7 @@ download_blockchain() {
 restore_blockchain() {
   echo "Restoring blockchain..."
   if [ -f blockchain.db ]; then
-    psql -q -U "$DB_USER" -d "$DB_NAME" < blockchain.db &> /dev/null
+    psql -qd "$DB_NAME" < blockchain.db &> /dev/null
   fi
   rm -f blockchain.*
   if [ $? != 0 ]; then
@@ -158,12 +118,29 @@ autostart_cron() {
 }
 
 coldstart_lisk() {
-  install_postgresql
+  stop_lisk &> /dev/null
+  stop_postgresql &> /dev/null
+  rm -rf $DB_DATA
+  pg_ctl initdb -D $DB_DATA &> /dev/null
+  start_postgresql
+  sleep 1
   create_user
   create_database
   populate_database
   autostart_cron
   start_lisk
+}
+
+start_postgresql() {
+  pg_ctl -D $DB_DATA -l $DB_LOG_FILE start &> /dev/null
+  if [ $? != 0 ]; then
+    echo "X Failed to start postgresql."
+    exit 1
+  fi
+}
+
+stop_postgresql() {
+  pg_ctl -D $DB_DATA -l $DB_LOG_FILE stop &> /dev/null
 }
 
 start_lisk() {
@@ -218,10 +195,13 @@ case $1 in
   coldstart_lisk
   ;;
 "start")
+  start_postgresql
+  sleep 1
   start_lisk
   ;;
 "stop")
   stop_lisk
+  stop_postgresql
   ;;
 "restart")
   stop_lisk
