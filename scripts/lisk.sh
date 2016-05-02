@@ -59,7 +59,7 @@ create_database() {
 
 populate_database() {
   psql -ltAq | grep -q "^$DB_NAME|" &> /dev/null
-  if [ $? != 0 ]; then
+  if [ $? == 0 ]; then
     download_blockchain
     restore_blockchain
   fi
@@ -114,12 +114,12 @@ autostart_cron() {
 
   printf "$crontab\n" | $cmd - &> /dev/null
 
-  if [ $? == 0 ]; then
-    echo "√ Crontab updated successfully."
-    return 0
-  else
+  if [ $? != 0 ]; then
     echo "X Failed to update crontab."
     return 1
+  else
+    echo "√ Crontab updated successfully."
+    return 0
   fi
 }
 
@@ -160,10 +160,10 @@ start_lisk() {
 
 stop_lisk() {
   forever stop lisk &> /dev/null
-  if [ $? ==  0 ]; then
-    echo "√ Lisk stopped successfully."
-  else
+  if [ $? !=  0 ]; then
     echo "X Failed to stop lisk."
+  else
+    echo "√ Lisk stopped successfully."
   fi
 }
 
