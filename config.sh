@@ -33,7 +33,7 @@ NODE_CONFIG=""
 POSTGRESQL_DIR="postgresql-9.5.2"
 POSTGRESQL_FILE="$POSTGRESQL_DIR.tar.gz"
 POSTGRESQL_URL="https://ftp.postgresql.org/pub/source/v9.5.2/$POSTGRESQL_FILE"
-POSTGRESQL_OUT="compiled"
+POSTGRESQL_OUT="pgsql"
 
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 

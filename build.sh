@@ -88,7 +88,7 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT" ]; then
   exec_cmd "make install"
   cd ../
 fi
-exec_cmd "cp -vR POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
+exec_cmd "cp -vR $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
 
 cd "$BUILD_NAME"
 exec_cmd "bin/npm install -g forever"
