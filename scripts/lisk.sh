@@ -18,6 +18,7 @@ DB_DATA="$(pwd)/pgsql/data"
 DB_LOG_FILE="$(pwd)/pgsql.log"
 
 PATH="$(pwd)/bin:$(pwd)/pgsql/bin:/usr/bin:/bin:/usr/local/bin"
+LD_LIBRARY_PATH="$(pwd)/pgsql/lib:$LD_LIBRARY_PATH"
 LOG_FILE="$(pwd)/app.log"
 PID_FILE="$(pwd)/app.pid"
 
