@@ -45,12 +45,8 @@ create_user() {
   fi
 }
 
-drop_database() {
-  dropdb --if-exists "$DB_NAME" &> /dev/null
-}
-
 create_database() {
-  drop_database
+  dropdb --if-exists "$DB_NAME" &> /dev/null
   createdb "$DB_NAME" &> /dev/null
   if [ $? != 0 ]; then
     echo "X Failed to create postgres database."
