@@ -15,7 +15,8 @@ JOBS="2"
 
 LISK_DIR="lisk-source"
 LISK_FILE="$LISK_DIR.tar.gz"
-LISK_URL="http://downloads.lisk.io/$LISK_FILE"
+LISK_NETWORK="test"
+LISK_URL="http://downloads.lisk.io/lisk/$LISK_NETWORK/$LISK_FILE"
 LISK_CONFIG=""
 
 LISK_NODE_DIR="lisk-node-0.12.13-lisk"
