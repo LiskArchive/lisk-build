@@ -34,9 +34,9 @@ check_cmds CMDS[@]
 ################################################################################
 
 create_user() {
-  dropuser -U postgres --if-exists "$DB_USER" &> /dev/null
-  createuser -U postgres --createdb "$DB_USER" &> /dev/null
-  psql -U postgres -qd postgres -c "ALTER USER "$DB_USER" WITH PASSWORD '$DB_PASS';" &> /dev/null
+  dropuser --if-exists "$DB_USER" &> /dev/null
+  createuser --createdb "$DB_USER" &> /dev/null
+  psql -qd postgres -c "ALTER USER "$DB_USER" WITH PASSWORD '$DB_PASS';" &> /dev/null
   if [ $? != 0 ]; then
     echo "X Failed to create postgres user."
     exit 1
