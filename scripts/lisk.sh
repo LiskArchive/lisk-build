@@ -4,12 +4,12 @@ cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 . "$(pwd)/shared.sh"
 
 if [ ! -f "$(pwd)/app.js" ]; then
-  echo "Error: Lisk installation was not found. Aborting."
+  echo "Error: Lisk installation was not found. Exiting."
   exit 1
 fi
 
 if [ "$USER" == "root" ]; then
-  echo "Error: Lisk cannot be run as root. Aborting."
+  echo "Error: Lisk should not be run be as root. Exiting."
   exit 1
 fi
 
