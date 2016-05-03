@@ -214,6 +214,9 @@ case $1 in
   ;;
 "rebuild")
   stop_lisk
+  sleep 1
+  start_postgresql
+  sleep 1
   rebuild_lisk
   start_lisk
   ;;
