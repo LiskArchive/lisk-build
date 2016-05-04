@@ -2,6 +2,7 @@
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 . "$(pwd)/shared.sh"
+. "$(pwd)/env.sh"
 
 if [ ! -f "$(pwd)/app.js" ]; then
   echo "Error: Lisk installation was not found. Exiting."
@@ -21,9 +22,6 @@ DB_USER=$USER
 DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
 DB_LOG_FILE="$(pwd)/pgsql.log"
-
-export PATH="$(pwd)/bin:$(pwd)/pgsql/bin:/usr/bin:/bin:/usr/local/bin"
-export LD_LIBRARY_PATH="$(pwd)/pgsql/lib"
 
 LOG_FILE="$(pwd)/app.log"
 PID_FILE="$(pwd)/app.pid"
