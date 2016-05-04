@@ -26,7 +26,7 @@ DB_LOG_FILE="$(pwd)/pgsql.log"
 LOG_FILE="$(pwd)/app.log"
 PID_FILE="$(pwd)/app.pid"
 
-CMDS=("curl" "forever" "gunzip" "node" "tar" "psql" "createdb" "createuser" "dropdb" "dropuser" "psql" "createdb" "createuser" "dropdb" "dropuser")
+CMDS=("curl" "forever" "gunzip" "node" "tar" "psql" "createdb" "createuser" "dropdb" "dropuser")
 check_cmds CMDS[@]
 
 ################################################################################
