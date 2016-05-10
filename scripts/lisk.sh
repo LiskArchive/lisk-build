@@ -149,7 +149,8 @@ stop_postgresql() {
 start_lisk() {
   forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js &> /dev/null
   if [ $? == 0 ]; then
-    echo "√ Lisk started successfully."
+    sleep 1
+    check_status
   else
     echo "X Failed to start lisk."
   fi
