@@ -153,6 +153,15 @@ start_lisk() {
   else
     echo "X Failed to start lisk."
   fi
+  
+ if [ "$(grep -Ei 'debian|buntu|mint' /etc/*release)" ]; then
+   if pgrep -x "ntpd" > /dev/null
+   then
+      echo "√ ntp is running"
+   else
+      echo "X ntp is not running"
+   fi
+ fi
 }
 
 stop_lisk() {
