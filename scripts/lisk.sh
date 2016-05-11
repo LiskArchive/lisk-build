@@ -153,6 +153,24 @@ start_lisk() {
   else
     echo "X Failed to start lisk."
   fi
+  
+ if [ "$(grep -Ei 'debian|buntu|mint' /etc/*release)" ]; then
+   if pgrep -x "ntpd" > /dev/null
+   then
+      echo "√ ntp is running"
+   else
+      echo "X ntp is not running"
+      read -r -n 1 -p "Would like to install ntp? (y/n): " $REPLY
+      if [[  $REPLY =~ ^[Yy]$ ]]
+      then
+        sudo apt-get update
+        sudo apt-get install ntp -y
+        sudo service ntp stop
+        sudo ntpdate pool.ntp.org
+        sudo service ntp start
+      fi
+   fi
+ fi
 }
 
 stop_lisk() {
