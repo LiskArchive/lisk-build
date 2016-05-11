@@ -154,7 +154,7 @@ start_lisk() {
     echo "X Failed to start lisk."
   fi
   
- if [ "$(grep -Ei 'debian|buntu|mint' /etc/*release)" ]; then
+ if [ -f /etc/debian_version &&  ! -f /proc/user_beancounters]; then
    if pgrep -x "ntpd" > /dev/null
    then
       echo "√ ntp is running"
@@ -170,6 +170,28 @@ start_lisk() {
         sudo service ntp start
       fi
    fi
+ elif [ -f /etc/redhat-release &&  ! -f /proc/user_beancounters]; then
+   if pgrep -x "ntpd" > /dev/null
+   then
+      echo "√ ntp is running"
+   else
+      if pgrep -x "chronyd" > /dev/null
+      then
+      	echo "√ chrony is running"
+      else
+      	echo "X ntp and chrony are not running"
+      	read -r -n 1 -p "Would like to install ntp? (y/n): " $REPLY
+      	if [[  $REPLY =~ ^[Yy]$ ]]
+      	then
+	  yum install ntp ntpdate ntp-doc
+	  chkconfig ntpd on
+	  ntpdate pool.ntp.org
+	  /etc/init.d/ntpd start
+      	fi
+      fi
+   fi
+ elif [ -f /proc/user_beancounters]; then
+   echo "_ Running OpenVZ VM"
  fi
 }
 
