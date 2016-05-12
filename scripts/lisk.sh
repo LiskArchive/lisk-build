@@ -169,7 +169,6 @@ start_lisk() {
   if pgrep -x "node" &> /dev/null; then
         echo "√ Lisk is running"
   exit 1
-  fi
   else
   forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js &> /dev/null
   if [ $? == 0 ]; then
