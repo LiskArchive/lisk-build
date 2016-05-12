@@ -136,7 +136,7 @@ coldstart_lisk() {
 
 start_postgresql() {
   if pgrep -x "postgres" &> /dev/null; then
-        echo "√ Postgres is already running"
+        echo "√ Postgres is running"
   else
   pg_ctl -D $DB_DATA -l $DB_LOG_FILE start &> /dev/null
   sleep 1
@@ -164,7 +164,7 @@ stop_postgresql() {
 
 start_lisk() {
   if pgrep -x "node" &> /dev/null; then
-        echo "√ Lisk is already running"
+        echo "√ Lisk is running"
   exit 1
   fi
   forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js &> /dev/null
