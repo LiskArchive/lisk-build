@@ -36,10 +36,10 @@ create_user() {
   createuser --createdb "$DB_USER" &> /dev/null
   psql -qd postgres -c "ALTER USER "$DB_USER" WITH PASSWORD '$DB_PASS';" &> /dev/null
   if [ $? != 0 ]; then
-    echo "X Failed to create postgres user."
+    echo "X Failed to create Postgresql user."
     exit 1
   else
-    echo "√ Postgres user created successfully."
+    echo "√ Postgresql user created successfully."
   fi
 }
 
@@ -47,10 +47,10 @@ create_database() {
   dropdb --if-exists "$DB_NAME" &> /dev/null
   createdb "$DB_NAME" &> /dev/null
   if [ $? != 0 ]; then
-    echo "X Failed to create postgres database."
+    echo "X Failed to create Postgresql database."
     exit 1
   else
-    echo "√ Postgres database created successfully."
+    echo "√ Postgresql database created successfully."
   fi
 }
 
@@ -136,29 +136,32 @@ coldstart_lisk() {
 
 start_postgresql() {
   if pgrep -x "postgres" &> /dev/null; then
-        echo "√ Postgres is running"
+        echo "√ Postgresql is running"
   else
   pg_ctl -D $DB_DATA -l $DB_LOG_FILE start &> /dev/null
   sleep 1
   if [ $? != 0 ]; then
-    echo "X Failed to start postgresql."
+    echo "X Failed to start Postgresql."
     exit 1
   else
-    echo "√ Postgres started successfully."
+    echo "√ Postgresql started successfully."
   fi
   fi
 }
 
 stop_postgresql() {
+  if ! pgrep -x "postgres" &> /dev/null; then
+        echo "√ Postgresql is not running"
+  else
   while pgrep -x "postgres" &> /dev/null; do
   pg_ctl -D $DB_DATA -l $DB_LOG_FILE stop &> /dev/null
   if [ $? == 0 ]; then
-  echo "√ Postgres stopped successfully"
-  break
+  echo "√ Postgresql stopped successfully"
   else
-  echo "X Postgres failed to stop"
+  echo "X Postgresql failed to stop"
   fi
   done
+  fi
 }
 
 
