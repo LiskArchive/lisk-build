@@ -232,8 +232,15 @@ case $1 in
   stop_lisk
   stop_postgresql
   ;;
+  "reload")
+  stop_lisk
+  start_lisk
+  ;;
 "restart")
   stop_lisk
+  stop_postgresql
+  start_postgresql
+  sleep 1
   start_lisk
   ;;
 "rebuild")
