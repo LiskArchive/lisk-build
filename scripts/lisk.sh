@@ -232,7 +232,7 @@ case $1 in
   stop_lisk
   stop_postgresql
   ;;
-  "reload")
+"reload")
   stop_lisk
   start_lisk
   ;;
@@ -260,6 +260,6 @@ case $1 in
 *)
   echo "Error: Unrecognized command."
   echo ""
-  echo "Available commands are: coldstart start stop restart rebuild status logs"
+  echo "Available commands are: coldstart start stop reload restart rebuild status logs "
   ;;
 esac
