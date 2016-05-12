@@ -143,8 +143,17 @@ start_postgresql() {
 }
 
 stop_postgresql() {
+  while pgrep -x "postgres" &> /dev/null; do
   pg_ctl -D $DB_DATA -l $DB_LOG_FILE stop &> /dev/null
+  if [ $? == 0 ]; then
+  echo "\xe2\x88\x9a Postgres stopped successfully"
+  break
+  else
+  echo "X Postgres failed to stop"
+  fi
+  done
 }
+
 
 start_lisk() {
   forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js &> /dev/null
@@ -156,13 +165,20 @@ start_lisk() {
 }
 
 stop_lisk() {
+  if ! pgrep -x "node" &> /dev/null; then
+        echo "Lisk is not running"
+  fi
+  while pgrep -x "node" &> /dev/null; do
   forever stop lisk &> /dev/null
   if [ $? !=  0 ]; then
     echo "X Failed to stop lisk."
   else
-    echo "√ Lisk stopped successfully."
+    echo "\xe2\x88\x9a Lisk stopped successfully."
+  break
   fi
+ done
 }
+
 
 rebuild_lisk() {
   create_database
