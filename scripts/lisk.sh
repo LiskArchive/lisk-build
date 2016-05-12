@@ -185,7 +185,6 @@ stop_lisk() {
     echo "X Failed to stop lisk."
   else
     echo "√ Lisk stopped successfully."
-  break
   fi
  done
 }
