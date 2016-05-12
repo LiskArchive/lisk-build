@@ -139,6 +139,7 @@ start_postgresql() {
         echo "√ Postgres is already running"
   else
   pg_ctl -D $DB_DATA -l $DB_LOG_FILE start &> /dev/null
+  sleep 1
   if [ $? != 0 ]; then
     echo "X Failed to start postgresql."
     exit 1
@@ -225,7 +226,7 @@ case $1 in
   ;;
 "start")
   start_postgresql
-  sleep 1
+  sleep 2
   start_lisk
   ;;
 "stop")
