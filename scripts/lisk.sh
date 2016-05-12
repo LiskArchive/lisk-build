@@ -137,7 +137,7 @@ coldstart_lisk() {
 start_postgresql() {
   if pgrep -x "postgres" &> /dev/null; then
         echo "√ Postgresql is running"
-  fi
+  else
   pg_ctl -D $DB_DATA -l $DB_LOG_FILE start &> /dev/null
   sleep 1
   if [ $? != 0 ]; then
@@ -146,12 +146,13 @@ start_postgresql() {
   else
     echo "√ Postgresql started successfully."
   fi
+  fi
 }
 
 stop_postgresql() {
   if ! pgrep -x "postgres" &> /dev/null; then
         echo "√ Postgresql is not running"
-  fi
+  else 
   while pgrep -x "postgres" &> /dev/null; do
   pg_ctl -D $DB_DATA -l $DB_LOG_FILE stop &> /dev/null
   if [ $? == 0 ]; then
@@ -160,6 +161,7 @@ stop_postgresql() {
   echo "X Postgresql failed to stop"
   fi
   done
+  fi
 }
 
 
@@ -168,18 +170,20 @@ start_lisk() {
         echo "√ Lisk is running"
   exit 1
   fi
+  else
   forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js &> /dev/null
   if [ $? == 0 ]; then
     echo "√ Lisk started successfully."
   else
     echo "X Failed to start lisk."
   fi
+  fi
 }
 
 stop_lisk() {
   if ! pgrep -x "node" &> /dev/null; then
         echo "√ Lisk is not running"
-  fi
+  else
   while pgrep -x "node" &> /dev/null; do
   forever stop lisk &> /dev/null
   if [ $? !=  0 ]; then
@@ -188,6 +192,7 @@ stop_lisk() {
     echo "√ Lisk stopped successfully."
   fi
  done
+ fi
 }
 
 
