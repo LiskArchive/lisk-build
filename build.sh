@@ -112,6 +112,14 @@ exec_cmd "GZIP=-6 tar -czvf ../release/$NOVER_BUILD_NAME.tar.gz $NOVER_BUILD_NAM
 # Create lisk-source.tar.gz
 exec_cmd "mv -f $VERSION lisk-source"
 exec_cmd "GZIP=-6 tar -czvf ../release/lisk-source.tar.gz lisk-source"
-# Cleanup directories
+
+echo "Checksumming archives..."
+echo "--------------------------------------------------------------------------"
+exec_cmd "md5sum ../release/$BUILD_NAME.tar.gz > ../release/$BUILD_NAME.tar.gz.md5"
+exec_cmd "md5sum ../release/$NOVER_BUILD_NAME.tar.gz > ../release/$NOVER_BUILD_NAME.tar.gz.md5"
+exec_cmd "md5sum ../release/lisk-source.tar.gz > ../release/lisk-source.tar.gz.md5"
+
+echo "Cleaning up..."
+echo "--------------------------------------------------------------------------"
 exec_cmd "rm -rf $BUILD_NAME $NOVER_BUILD_NAME lisk-source"
 cd ../
