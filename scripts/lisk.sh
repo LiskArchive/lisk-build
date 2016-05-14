@@ -36,10 +36,10 @@ create_user() {
   createuser --createdb "$DB_USER" &> /dev/null
   psql -qd postgres -c "ALTER USER "$DB_USER" WITH PASSWORD '$DB_PASS';" &> /dev/null
   if [ $? != 0 ]; then
-    echo "X Failed to create postgres user."
+    echo "X Failed to create Postgresql user."
     exit 1
   else
-    echo "√ Postgres user created successfully."
+    echo "√ Postgresql user created successfully."
   fi
 }
 
@@ -47,10 +47,10 @@ create_database() {
   dropdb --if-exists "$DB_NAME" &> /dev/null
   createdb "$DB_NAME" &> /dev/null
   if [ $? != 0 ]; then
-    echo "X Failed to create postgres database."
+    echo "X Failed to create Postgresql database."
     exit 1
   else
-    echo "√ Postgres database created successfully."
+    echo "√ Postgresql database created successfully."
   fi
 }
 
@@ -135,34 +135,65 @@ coldstart_lisk() {
 }
 
 start_postgresql() {
+  if pgrep -x "postgres" &> /dev/null; then
+        echo "√ Postgresql is running"
+  else
   pg_ctl -D $DB_DATA -l $DB_LOG_FILE start &> /dev/null
+  sleep 1
   if [ $? != 0 ]; then
-    echo "X Failed to start postgresql."
+    echo "X Failed to start Postgresql."
     exit 1
+  else
+    echo "√ Postgresql started successfully."
+  fi
   fi
 }
 
 stop_postgresql() {
+  if ! pgrep -x "postgres" &> /dev/null; then
+        echo "√ Postgresql is not running"
+  else 
+  while pgrep -x "postgres" &> /dev/null; do
   pg_ctl -D $DB_DATA -l $DB_LOG_FILE stop &> /dev/null
+  if [ $? == 0 ]; then
+  echo "√ Postgresql stopped successfully"
+  else
+  echo "X Postgresql failed to stop"
+  fi
+  done
+  fi
 }
 
+
 start_lisk() {
+  if pgrep -x "node" &> /dev/null; then
+        echo "√ Lisk is running"
+  exit 1
+  else
   forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js &> /dev/null
   if [ $? == 0 ]; then
     echo "√ Lisk started successfully."
   else
     echo "X Failed to start lisk."
   fi
+  fi
 }
 
 stop_lisk() {
+  if ! pgrep -x "node" &> /dev/null; then
+        echo "√ Lisk is not running"
+  else
+  while pgrep -x "node" &> /dev/null; do
   forever stop lisk &> /dev/null
   if [ $? !=  0 ]; then
     echo "X Failed to stop lisk."
   else
     echo "√ Lisk stopped successfully."
   fi
+ done
+ fi
 }
+
 
 rebuild_lisk() {
   create_database
@@ -199,15 +230,22 @@ case $1 in
   ;;
 "start")
   start_postgresql
-  sleep 1
+  sleep 2
   start_lisk
   ;;
 "stop")
   stop_lisk
   stop_postgresql
   ;;
+"reload")
+  stop_lisk
+  start_lisk
+  ;;
 "restart")
   stop_lisk
+  stop_postgresql
+  start_postgresql
+  sleep 1
   start_lisk
   ;;
 "rebuild")
@@ -227,6 +265,6 @@ case $1 in
 *)
   echo "Error: Unrecognized command."
   echo ""
-  echo "Available commands are: coldstart start stop restart rebuild status logs"
+  echo "Available commands are: coldstart start stop reload restart rebuild status logs "
   ;;
 esac

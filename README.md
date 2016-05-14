@@ -12,7 +12,7 @@ Please read [Installing Lisk (from Binaries)](https://github.com/LiskHQ/lisk-doc
 - [Darwin (native)](#darwin)
 - [FreeBSD (native)](#freebsd)
 
-**NOTE:** For each platform, the resulting packages are placed within the `src` directory, using the following naming convention: `lisk-{version}-{os}-{architecture}.zip`.
+**NOTE:** For each platform, the resulting packages are placed within the `src` directory, using the following naming convention: `lisk-{version}-{os}-{architecture}.tar.gz`.
 
 ## Linux
 
