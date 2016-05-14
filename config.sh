@@ -10,6 +10,7 @@ VERSION="0.2.2"
 OS=`uname`
 [ ! -z "$ARCH" ] || ARCH=`uname -m`
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
+NOVER_BUILD_NAME="lisk-$OS-$ARCH"
 TARGET=""
 JOBS="2"
 
