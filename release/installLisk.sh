@@ -44,7 +44,7 @@ ntp_checks() {
   #Install NTP or Chrony for Time Management - Physical Machines only
   if [[ "$(uname)" == "Linux" ]]; then
     if [[ -f "/etc/debian_version" &&  ! -f "/proc/user_beancounters" ]]; then
-      if pgrep -x "ntpd" > /dev/null; then
+      if sudo pgrep -x "ntpd" > /dev/null; then
         echo "√ NTP is running"
       else
         echo "X NTP is not running"
@@ -55,7 +55,7 @@ ntp_checks() {
           sudo service ntp stop
           sudo ntpdate pool.ntp.org
           sudo service ntp start
-          if pgrep -x "ntpd" > /dev/null; then
+          if sudo pgrep -x "ntpd" > /dev/null; then
             echo "√ NTP is running"
           else
             echo -e "\nLisk requires NTP running on Debian based systems. Please check /etc/ntp.conf and correct any issues."
@@ -67,10 +67,10 @@ ntp_checks() {
         fi
       fi #End Debian Checks
     elif [[ -f "/etc/redhat-release" &&  ! -f "/proc/user_beancounters" ]]; then
-      if pgrep -x "ntpd" > /dev/null; then
+      if sudo pgrep -x "ntpd" > /dev/null; then
         echo "√ NTP is running"
       else
-        if pgrep -x "chronyd" > /dev/null; then
+        if sudo pgrep -x "chronyd" > /dev/null; then
           echo "√ Chrony is running"
         else
           echo "X NTP and Chrony are not running"
@@ -98,7 +98,7 @@ ntp_checks() {
       echo "_ Running OpenVZ VM, NTP and Chrony are not required"
     fi
   elif [[ "$(uname)" == "FreeBSD" ]]; then
-    if pgrep -x "ntpd" > /dev/null; then
+    if sudo pgrep -x "ntpd" > /dev/null; then
       echo "√ NTP is running"
     else
       echo "X NTP is not running"
