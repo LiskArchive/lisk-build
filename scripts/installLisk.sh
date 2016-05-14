@@ -144,19 +144,18 @@ install_lisk() {
 
   curl -s https://downloads.lisk.io/lisk/test/$liskVersion -o $liskVersion
 
-  # Disabled until file is present
-  # curl -s https://downloads.lisk.iso/lisk/test/lisk_checksum.md5 -o lisk_checksum.md5
+  curl -s https://downloads.lisk.iso/lisk/test/lisk_checksum.md5 -o lisk_checksum.md5
 
-  # md5=`md5sum $liskVersion | awk '{print $1}'`
-  # md5_compare=`grep "$liskVersion" lisk_checksum.md5 | awk '{print $1}'`
+  md5=`md5sum $liskVersion | awk '{print $1}'`
+  md5_compare=`grep "$liskVersion" lisk_checksum.md5 | awk '{print $1}'`
 
-  # if [[ "$md5" == "$md5_compare" ]]; then
-  # echo "Checksum Passed!"
-  # else
-  # echo "Checksum Failed, aborting installation"
-  # rm -f $liskVersion lisk_checksum.md5
-  # exit 0
-  # fi
+  if [[ "$md5" == "$md5_compare" ]]; then
+    echo "Checksum Passed!"
+  else
+    echo "Checksum Failed, aborting installation"
+    rm -f $liskVersion lisk_checksum.md5
+    exit 0
+  fi
 
   echo -e "Extracting Lisk binaries to "$liskLocation/lisk
 
