@@ -45,6 +45,12 @@ else
   SED_OPTS="-i"
 fi
 
+if [ $(uname -s) == "FreeBSD" ]; then
+  $MD5_CMD="md5"
+else
+  $MD5_CMD="md5sum"
+fi
+
 if [ "$ARCH" == "armv6l" ]; then
   export TARGET="arm-linux-gnueabihf"
   export PATH="$PATH:$(pwd)/toolchains/rpi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin"

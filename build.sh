@@ -116,9 +116,9 @@ exec_cmd "GZIP=-6 tar -czvf ../release/lisk-source.tar.gz lisk-source"
 echo "Checksumming archives..."
 echo "--------------------------------------------------------------------------"
 cd ../release
-exec_cmd "md5sum $BUILD_NAME.tar.gz > $BUILD_NAME.tar.gz.md5"
-exec_cmd "md5sum $NOVER_BUILD_NAME.tar.gz > $NOVER_BUILD_NAME.tar.gz.md5"
-exec_cmd "md5sum lisk-source.tar.gz > lisk-source.tar.gz.md5"
+exec_cmd "$MD5_CMD $BUILD_NAME.tar.gz > $BUILD_NAME.tar.gz.md5"
+exec_cmd "$MD5_CMD $NOVER_BUILD_NAME.tar.gz > $NOVER_BUILD_NAME.tar.gz.md5"
+exec_cmd "$MD5_CMD lisk-source.tar.gz > lisk-source.tar.gz.md5"
 cd ../src
 
 echo "Cleaning up..."
