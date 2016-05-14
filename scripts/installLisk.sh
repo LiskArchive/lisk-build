@@ -144,16 +144,16 @@ install_lisk() {
 
   curl -s https://downloads.lisk.io/lisk/test/$liskVersion -o $liskVersion
 
-  curl -s https://downloads.lisk.iso/lisk/test/lisk_checksum.md5 -o lisk_checksum.md5
+  curl -s https://downloads.lisk.iso/lisk/test/$liskVersion.md5 -o $liskVersion.md5
 
   md5=`md5sum $liskVersion | awk '{print $1}'`
-  md5_compare=`grep "$liskVersion" lisk_checksum.md5 | awk '{print $1}'`
+  md5_compare=`grep "$liskVersion" $liskVersion.md5 | awk '{print $1}'`
 
   if [[ "$md5" == "$md5_compare" ]]; then
     echo "Checksum Passed!"
   else
     echo "Checksum Failed, aborting installation"
-    rm -f $liskVersion lisk_checksum.md5
+    rm -f $liskVersion $liskVersion.md5
     exit 0
   fi
 
@@ -164,7 +164,7 @@ install_lisk() {
   mv $liskDir $liskLocation/lisk
 
   echo -e "\nCleaning up downloaded files"
-  rm -f $liskVersion lisk_checksum.md5
+  rm -f $liskVersion $liskVersion.md5
 
   cd $liskLocation/lisk
 
