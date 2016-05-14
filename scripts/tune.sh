@@ -83,10 +83,10 @@ fi
 
 if [[ "$memoryBase" -lt "1024" ]]; then
   max_connections=200
-  shared_buffers=256MB
+  shared_buffers=128MB
   effective_cache_size=128MB
   work_mem=5242kB
-  maintenance_work_mem=256MB
+  maintenance_work_mem=128MB
   min_wal_size=1GB
   max_wal_size=2GB
   checkpoint_completion_target=0.7
@@ -99,7 +99,7 @@ fi
 if [[ "$memoryBase" -lt "2048"  && "$memoryBase" -gt "1024" ]]; then
   max_connections=200
   shared_buffers=2GB
-  effective_cache_size=4GB
+  effective_cache_size=3GB
   work_mem=10485kB
   maintenance_work_mem=512MB
   min_wal_size=1GB
@@ -114,7 +114,7 @@ fi
 if [[ "$memoryBase" -lt "4096" && "$memoryBase" -gt "2048" ]]; then
   max_connections=200
   shared_buffers=4GB
-  effective_cache_size=8GB
+  effective_cache_size=6GB
   work_mem=20971kB
   maintenance_work_mem=1GB
   min_wal_size=1GB
