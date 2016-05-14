@@ -7,6 +7,14 @@
 #
 #############################################################
 
+if [ ! -d ./pgsql/data ]; then
+  echo "Failed to open ./pgsql/data folder"
+  exit 1
+elif [ ! -f ./pgsql/data/postgresql.conf ]; then
+  echo "Failed to open ./pgsql/data/postgresql.conf"
+  exit 1
+fi
+
 update_config() {
   if [[ "$(uname)" == "Linux" ]]; then
     cp ./pgsql/data/postgresql.conf ./pgsql/data/postgresql.conf.bak
