@@ -161,7 +161,7 @@ install_lisk() {
 
   tar -xzf $liskVersion -C $liskLocation
 
-  mv $liskDir $liskLocation/lisk
+  mv $liskLocation/$liskDir $liskLocation/lisk
 
   echo -e "\nCleaning up downloaded files"
   rm -f $liskVersion $liskVersion.md5
