@@ -162,6 +162,7 @@ stop_postgresql() {
       else
         echo "X Postgresql failed to stop."
       fi
+      stopPg=$[$stopPg+1]
     done
     if pgrep -x "postgres" &> /dev/null; then
       pkill -x postgres -9  &> /dev/null;
