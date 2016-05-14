@@ -46,9 +46,9 @@ else
 fi
 
 if [ $(uname -s) == "FreeBSD" ]; then
-  $MD5_CMD="md5"
+  MD5_CMD="md5"
 else
-  $MD5_CMD="md5sum"
+  MD5_CMD="md5sum"
 fi
 
 if [ "$ARCH" == "armv6l" ]; then
