@@ -54,6 +54,7 @@ fi
 echo "Copying scripts..."
 echo "--------------------------------------------------------------------------"
 exec_cmd "cp -f ../shared.sh ../scripts/* $BUILD_NAME/"
+exec_cmd "cp -fR ../etc $BUILD_NAME/"
 
 echo "Building lisk-node..."
 echo "--------------------------------------------------------------------------"
