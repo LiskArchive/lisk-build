@@ -105,13 +105,13 @@ exec_cmd "echo v`date '+%H:%M:%S %d/%m/%Y'` > $BUILD_NAME/package.build";
 echo "Creating archives..."
 echo "--------------------------------------------------------------------------"
 # Create $BUILD_NAME.tar.gz
-exec_cmd "GZIP=-6 tar -czvf $BUILD_NAME.tar.gz $BUILD_NAME"
+exec_cmd "GZIP=-6 tar -czvf ../release/$BUILD_NAME.tar.gz $BUILD_NAME"
 # Create $NOVER_BUILD_NAME.tar.gz
 exec_cmd "mv -f $BUILD_NAME $NOVER_BUILD_NAME"
-exec_cmd "GZIP=-6 tar -czvf $NOVER_BUILD_NAME.tar.gz $NOVER_BUILD_NAME"
+exec_cmd "GZIP=-6 tar -czvf ../release/$NOVER_BUILD_NAME.tar.gz $NOVER_BUILD_NAME"
 # Create lisk-source.tar.gz
 exec_cmd "mv -f $VERSION lisk-source"
-exec_cmd "GZIP=-6 tar -czvf lisk-source.tar.gz lisk-source"
+exec_cmd "GZIP=-6 tar -czvf ../release/lisk-source.tar.gz lisk-source"
 # Cleanup directories
 exec_cmd "rm -rf $BUILD_NAME $NOVER_BUILD_NAME lisk-source"
 cd ../
