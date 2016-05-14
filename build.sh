@@ -43,7 +43,7 @@ fi
 if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "rm -rf $BUILD_NAME"
   exec_cmd "tar -xvf lisk-source.tar.gz"
-  exec_cmd "mv -f $VERSION $BUILD_NAME"
+  exec_cmd "mv -f lisk-source $BUILD_NAME"
   exec_cmd "cp -vR $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
   exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
   cd "$BUILD_NAME"
