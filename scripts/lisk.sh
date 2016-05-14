@@ -125,6 +125,7 @@ coldstart_lisk() {
   stop_postgresql &> /dev/null
   rm -rf $DB_DATA
   pg_ctl initdb -D $DB_DATA &> /dev/null
+  sleep 2
   start_postgresql
   sleep 1
   create_user
