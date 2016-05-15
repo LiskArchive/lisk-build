@@ -170,6 +170,8 @@ install_lisk() {
 
   echo -e "\nColdstarting Lisk for the first time"
   bash lisk.sh coldstart
+  
+  sleep 3
 
   echo -e "\nStopping Lisk to perform database tuning"
   bash lisk.sh stop
