@@ -98,8 +98,8 @@ fi
 
 if [[ "$memoryBase" -lt "2048"  && "$memoryBase" -gt "1024" ]]; then
   max_connections=200
-  shared_buffers=2GB
-  effective_cache_size=3GB
+  shared_buffers=1GB
+  effective_cache_size=2GB
   work_mem=10485kB
   maintenance_work_mem=512MB
   min_wal_size=1GB
@@ -113,8 +113,8 @@ fi
 
 if [[ "$memoryBase" -lt "4096" && "$memoryBase" -gt "2048" ]]; then
   max_connections=200
-  shared_buffers=4GB
-  effective_cache_size=6GB
+  shared_buffers=2GB
+  effective_cache_size=4GB
   work_mem=20971kB
   maintenance_work_mem=1GB
   min_wal_size=1GB
@@ -128,8 +128,8 @@ fi
 
 if [[ "$memoryBase" -lt "8192" && "$memoryBase" -gt "4096" ]]; then
   max_connections=200
-  shared_buffers=8GB
-  effective_cache_size=16GB
+  shared_buffers=4GB
+  effective_cache_size=8GB
   work_mem=41943kB
   maintenance_work_mem=2GB
   min_wal_size=1GB
@@ -143,8 +143,8 @@ fi
 
 if [[ "$memoryBase" -gt "8192" ]]; then
   max_connections=200
-  shared_buffers=16GB
-  effective_cache_size=32GB
+  shared_buffers=8GB
+  effective_cache_size=16GB
   work_mem=83886kB
   maintenance_work_mem=2GB
   min_wal_size=1GB
