@@ -7,6 +7,10 @@
 #
 #############################################################
 
+#Copying template into pgsql/data folder
+  rm -f ./pgsql/data/postgresql.conf
+  cp ./etc/postgresql.conf ./pgsql/data/postgresql.conf
+  
 if [ ! -d ./pgsql/data ]; then
   echo "Failed to open ./pgsql/data folder"
   exit 1
@@ -61,32 +65,25 @@ update_config() {
   fi
 }
 
-if [[ -f "./pgsql/data/postgresql.conf.bak" ]]; then
-  cp -f ./pgsql/data/postgresql.conf.bak ./pgsql/data/postgresql.conf
-fi
-
 if [[ "$(uname)" == "Linux" ]]; then
   memoryBase=`cat /proc/meminfo | grep MemTotal | awk '{print $2 / 1024 /4}' | cut -f1 -d"."`
-  echo $memoryBase
 fi
 
 if [[ "$(uname)" == "FreeBSD" ]]; then
   memoryBase=`sysctl hw.physmem | awk '{print $2 / 1024 / 1024/ 4}' |cut -f1 -d"."`
-  echo $memoryBase
 fi
 
 ### UNTESTED
 if [[ "$(uname)" == "Darwin" ]]; then
   memoryBase=`top -l 1 | grep PhysMem: | awk '{print $10  / 1024  / 1024 /  4 }' |cut -f1 -d"."`
-  echo $memoryBase
 fi
 
 if [[ "$memoryBase" -lt "1024" ]]; then
-  max_connections=200
+  max_connections=100
   shared_buffers=128MB
   effective_cache_size=128MB
   work_mem=5242kB
-  maintenance_work_mem=128MB
+  maintenance_work_mem=64MB
   min_wal_size=1GB
   max_wal_size=2GB
   checkpoint_completion_target=0.7
