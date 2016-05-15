@@ -155,13 +155,15 @@ stop_postgresql() {
   if ! pgrep -x "postgres" &> /dev/null; then
     echo "√ Postgresql is not running."
   else
-   while [ $stopPg < 5 ] /dev/null; do
+   while [[ $stopPg < 5 ]] &> /dev/null; do
       pg_ctl -D $DB_DATA -l $DB_LOG_FILE stop &> /dev/null
       if [ $? == 0 ]; then
         echo "√ Postgresql stopped successfully."
+        break
       else
         echo "X Postgresql failed to stop."
       fi
+      sleep .5
       stopPg=$[$stopPg+1]
     done
     if pgrep -x "postgres" &> /dev/null; then
@@ -190,13 +192,15 @@ stop_lisk() {
   if ! pgrep -x "node" &> /dev/null; then
     echo "√ Lisk is not running."
   else
-    while [ $stopLisk < 5 ] /dev/null; do
+    while [[ $stopLisk < 5 ]] &> /dev/null; do
       forever stop lisk &> /dev/null
       if [ $? !=  0 ]; then
         echo "X Failed to stop lisk."
       else
         echo "√ Lisk stopped successfully."
+        break
       fi
+      sleep .5
       stopLisk=$[$stopLisk+1]
     done
     if pgrep -x "node" &> /dev/null; then
