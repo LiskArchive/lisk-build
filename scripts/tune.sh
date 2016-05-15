@@ -21,7 +21,6 @@ fi
 
 update_config() {
   if [[ "$(uname)" == "Linux" ]]; then
-    cp ./pgsql/data/postgresql.conf ./pgsql/data/postgresql.conf.bak
     sed -i "s#mc#$max_connections#g" ./pgsql/data/postgresql.conf
     sed -i "s#sb#$shared_buffers#g" ./pgsql/data/postgresql.conf
     sed -i "s#ecs#$effective_cache_size#g" ./pgsql/data/postgresql.conf
@@ -36,7 +35,6 @@ update_config() {
   fi
 
   if [[ "$(uname)" == "FreeBSD" ]]; then
-    cp ./pgsql/data/postgresql.conf ./pgsql/data/postgresql.conf.bak
     sed -I .temp "s#mc#$max_connections#g" ./pgsql/data/postgresql.conf
     sed -I .temp "s#sb#$shared_buffers#g" ./pgsql/data/postgresql.conf
     sed -I .temp "s#ecs#$effective_cache_size#g" ./pgsql/data/postgresql.conf
@@ -51,7 +49,6 @@ update_config() {
 
   #### UNTESTED
   if [[ "$(uname)" == "Darwin" ]]; then
-    cp ./pgsql/data/postgresql.conf ./pgsql/data/postgresql.conf.bak
     sed -i "s#mc#$max_connections#g" ./pgsql/data/postgresql.conf
     sed -i "s#sb#$shared_buffers#g" ./pgsql/data/postgresql.conf
     sed -i "s#ecs#$effective_cache_size#g" ./pgsql/data/postgresql.conf
