@@ -171,13 +171,10 @@ install_lisk() {
   echo -e "\nColdstarting Lisk for the first time"
   bash lisk.sh coldstart
   
-  sleep 3
+  sleep 5
 
   echo -e "\nStopping Lisk to perform database tuning"
   bash lisk.sh stop
-
-  rm -f $liskLocation/lisk/pgsql/data/postgresql.conf
-  cp ./etc/postgresql.conf $liskLocation/lisk/pgsql/data/postgresql.conf
 
   echo -e "\nExecuting database tuning operation"
   bash $liskLocation/lisk/tune.sh
