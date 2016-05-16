@@ -12,6 +12,10 @@
 UNAME=$(uname)-$(uname -m)
 defaultLiskLocation=~
 
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
+
 #Verification Checks
 if [ "$USER" == "root" ]; then
   echo "Error: Lisk should not be installed be as root. Exiting."
