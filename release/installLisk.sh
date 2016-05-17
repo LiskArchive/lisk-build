@@ -22,7 +22,6 @@ if [ "$USER" == "root" ]; then
   exit 1
 fi
 
-
 #Adding LC_ALL LANG and LANGUAGE to user profile
 if [[ -f ~/.profile && ! "$(grep "en_US.UTF-8" ~/.profile)" ]]; then
   echo "LC_ALL=en_US.UTF-8" >> ~/.profile
@@ -34,8 +33,6 @@ elif [[ -f ~/.bash_profile && ! "$(grep "en_US.UTF-8" ~/.bash_profile)" ]]; then
   echo "LANGUAGE=en_US.UTF-8"  >> ~/.bash_profile
 fi
 
-
-
 user_prompts() {
   read -r -p "Where do you want to install Lisk to? (Default $defaultLiskLocation): " liskLocation
   liskLocation=${liskLocation:-$defaultLiskLocation}
@@ -44,7 +41,6 @@ user_prompts() {
     exit 2;
   fi
 }
-
 
 ntp_checks() {
   #Install NTP or Chrony for Time Management - Physical Machines only

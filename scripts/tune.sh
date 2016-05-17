@@ -62,7 +62,6 @@ update_config() {
   fi
 }
 
-
 if [[ "$(uname)" == "Linux" ]]; then
   memoryBase=`cat /proc/meminfo | grep MemTotal | awk '{print $2 }' | cut -f1 -d"."`
 fi
