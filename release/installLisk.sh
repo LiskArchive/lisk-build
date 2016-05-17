@@ -16,6 +16,16 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 
+if [[ -f ~/.profile && ! "$(grep "en_US.UTF-8" ~/.profile)" ]]; then
+echo "LC_ALL=en_US.UTF-8" >> ~/.profile
+echo "LANG=en_US.UTF-8"  >> ~/.profile
+echo "LANGUAGE=en_US.UTF-8"  >> ~/.profile
+elif [[ -f ~/.bash_profile && ! "$(grep "en_US.UTF-8" ~/.bash_profile)" ]]; then
+echo "LC_ALL=en_US.UTF-8" >> ~/.bash_profile
+echo "LANG=en_US.UTF-8"  >> ~/.bash_profile
+echo "LANGUAGE=en_US.UTF-8"  >> ~/.bash_profile
+fi
+
 #Verification Checks
 if [ "$USER" == "root" ]; then
   echo "Error: Lisk should not be installed be as root. Exiting."
