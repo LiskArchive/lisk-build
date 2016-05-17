@@ -45,18 +45,6 @@ user_prompts() {
   fi
 }
 
-install_prereqs() {
-  if [[ -f "/etc/redhat-release" ]]; then
-    sudo yum -yq install curl tar
-  fi
-  if [[ -f "/etc/debian_version" ]]; then
-    sudo apt-get update
-    sudo apt-get install -yyq curl tar
-  fi
-  if [[ "$(uname)" == "FreeBSD" ]]; then
-    sudo pkg install curl tar
-  fi
-}
 
 ntp_checks() {
   #Install NTP or Chrony for Time Management - Physical Machines only
@@ -214,7 +202,6 @@ case $1 in
 "install")
   user_prompts
   ntp_checks
-  install_prereqs
   install_lisk
   ;;
 "upgrade")
