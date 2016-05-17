@@ -1,22 +1,40 @@
 #!/bin/bash
 #############################################################
 # Lisk Installation Script                                  #
-# by: Isabella D.
-#
-#
-#
-#
+# by: Isabella Dell                                         #
+# Date: 15/05/2016                                          #
+#                                                           #
+#                                                           #
+#                                                           #
 #############################################################
 
 #Variable Declaration
 UNAME=$(uname)-$(uname -m)
 defaultLiskLocation=~
 
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LANGUAGE=en_US.UTF-8
+
 #Verification Checks
 if [ "$USER" == "root" ]; then
   echo "Error: Lisk should not be installed be as root. Exiting."
   exit 1
 fi
+
+
+#Adding LC_ALL LANG and LANGUAGE to user profile
+if [[ -f ~/.profile && ! "$(grep "en_US.UTF-8" ~/.profile)" ]]; then
+  echo "LC_ALL=en_US.UTF-8" >> ~/.profile
+  echo "LANG=en_US.UTF-8"  >> ~/.profile
+  echo "LANGUAGE=en_US.UTF-8"  >> ~/.profile
+elif [[ -f ~/.bash_profile && ! "$(grep "en_US.UTF-8" ~/.bash_profile)" ]]; then
+  echo "LC_ALL=en_US.UTF-8" >> ~/.bash_profile
+  echo "LANG=en_US.UTF-8"  >> ~/.bash_profile
+  echo "LANGUAGE=en_US.UTF-8"  >> ~/.bash_profile
+fi
+
+
 
 user_prompts() {
   read -r -p "Where do you want to install Lisk to? (Default $defaultLiskLocation): " liskLocation
@@ -27,18 +45,6 @@ user_prompts() {
   fi
 }
 
-install_prereqs() {
-  if [[ -f "/etc/redhat-release" ]]; then
-    sudo yum -yq install curl tar
-  fi
-  if [[ -f "/etc/debian_version" ]]; then
-    sudo apt-get update
-    sudo apt-get install -yyq curl tar
-  fi
-  if [[ "$(uname)" == "FreeBSD" ]]; then
-    sudo pkg install curl tar
-  fi
-}
 
 ntp_checks() {
   #Install NTP or Chrony for Time Management - Physical Machines only
@@ -170,12 +176,11 @@ install_lisk() {
 
   echo -e "\nColdstarting Lisk for the first time"
   bash lisk.sh coldstart
+  
+  sleep 5
 
   echo -e "\nStopping Lisk to perform database tuning"
   bash lisk.sh stop
-
-  rm -f $liskLocation/lisk/pgsql/data/postgresql.conf
-  cp ./etc/postgresql.conf $liskLocation/lisk/pgsql/data/postgresql.conf
 
   echo -e "\nExecuting database tuning operation"
   bash $liskLocation/lisk/tune.sh
@@ -197,7 +202,6 @@ case $1 in
 "install")
   user_prompts
   ntp_checks
-  install_prereqs
   install_lisk
   ;;
 "upgrade")

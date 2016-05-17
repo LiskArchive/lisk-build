@@ -125,6 +125,7 @@ coldstart_lisk() {
   stop_postgresql &> /dev/null
   rm -rf $DB_DATA
   pg_ctl initdb -D $DB_DATA &> /dev/null
+  sleep 2
   start_postgresql
   sleep 1
   create_user
@@ -150,17 +151,25 @@ start_postgresql() {
 }
 
 stop_postgresql() {
+  stopPg=0
   if ! pgrep -x "postgres" &> /dev/null; then
     echo "√ Postgresql is not running."
   else
-    while pgrep -x "postgres" &> /dev/null; do
+   while [[ $stopPg < 5 ]] &> /dev/null; do
       pg_ctl -D $DB_DATA -l $DB_LOG_FILE stop &> /dev/null
       if [ $? == 0 ]; then
         echo "√ Postgresql stopped successfully."
+        break
       else
         echo "X Postgresql failed to stop."
       fi
+      sleep .5
+      stopPg=$[$stopPg+1]
     done
+    if pgrep -x "postgres" &> /dev/null; then
+      pkill -x postgres -9  &> /dev/null;
+      echo "√ Postgresql Killed."
+    fi
   fi
 }
 
@@ -179,17 +188,25 @@ start_lisk() {
 }
 
 stop_lisk() {
+  stopLisk=0
   if ! pgrep -x "node" &> /dev/null; then
     echo "√ Lisk is not running."
   else
-    while pgrep -x "node" &> /dev/null; do
+    while [[ $stopLisk < 5 ]] &> /dev/null; do
       forever stop lisk &> /dev/null
       if [ $? !=  0 ]; then
         echo "X Failed to stop lisk."
       else
         echo "√ Lisk stopped successfully."
+        break
       fi
+      sleep .5
+      stopLisk=$[$stopLisk+1]
     done
+    if pgrep -x "node" &> /dev/null; then
+      pkill -x node -9  &> /dev/null;
+      echo "√ Lisk Killed."
+    fi
   fi
 }
 

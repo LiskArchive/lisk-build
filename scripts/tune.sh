@@ -1,12 +1,16 @@
 #!/bin/bash
 #############################################################
 # Postgres Memory Tuning for Lisk                           #
-# by: Isabella D.
-#
-#
-#
+# by: Isabella Dell                                         #
+# Date: 16/05/2016                                          #
+#                                                           #
+#                                                           #
 #############################################################
 
+#Copying template into pgsql/data folder
+rm -f ./pgsql/data/postgresql.conf
+cp ./etc/postgresql.conf ./pgsql/data/postgresql.conf
+  
 if [ ! -d ./pgsql/data ]; then
   echo "Failed to open ./pgsql/data folder"
   exit 1
@@ -17,7 +21,6 @@ fi
 
 update_config() {
   if [[ "$(uname)" == "Linux" ]]; then
-    cp ./pgsql/data/postgresql.conf ./pgsql/data/postgresql.conf.bak
     sed -i "s#mc#$max_connections#g" ./pgsql/data/postgresql.conf
     sed -i "s#sb#$shared_buffers#g" ./pgsql/data/postgresql.conf
     sed -i "s#ecs#$effective_cache_size#g" ./pgsql/data/postgresql.conf
@@ -32,7 +35,6 @@ update_config() {
   fi
 
   if [[ "$(uname)" == "FreeBSD" ]]; then
-    cp ./pgsql/data/postgresql.conf ./pgsql/data/postgresql.conf.bak
     sed -I .temp "s#mc#$max_connections#g" ./pgsql/data/postgresql.conf
     sed -I .temp "s#sb#$shared_buffers#g" ./pgsql/data/postgresql.conf
     sed -I .temp "s#ecs#$effective_cache_size#g" ./pgsql/data/postgresql.conf
@@ -47,7 +49,6 @@ update_config() {
 
   #### UNTESTED
   if [[ "$(uname)" == "Darwin" ]]; then
-    cp ./pgsql/data/postgresql.conf ./pgsql/data/postgresql.conf.bak
     sed -i "s#mc#$max_connections#g" ./pgsql/data/postgresql.conf
     sed -i "s#sb#$shared_buffers#g" ./pgsql/data/postgresql.conf
     sed -i "s#ecs#$effective_cache_size#g" ./pgsql/data/postgresql.conf
@@ -61,97 +62,29 @@ update_config() {
   fi
 }
 
-if [[ -f "./pgsql/data/postgresql.conf.bak" ]]; then
-  cp -f ./pgsql/data/postgresql.conf.bak ./pgsql/data/postgresql.conf
-fi
 
 if [[ "$(uname)" == "Linux" ]]; then
-  memoryBase=`cat /proc/meminfo | grep MemTotal | awk '{print $2 / 1024 /4}' | cut -f1 -d"."`
-  echo $memoryBase
+  memoryBase=`cat /proc/meminfo | grep MemTotal | awk '{print $2 }' | cut -f1 -d"."`
 fi
 
 if [[ "$(uname)" == "FreeBSD" ]]; then
-  memoryBase=`sysctl hw.physmem | awk '{print $2 / 1024 / 1024/ 4}' |cut -f1 -d"."`
-  echo $memoryBase
+  memoryBase=`sysctl hw.physmem | awk '{print $2 }'|cut -f1 -d"."`
 fi
 
 ### UNTESTED
 if [[ "$(uname)" == "Darwin" ]]; then
-  memoryBase=`top -l 1 | grep PhysMem: | awk '{print $10  / 1024  / 1024 /  4 }' |cut -f1 -d"."`
-  echo $memoryBase
+  memoryBase=`top -l 1 | grep PhysMem: | awk '{print $10}' |cut -f1 -d"."`
 fi
 
-if [[ "$memoryBase" -lt "1024" ]]; then
-  max_connections=200
-  shared_buffers=1GB
-  effective_cache_size=3GB
-  work_mem=5242kB
-  maintenance_work_mem=256MB
-  min_wal_size=1GB
-  max_wal_size=2GB
-  checkpoint_completion_target=0.7
-  wal_buffers=16MB
-  default_statistics_target=100
-  update_config
-  exit 0
-fi
+max_connections=200
+shared_buffers=$(expr $memoryBase / 8)"kB"
+effective_cache_size=$(expr $memoryBase  / 4)"kB"
+work_mem=$(( ($memoryBase - ( $memoryBase / 4 ))/ ($max_connections * 3  )))"kB"
+maintenance_work_mem=$(( $memoryBase / 16 ))"kB"
+min_wal_size=1GB
+max_wal_size=2GB
+checkpoint_completion_target=0.9
+wal_buffers=16MB
+default_statistics_target=100
 
-if [[ "$memoryBase" -lt "2048"  && "$memoryBase" -gt "1024" ]]; then
-  max_connections=200
-  shared_buffers=2GB
-  effective_cache_size=6GB
-  work_mem=10485kB
-  maintenance_work_mem=512MB
-  min_wal_size=1GB
-  max_wal_size=2GB
-  checkpoint_completion_target=0.7
-  wal_buffers=16MB
-  default_statistics_target=100
-  update_config
-  exit 0
-fi
-
-if [[ "$memoryBase" -lt "4096" && "$memoryBase" -gt "2048" ]]; then
-  max_connections=200
-  shared_buffers=4GB
-  effective_cache_size=12GB
-  work_mem=20971kB
-  maintenance_work_mem=1GB
-  min_wal_size=1GB
-  max_wal_size=2GB
-  checkpoint_completion_target=0.7
-  wal_buffers=16MB
-  default_statistics_target=100
-  update_config
-  exit 0
-fi
-
-if [[ "$memoryBase" -lt "8192" && "$memoryBase" -gt "4096" ]]; then
-  max_connections=200
-  shared_buffers=8GB
-  effective_cache_size=24GB
-  work_mem=41943kB
-  maintenance_work_mem=2GB
-  min_wal_size=1GB
-  max_wal_size=2GB
-  checkpoint_completion_target=0.7
-  wal_buffers=16MB
-  default_statistics_target=100
-  update_config
-  exit 0
-fi
-
-if [[ "$memoryBase" -gt "8192" ]]; then
-  max_connections=200
-  shared_buffers=16GB
-  effective_cache_size=48GB
-  work_mem=83886kB
-  maintenance_work_mem=2GB
-  min_wal_size=1GB
-  max_wal_size=2GB
-  checkpoint_completion_target=0.7
-  wal_buffers=16MB
-  default_statistics_target=100
-  update_config
-  exit 0
-fi
+update_config
