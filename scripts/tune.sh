@@ -62,90 +62,29 @@ update_config() {
   fi
 }
 
+
 if [[ "$(uname)" == "Linux" ]]; then
-  memoryBase=`cat /proc/meminfo | grep MemTotal | awk '{print $2 / 1024 }' | cut -f1 -d"."`
+  memoryBase=`cat /proc/meminfo | grep MemTotal | awk '{print $2 }' | cut -f1 -d"."`
 fi
 
 if [[ "$(uname)" == "FreeBSD" ]]; then
-  memoryBase=`sysctl hw.physmem | awk '{print $2 / 1024 / 1024}' |cut -f1 -d"."`
+  memoryBase=`sysctl hw.physmem | awk '{print $2 }'|cut -f1 -d"."`
 fi
 
 ### UNTESTED
 if [[ "$(uname)" == "Darwin" ]]; then
-  memoryBase=`top -l 1 | grep PhysMem: | awk '{print $10  / 1024  / 1024 }' |cut -f1 -d"."`
+  memoryBase=`top -l 1 | grep PhysMem: | awk '{print $10}' |cut -f1 -d"."`
 fi
 
-if [[ "$memoryBase" -lt "1024" ]]; then
-  max_connections=50
-  shared_buffers=64MB
-  effective_cache_size=256MB
-  work_mem=10922kB
-  maintenance_work_mem=64MB
-  min_wal_size=100MB
-  max_wal_size=100MB
-  checkpoint_completion_target=0.7
-  wal_buffers=2MB
-  default_statistics_target=100
-  update_config
-  exit 0
-fi
+max_connections=200
+shared_buffers=$(expr $memoryBase / 8)"kB"
+effective_cache_size=$(expr $memoryBase  / 4)"kB"
+work_mem=$(( ($memoryBase - ( $memoryBase / 4 ))/ ($max_connections * 3  )))"kB"
+maintenance_work_mem=$(( $memoryBase / 16 ))"kB"
+min_wal_size=1GB
+max_wal_size=2GB
+checkpoint_completion_target=0.9
+wal_buffers=16MB
+default_statistics_target=100
 
-if [[ "$memoryBase" -lt "2048"  && "$memoryBase" -gt "1024" ]]; then
-  max_connections=200
-  shared_buffers=128MB
-  effective_cache_size=512MB
-  work_mem=21845kB
-  maintenance_work_mem=128MB
-  min_wal_size=100MB
-  max_wal_size=100MB
-  checkpoint_completion_target=0.7
-  wal_buffers=4MB
-  default_statistics_target=100
-  update_config
-  exit 0
-fi
-
-if [[ "$memoryBase" -lt "4096" && "$memoryBase" -gt "2048" ]]; then
-  max_connections=200
-  shared_buffers=512MB
-  effective_cache_size=1GB
-  work_mem=43690kB
-  maintenance_work_mem=256MB
-  min_wal_size=100MB
-  max_wal_size=100MB
-  checkpoint_completion_target=0.7
-  wal_buffers=8MB
-  default_statistics_target=100
-  update_config
-  exit 0
-fi
-
-if [[ "$memoryBase" -lt "8192" && "$memoryBase" -gt "4096" ]]; then
-  max_connections=200
-  shared_buffers=1GB
-  effective_cache_size=2GB
-  work_mem=87381kB
-  maintenance_work_mem=512MB
-  min_wal_size=100MB
-  max_wal_size=100MB
-  checkpoint_completion_target=0.7
-  wal_buffers=16MB
-  default_statistics_target=100
-  update_config
-  exit 0
-fi
-
-if [[ "$memoryBase" -gt "8192" ]]; then
-  max_connections=200
-  shared_buffers=2GB
-  effective_cache_size=4GB
-  work_mem=174762kB
-  maintenance_work_mem=1GB
-  min_wal_size=100MB
-  max_wal_size=100MB
-  checkpoint_completion_target=0.7
-  wal_buffers=16MB
-  default_statistics_target=100
-  update_config
-  exit 0
-fi
+update_config
