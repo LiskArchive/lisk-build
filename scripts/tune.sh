@@ -7,6 +7,24 @@
 #                                                           #
 #############################################################
 
+if [[ "$(uname)" == "Linux" ]]; then
+  memoryBase=`cat /proc/meminfo | grep MemTotal | awk '{print $2 }' | cut -f1 -d"."`
+fi
+
+if [[ "$(uname)" == "FreeBSD" ]]; then
+  memoryBase=`sysctl hw.physmem | awk '{print $2 }'|cut -f1 -d"."`
+fi
+
+### UNTESTED
+if [[ "$(uname)" == "Darwin" ]]; then
+  memoryBase=`top -l 1 | grep PhysMem: | awk '{print $10}' |cut -f1 -d"."`
+fi
+
+if [[ "$memoryBase" -lt "1310720" ]]; then
+echo "Not enough ram, taking defaults."
+exit 0
+fi
+
 #Copying template into pgsql/data folder
 rm -f ./pgsql/data/postgresql.conf
 cp ./etc/postgresql.conf ./pgsql/data/postgresql.conf
@@ -45,6 +63,7 @@ update_config() {
     sed -I .temp "s#cct#$checkpoint_completion_target#g" ./pgsql/data/postgresql.conf
     sed -I .temp "s#wb#$wal_buffers#g" ./pgsql/data/postgresql.conf
     sed -I .temp "s#dst#$default_statistics_target#g" ./pgsql/data/postgresql.conf
+    echo "Updates completed"
   fi
 
   #### UNTESTED
@@ -59,24 +78,13 @@ update_config() {
     sed -i "s#cct#$checkpoint_completion_target#g" ./pgsql/data/postgresql.conf
     sed -i "s#wb#$wal_buffers#g" ./pgsql/data/postgresql.conf
     sed -i "s#dst#$default_statistics_target#g" ./pgsql/data/postgresql.conf
+    echo "Updates completed"
   fi
 }
 
-if [[ "$(uname)" == "Linux" ]]; then
-  memoryBase=`cat /proc/meminfo | grep MemTotal | awk '{print $2 }' | cut -f1 -d"."`
-fi
-
-if [[ "$(uname)" == "FreeBSD" ]]; then
-  memoryBase=`sysctl hw.physmem | awk '{print $2 }'|cut -f1 -d"."`
-fi
-
-### UNTESTED
-if [[ "$(uname)" == "Darwin" ]]; then
-  memoryBase=`top -l 1 | grep PhysMem: | awk '{print $10}' |cut -f1 -d"."`
-fi
 
 max_connections=200
-shared_buffers=$(expr $memoryBase / 8)"kB"
+shared_buffers=$(expr $memoryBase / 4)"kB"
 effective_cache_size=$(expr $memoryBase  / 4)"kB"
 work_mem=$(( ($memoryBase - ( $memoryBase / 4 ))/ ($max_connections * 3  )))"kB"
 maintenance_work_mem=$(( $memoryBase / 16 ))"kB"
