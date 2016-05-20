@@ -43,9 +43,9 @@ user_prompts() {
     exit 2;
   fi
   
-  read -r -p "Would you like to install the Main-Net or Test-Net Client?? (Default $defaultRelease): " release
+  read -r -p "Would you like to install the Main or Test Client? (Default $defaultRelease): " release
   release=${release:-$defaultRelease}
-  if [[ ! "$release" == "main" || ! "$release" == "test" ]]; then
+  if [[ ! "$release" == "main" && ! "$release" == "test" ]]; then
     echo "$release is not valid, please check and re-excute"
     exit 2;
   fi
@@ -218,7 +218,7 @@ backup_lisk() {
 upgrade_lisk() {
   
   echo -e "\nRestoring Database to new Lisk Install"
-  mkdir -p -m700 $liskLocation/lisk/pgsql/data
+  mkdir -p -m700 $liskLocation/lisk-$release/pgsql/data
   cp -rf $liskLocation/backup/lisk-$release/pgsql/data/* $liskLocation/lisk-$release/pgsql/data/
   
   echo -e "\nStarting Lisk"
