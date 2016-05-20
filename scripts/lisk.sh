@@ -125,6 +125,7 @@ coldstart_lisk() {
   stop_postgresql &> /dev/null
   rm -rf $DB_DATA
   pg_ctl initdb -D $DB_DATA &> /dev/null
+  sleep 2
   start_postgresql
   sleep 1
   create_user
@@ -136,64 +137,78 @@ coldstart_lisk() {
 
 start_postgresql() {
   if pgrep -x "postgres" &> /dev/null; then
-        echo "√ Postgresql is running"
+    echo "√ Postgresql is running."
   else
-  pg_ctl -D $DB_DATA -l $DB_LOG_FILE start &> /dev/null
-  sleep 1
-  if [ $? != 0 ]; then
-    echo "X Failed to start Postgresql."
-    exit 1
-  else
-    echo "√ Postgresql started successfully."
-  fi
+    pg_ctl -D $DB_DATA -l $DB_LOG_FILE start &> /dev/null
+    sleep 1
+    if [ $? != 0 ]; then
+      echo "X Failed to start Postgresql."
+      exit 1
+    else
+      echo "√ Postgresql started successfully."
+    fi
   fi
 }
 
 stop_postgresql() {
+  stopPg=0
   if ! pgrep -x "postgres" &> /dev/null; then
-        echo "√ Postgresql is not running"
-  else 
-  while pgrep -x "postgres" &> /dev/null; do
-  pg_ctl -D $DB_DATA -l $DB_LOG_FILE stop &> /dev/null
-  if [ $? == 0 ]; then
-  echo "√ Postgresql stopped successfully"
+    echo "√ Postgresql is not running."
   else
-  echo "X Postgresql failed to stop"
-  fi
-  done
+   while [[ $stopPg < 5 ]] &> /dev/null; do
+      pg_ctl -D $DB_DATA -l $DB_LOG_FILE stop &> /dev/null
+      if [ $? == 0 ]; then
+        echo "√ Postgresql stopped successfully."
+        break
+      else
+        echo "X Postgresql failed to stop."
+      fi
+      sleep .5
+      stopPg=$[$stopPg+1]
+    done
+    if pgrep -x "postgres" &> /dev/null; then
+      pkill -x postgres -9  &> /dev/null;
+      echo "√ Postgresql Killed."
+    fi
   fi
 }
 
-
 start_lisk() {
   if pgrep -x "node" &> /dev/null; then
-        echo "√ Lisk is running"
-  exit 1
+    echo "√ Lisk is running."
+    exit 1
   else
-  forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js &> /dev/null
-  if [ $? == 0 ]; then
-    echo "√ Lisk started successfully."
-  else
-    echo "X Failed to start lisk."
-  fi
+    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js &> /dev/null
+    if [ $? == 0 ]; then
+      echo "√ Lisk started successfully."
+    else
+      echo "X Failed to start lisk."
+    fi
   fi
 }
 
 stop_lisk() {
+  stopLisk=0
   if ! pgrep -x "node" &> /dev/null; then
-        echo "√ Lisk is not running"
+    echo "√ Lisk is not running."
   else
-  while pgrep -x "node" &> /dev/null; do
-  forever stop lisk &> /dev/null
-  if [ $? !=  0 ]; then
-    echo "X Failed to stop lisk."
-  else
-    echo "√ Lisk stopped successfully."
+    while [[ $stopLisk < 5 ]] &> /dev/null; do
+      forever stop lisk &> /dev/null
+      if [ $? !=  0 ]; then
+        echo "X Failed to stop lisk."
+      else
+        echo "√ Lisk stopped successfully."
+        break
+      fi
+      sleep .5
+      stopLisk=$[$stopLisk+1]
+    done
+    if pgrep -x "node" &> /dev/null; then
+      pkill -x node -9  &> /dev/null;
+      echo "√ Lisk Killed."
+    fi
   fi
- done
- fi
 }
-
 
 rebuild_lisk() {
   create_database

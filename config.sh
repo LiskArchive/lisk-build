@@ -6,28 +6,29 @@ if [ ! -z $1 ]; then
   ARCH=$1
 fi
 
-VERSION="0.2.1"
+VERSION="0.2.3"
 OS=`uname`
 [ ! -z "$ARCH" ] || ARCH=`uname -m`
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
+NOVER_BUILD_NAME="lisk-$OS-$ARCH"
 TARGET=""
 JOBS="2"
 
-LISK_DIR="lisk-source"
-LISK_FILE="$LISK_DIR.tar.gz"
+LISK_DIR=$VERSION
+LISK_FILE="$VERSION.tar.gz"
 LISK_NETWORK="test"
-LISK_URL="http://downloads.lisk.io/lisk/$LISK_NETWORK/$LISK_FILE"
+LISK_URL="http://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
 
-LISK_NODE_DIR="lisk-node-0.12.13-lisk"
-LISK_NODE_FILE="$LISK_NODE_DIR.zip"
-LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v0.12.13-lisk.tar.gz"
+LISK_NODE_DIR="lisk-node-0.12.14-lisk"
+LISK_NODE_FILE="$LISK_NODE_DIR.tar.gz"
+LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v0.12.14-lisk.tar.gz"
 LISK_NODE_OUT="out/Release/node"
 LISK_NODE_CONFIG=""
 
-NODE_DIR="node-v0.12.13"
+NODE_DIR="node-v0.12.14"
 NODE_FILE="$NODE_DIR.tar.gz"
-NODE_URL="https://nodejs.org/download/release/v0.12.13/$NODE_FILE"
+NODE_URL="https://nodejs.org/download/release/v0.12.14/$NODE_FILE"
 NODE_OUT="compiled"
 NODE_CONFIG=""
 
@@ -42,6 +43,12 @@ if [ $(uname -s) == "Darwin" ] || [ $(uname -s) == "FreeBSD" ]; then
   SED_OPTS="-i ''"
 else
   SED_OPTS="-i"
+fi
+
+if [ $(uname -s) == "FreeBSD" ]; then
+  MD5_CMD="md5"
+else
+  MD5_CMD="md5sum"
 fi
 
 if [ "$ARCH" == "armv6l" ]; then

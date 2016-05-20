@@ -42,8 +42,8 @@ if [ ! -f "$LISK_FILE" ]; then
 fi
 if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "rm -rf $BUILD_NAME"
-  exec_cmd "tar -xvf lisk-source.tar.gz"
-  exec_cmd "mv -f $VERSION $BUILD_NAME"
+  exec_cmd "tar -xvf $VERSION.tar.gz"
+  exec_cmd "cp -Rf $VERSION $BUILD_NAME"
   exec_cmd "cp -vR $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
   exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
   cd "$BUILD_NAME"
@@ -54,6 +54,7 @@ fi
 echo "Copying scripts..."
 echo "--------------------------------------------------------------------------"
 exec_cmd "cp -f ../shared.sh ../scripts/* $BUILD_NAME/"
+exec_cmd "cp -fR ../etc $BUILD_NAME/"
 
 echo "Building lisk-node..."
 echo "--------------------------------------------------------------------------"
@@ -101,7 +102,26 @@ echo "Stamping build..."
 echo "--------------------------------------------------------------------------"
 exec_cmd "echo v`date '+%H:%M:%S %d/%m/%Y'` > $BUILD_NAME/package.build";
 
-echo "Creating archive..."
+echo "Creating archives..."
 echo "--------------------------------------------------------------------------"
-exec_cmd "GZIP=-6 tar -czvf $BUILD_NAME.tar.gz $BUILD_NAME"
+# Create $BUILD_NAME.tar.gz
+exec_cmd "GZIP=-6 tar -czvf ../release/$BUILD_NAME.tar.gz $BUILD_NAME"
+# Create $NOVER_BUILD_NAME.tar.gz
+exec_cmd "mv -f $BUILD_NAME $NOVER_BUILD_NAME"
+exec_cmd "GZIP=-6 tar -czvf ../release/$NOVER_BUILD_NAME.tar.gz $NOVER_BUILD_NAME"
+# Create lisk-source.tar.gz
+exec_cmd "mv -f $VERSION lisk-source"
+exec_cmd "GZIP=-6 tar -czvf ../release/lisk-source.tar.gz lisk-source"
+
+echo "Checksumming archives..."
+echo "--------------------------------------------------------------------------"
+cd ../release
+exec_cmd "$MD5_CMD $BUILD_NAME.tar.gz > $BUILD_NAME.tar.gz.md5"
+exec_cmd "$MD5_CMD $NOVER_BUILD_NAME.tar.gz > $NOVER_BUILD_NAME.tar.gz.md5"
+exec_cmd "$MD5_CMD lisk-source.tar.gz > lisk-source.tar.gz.md5"
+cd ../src
+
+echo "Cleaning up..."
+echo "--------------------------------------------------------------------------"
+exec_cmd "rm -rf $BUILD_NAME $NOVER_BUILD_NAME lisk-source"
 cd ../
