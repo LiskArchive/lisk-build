@@ -11,6 +11,8 @@
 #Variable Declaration
 UNAME=$(uname)-$(uname -m)
 defaultLiskLocation=~
+defaultRelease=main
+
 
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
@@ -38,6 +40,13 @@ user_prompts() {
   liskLocation=${liskLocation:-$defaultLiskLocation}
   if [[ ! -r "$liskLocation" ]]; then
     echo "$liskLocation is not valid, please check and re-excute"
+    exit 2;
+  fi
+  
+  read -r -p "Would you like to install the Main-Net or Test-Net Client?? (Default $defaultRelease): " release
+  release=${release:-$defaultRelease}
+  if [[ ! "$release" == "main" || ! "$release" == "test" ]]; then
+    echo "$release is not valid, please check and re-excute"
     exit 2;
   fi
 }
@@ -139,14 +148,14 @@ ntp_checks() {
 }
 
 install_lisk() {
-  liskVersion=`curl -s "https://downloads.lisk.io/lisk/test/" | grep "$UNAME.tar.gz<" | cut -d'"' -f2`
+  liskVersion=`curl -s "https://downloads.lisk.io/lisk/$release/" | grep "$UNAME.tar.gz<" | cut -d'"' -f2`
   liskDir=`echo $liskVersion | cut -d'.' -f1`
 
   echo -e "\nDownloading current Lisk binaries: "$liskVersion
 
-  curl -s "https://downloads.lisk.io/lisk/test/$liskVersion" -o $liskVersion
+  curl -s "https://downloads.lisk.io/lisk/$release/$liskVersion" -o $liskVersion
 
-  curl -s "https://downloads.lisk.io/lisk/test/$liskVersion.md5" -o $liskVersion.md5
+  curl -s "https://downloads.lisk.io/lisk/$release/$liskVersion.md5" -o $liskVersion.md5
 
   md5=`md5sum $liskVersion | awk '{print $1}'`
   md5_compare=`grep "$liskVersion" $liskVersion.md5 | awk '{print $1}'`
@@ -159,16 +168,20 @@ install_lisk() {
     exit 0
   fi
 
-  echo -e "Extracting Lisk binaries to "$liskLocation/lisk
+  echo -e "Extracting Lisk binaries to "$liskLocation/lisk-$release
 
   tar -xzf $liskVersion -C $liskLocation
 
-  mv $liskLocation/$liskDir $liskLocation/lisk
+  mv $liskLocation/$liskDir $liskLocation/lisk-$release
 
   echo -e "\nCleaning up downloaded files"
   rm -f $liskVersion $liskVersion.md5
+ 
+}
 
-  cd $liskLocation/lisk
+configure_lisk() {
+
+  cd $liskLocation/lisk-$release
 
   echo -e "\nColdstarting Lisk for the first time"
   bash lisk.sh coldstart
@@ -179,28 +192,58 @@ install_lisk() {
   bash lisk.sh stop
 
   echo -e "\nExecuting database tuning operation"
-  bash $liskLocation/lisk/tune.sh
+  bash tune.sh
 
-  echo -e "\nStarting Lisk with all parameters in place."
+  echo -e "\nStarting Lisk with all parameters in place"
   bash lisk.sh start
 
   sleep 5
   blockHeight=`curl -s http://localhost:7000/api/loader/status/sync | cut -d: -f5 | cut -d} -f1`
 
   echo -e "\nCurrent Block Height: " $blockHeight
+
+}
+
+backup_lisk() {
+  echo -e "\nStopping Lisk to perform a backup"
+  cd $liskLocation/lisk-$release
+  bash lisk.sh stop
+
+  echo -e "\nBacking up existing Lisk Folder"
+  mkdir -p $liskLocation/backup/  
+  mv -f $liskLocation/lisk-$release $liskLocation/backup/    
+  
 }
 
 upgrade_lisk() {
-  echo "Not supported yet"
+  
+  echo -e "\nRestoring Database to new Lisk Install"
+  mkdir -p -m700 $liskLocation/lisk/pgsql/data
+  cp -rf $liskLocation/backup/lisk-$release/pgsql/data/* $liskLocation/lisk-$release/pgsql/data/
+  
+  echo -e "\nStarting Lisk"
+  cd $liskLocation/lisk-$release
+  bash lisk.sh start
+  
+  echo -e "\nWaiting to check Block Height"
+  sleep 5
+  blockHeight=`curl -s http://localhost:7000/api/loader/status/sync | cut -d: -f5 | cut -d} -f1`
+
+  echo -e "\nCurrent Block Height: " $blockHeight
 }
+
 
 case $1 in
 "install")
   user_prompts
   ntp_checks
   install_lisk
+  configure_lisk
   ;;
 "upgrade")
+  user_prompts
+  backup_lisk
+  install_lisk
   upgrade_lisk
   ;;
 *)
