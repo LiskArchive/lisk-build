@@ -12,7 +12,7 @@ if [[ "$(uname)" == "Linux" ]]; then
 fi
 
 if [[ "$(uname)" == "FreeBSD" ]]; then
-  memoryBase=`sysctl hw.physmem | awk '{print $2 }'|cut -f1 -d"."`
+  memoryBase=`sysctl hw.physmem | awk '{print $2 / 1024 }'|cut -f1 -d"."`
 fi
 
 ### UNTESTED
