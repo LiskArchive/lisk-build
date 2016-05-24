@@ -148,7 +148,7 @@ ntp_checks() {
 }
 
 install_lisk() {
-  liskVersion=`curl -s "https://downloads.lisk.io/lisk/$release/" | grep "$UNAME.tar.gz" | cut -d'"' -f2`
+  liskVersion=`curl -s "https://downloads.lisk.io/lisk/$release/" | grep "$UNAME.tar.gz" | cut -d'"' -f2 | grep -v '\.md5$'`
   liskDir=`echo $liskVersion | cut -d'.' -f1`
 
   echo -e "\nDownloading current Lisk binaries: "$liskVersion
