@@ -15,7 +15,7 @@ if [ "$USER" == "root" ]; then
 fi
 
 UNAME=$(uname)
-NETWORK="test"
+NETWORK="main"
 
 DB_NAME="lisk_$NETWORK"
 DB_USER=$USER
