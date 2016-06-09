@@ -24,6 +24,52 @@ if [ "$USER" == "root" ]; then
   exit 1
 fi
 
+prereq_checks() {
+  
+  echo -e "Checking prerequisites:"
+  
+  if [ -x "$(command -v curl)" ]; then
+    echo -e "Curl is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
+  else
+    echo -e "\nCurl is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
+      echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+    exit 2
+  fi
+  
+  if [ -x "$(command -v tar)" ]; then
+    echo -e "Tar is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
+  else
+    echo -e "\ntar is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
+      echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+    exit 2
+  fi
+  
+  if [ -x "$(command -v wget)" ]; then
+    echo -e "Wget is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
+  else
+    echo -e "\nWget is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
+    echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+    exit 2
+  fi
+  
+  if sudo -n true 2>/dev/null; then 
+    echo -e "Sudo is installed and authenticated.\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
+  else
+    echo -e "Sudo is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
+    echo "Please provide sudo password for validation"
+    if sudo -Sv -p ''; then
+      echo -e "Sudo authenticated.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
+    else
+      echo -e "Unable to authenticate Sudo.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
+  	echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+  	exit 2
+    fi
+  fi
+  
+  echo -e "$(tput setaf 2)All preqrequisites passed!$(tput sgr0)"
+  
+}
+
 #Adding LC_ALL LANG and LANGUAGE to user profile
 if [[ -f ~/.profile && ! "$(grep "en_US.UTF-8" ~/.profile)" ]]; then
   echo "LC_ALL=en_US.UTF-8" >> ~/.profile
@@ -148,7 +194,7 @@ ntp_checks() {
 }
 
 install_lisk() {
-  liskVersion=`curl -s "https://downloads.lisk.io/lisk/$release/" | grep "$UNAME.tar.gz" | cut -d'"' -f2`
+  liskVersion=lisk-$UNAME.tar.gz
   liskDir=`echo $liskVersion | cut -d'.' -f1`
 
   echo -e "\nDownloading current Lisk binaries: "$liskVersion
@@ -157,7 +203,14 @@ install_lisk() {
 
   curl -s "https://downloads.lisk.io/lisk/$release/$liskVersion.md5" -o $liskVersion.md5
 
-  md5=`md5sum $liskVersion | awk '{print $1}'`
+  if [[ "$(uname)" == "Linux" ]]; then
+    md5=`md5sum $liskVersion | awk '{print $1}'`
+  elif [[ "$(uname)" == "FreeBSD" ]]; then
+    md5=`md5 $liskVersion | awk '{print $1}'`
+  elif [[ "$(uname)" == "Darwin" ]]; then
+    md5=`md5 $liskVersion | awk '{print $1}'`
+  fi
+  
   md5_compare=`grep "$liskVersion" $liskVersion.md5 | awk '{print $1}'`
 
   if [[ "$md5" == "$md5_compare" ]]; then
@@ -197,19 +250,21 @@ configure_lisk() {
   echo -e "\nStarting Lisk with all parameters in place"
   bash lisk.sh start
 
-  sleep 5
-  blockHeight=`curl -s http://localhost:7000/api/loader/status/sync | cut -d: -f5 | cut -d} -f1`
-
-  echo -e "\nCurrent Block Height: " $blockHeight
-
 }
 
 backup_lisk() {
+  
   echo -e "\nStopping Lisk to perform a backup"
   cd $liskLocation/lisk-$release
   bash lisk.sh stop
 
   echo -e "\nBacking up existing Lisk Folder"
+  
+  if [[ -d "$liskLocation/backup/lisk-$release" ]];then
+    echo -e "\nRemoving old backup folder"
+    rm -f $liskLocation/backup/lisk-$release
+  fi
+  
   mkdir -p $liskLocation/backup/  
   mv -f $liskLocation/lisk-$release $liskLocation/backup/    
   
@@ -223,28 +278,41 @@ upgrade_lisk() {
   
   echo -e "\nStarting Lisk"
   cd $liskLocation/lisk-$release
-  bash lisk.sh start
-  
-  echo -e "\nWaiting to check Block Height"
-  sleep 5
-  blockHeight=`curl -s http://localhost:7000/api/loader/status/sync | cut -d: -f5 | cut -d} -f1`
+  bash lisk.sh start  
 
+}
+
+check_blockheight() {
+
+  echo -e "\nWaiting to check Block Height"
+  
+  sleep 5
+  if [[ $release == main ]]; then 
+    blockHeight=`curl -s http://localhost:8000/api/loader/status/sync | cut -d: -f5 | cut -d} -f1`
+  else
+    blockHeight=`curl -s http://localhost:7000/api/loader/status/sync | cut -d: -f5 | cut -d} -f1`
+  fi
+  
   echo -e "\nCurrent Block Height: " $blockHeight
+  
 }
 
 
 case $1 in
 "install")
+  prereq_checks
   user_prompts
   ntp_checks
   install_lisk
   configure_lisk
+  check_blockheight
   ;;
 "upgrade")
   user_prompts
   backup_lisk
   install_lisk
   upgrade_lisk
+  check_blockheight
   ;;
 *)
   echo "Error: Unrecognized command."
