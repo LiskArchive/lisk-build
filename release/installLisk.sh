@@ -25,9 +25,9 @@ if [ "$USER" == "root" ]; then
 fi
 
 prereq_checks() {
-  
+
   echo -e "Checking prerequisites:"
-  
+
   if [ -x "$(command -v curl)" ]; then
     echo -e "Curl is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
@@ -35,7 +35,7 @@ prereq_checks() {
       echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
     exit 2
   fi
-  
+
   if [ -x "$(command -v tar)" ]; then
     echo -e "Tar is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
@@ -43,7 +43,7 @@ prereq_checks() {
       echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
     exit 2
   fi
-  
+
   if [ -x "$(command -v wget)" ]; then
     echo -e "Wget is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
@@ -51,8 +51,8 @@ prereq_checks() {
     echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
     exit 2
   fi
-  
-  if sudo -n true 2>/dev/null; then 
+
+  if sudo -n true 2>/dev/null; then
     echo -e "Sudo is installed and authenticated.\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
     echo -e "Sudo is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
@@ -65,9 +65,9 @@ prereq_checks() {
   	exit 2
     fi
   fi
-  
+
   echo -e "$(tput setaf 2)All preqrequisites passed!$(tput sgr0)"
-  
+
 }
 
 #Adding LC_ALL LANG and LANGUAGE to user profile
@@ -88,7 +88,7 @@ user_prompts() {
     echo "$liskLocation is not valid, please check and re-excute"
     exit 2;
   fi
-  
+
   read -r -p "Would you like to install the Main or Test Client? (Default $defaultRelease): " release
   release=${release:-$defaultRelease}
   if [[ ! "$release" == "main" && ! "$release" == "test" ]]; then
@@ -210,7 +210,7 @@ install_lisk() {
   elif [[ "$(uname)" == "Darwin" ]]; then
     md5=`md5 $liskVersion | awk '{print $1}'`
   fi
-  
+
   md5_compare=`grep "$liskVersion" $liskVersion.md5 | awk '{print $1}'`
 
   if [[ "$md5" == "$md5_compare" ]]; then
@@ -229,7 +229,7 @@ install_lisk() {
 
   echo -e "\nCleaning up downloaded files"
   rm -f $liskVersion $liskVersion.md5
- 
+
 }
 
 configure_lisk() {
@@ -238,7 +238,7 @@ configure_lisk() {
 
   echo -e "\nColdstarting Lisk for the first time"
   bash lisk.sh coldstart
-  
+
   sleep 5
 
   echo -e "\nStopping Lisk to perform database tuning"
@@ -253,48 +253,48 @@ configure_lisk() {
 }
 
 backup_lisk() {
-  
+
   echo -e "\nStopping Lisk to perform a backup"
   cd $liskLocation/lisk-$release
   bash lisk.sh stop
 
   echo -e "\nBacking up existing Lisk Folder"
-  
+
   if [[ -d "$liskLocation/backup/lisk-$release" ]];then
     echo -e "\nRemoving old backup folder"
     rm -f $liskLocation/backup/lisk-$release
   fi
-  
-  mkdir -p $liskLocation/backup/  
-  mv -f $liskLocation/lisk-$release $liskLocation/backup/    
-  
+
+  mkdir -p $liskLocation/backup/
+  mv -f $liskLocation/lisk-$release $liskLocation/backup/
+
 }
 
 upgrade_lisk() {
-  
+
   echo -e "\nRestoring Database to new Lisk Install"
   mkdir -p -m700 $liskLocation/lisk-$release/pgsql/data
   cp -rf $liskLocation/backup/lisk-$release/pgsql/data/* $liskLocation/lisk-$release/pgsql/data/
-  
+
   echo -e "\nStarting Lisk"
   cd $liskLocation/lisk-$release
-  bash lisk.sh start  
+  bash lisk.sh start
 
 }
 
 check_blockheight() {
 
   echo -e "\nWaiting to check Block Height"
-  
+
   sleep 5
-  if [[ $release == main ]]; then 
+  if [[ $release == main ]]; then
     blockHeight=`curl -s http://localhost:8000/api/loader/status/sync | cut -d: -f5 | cut -d} -f1`
   else
     blockHeight=`curl -s http://localhost:7000/api/loader/status/sync | cut -d: -f5 | cut -d} -f1`
   fi
-  
+
   echo -e "\nCurrent Block Height: " $blockHeight
-  
+
 }
 
 
