@@ -174,7 +174,7 @@ stop_postgresql() {
 }
 
 start_lisk() {
-  if pgrep -x "node" &> /dev/null; then
+  if pgrep -f "$(pwd)/bin/node" &> /dev/null; then
     echo "√ Lisk is running."
     exit 1
   else
