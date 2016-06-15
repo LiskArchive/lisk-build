@@ -189,11 +189,11 @@ start_lisk() {
 
 stop_lisk() {
   stopLisk=0
-  if ! pgrep -x "node" &> /dev/null; then
+  if ! pgrep -f "$(pwd)/bin/node" &> /dev/null; then
     echo "√ Lisk is not running."
   else
     while [[ $stopLisk < 5 ]] &> /dev/null; do
-      forever stop lisk &> /dev/null
+      forever stop &> /dev/null
       if [ $? !=  0 ]; then
         echo "X Failed to stop lisk."
       else
@@ -203,9 +203,9 @@ stop_lisk() {
       sleep .5
       stopLisk=$[$stopLisk+1]
     done
-    if pgrep -x "node" &> /dev/null; then
-      pkill -x node -9  &> /dev/null;
-      echo "√ Lisk Killed."
+    if pgrep -f "$(pwd)/bin/node" &> /dev/null; then
+      echo "√ Forever Stopped Successfully."
+      pkill -f "$(pwd)/bin/node" -9  &> /dev/null
     fi
   fi
 }
