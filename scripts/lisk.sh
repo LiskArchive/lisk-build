@@ -16,15 +16,16 @@ fi
 
 UNAME=$(uname)
 NETWORK="test"
+LISK_CONFIG=${2:-config.json}
 
-DB_NAME="lisk_$NETWORK"
+DB_NAME=`grep "database" $LISK_CONFIG | awk -d'"' '{print $2}' | cut -f 2 -d '"'`
 DB_USER=$USER
 DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
 DB_LOG_FILE="$(pwd)/pgsql.log"
 
-LOG_FILE="$(pwd)/app.log"
-PID_FILE="$(pwd)/app.pid"
+LOG_FILE="$(pwd)/$LISK_CONFIG.app.log"
+PID_FILE="$(pwd)/$LISK_CONFIG.pid"
 
 CMDS=("curl" "forever" "gunzip" "node" "tar" "psql" "createdb" "createuser" "dropdb" "dropuser")
 check_cmds CMDS[@]
@@ -173,12 +174,12 @@ stop_postgresql() {
   fi
 }
 
-start_lisk() {
-  if pgrep -f "$(pwd)/bin/node" &> /dev/null; then
-    echo "√ Lisk is running."
+start_lisk() {   
+  if check_status == 1 &> /dev/null; then
+    check_status
     exit 1
   else
-    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js &> /dev/null
+    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG &> /dev/null
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully."
     else
@@ -187,13 +188,11 @@ start_lisk() {
   fi
 }
 
-stop_lisk() {
-  stopLisk=0
-  if ! pgrep -f "$(pwd)/bin/node" &> /dev/null; then
-    echo "√ Lisk is not running."
-  else
+stop_lisk() {  
+  if check_status != 1 &> /dev/null; then
+    stopLisk=0
     while [[ $stopLisk < 5 ]] &> /dev/null; do
-      forever stop &> /dev/null
+      forever stop -t $PID  &> /dev/null
       if [ $? !=  0 ]; then
         echo "X Failed to stop lisk."
       else
@@ -203,10 +202,8 @@ stop_lisk() {
       sleep .5
       stopLisk=$[$stopLisk+1]
     done
-    if pgrep -f "$(pwd)/bin/node" &> /dev/null; then
-      echo "√ Forever Stopped Successfully."
-      pkill -f "$(pwd)/bin/node" -9  &> /dev/null
-    fi
+  else    
+    echo "√ Lisk is not running."
   fi
 }
 
@@ -218,18 +215,20 @@ rebuild_lisk() {
 
 check_status() {
   if [ -f "$PID_FILE" ]; then
-    local PID=$(cat "$PID_FILE")
+    PID=$(cat "$PID_FILE")    
   fi
   if [ ! -z "$PID" ]; then
     ps -p "$PID" > /dev/null 2>&1
-    local STATUS=$?
+    STATUS=$?
   else
-    local STATUS=1
+    STATUS=1
   fi
   if [ -f $PID_FILE ] && [ ! -z "$PID" ] && [ $STATUS == 0 ]; then
     echo "√ Lisk is running (as process $PID)."
+    return 0
   else
     echo "X Lisk is not running."
+    return 1
   fi
 }
 
@@ -239,28 +238,26 @@ tail_logs() {
   fi
 }
 
+help() {
+  echo -e "\nCommand Options for Lisk.sh"
+  echo -e "\n Start (config.json)"
+  echo -e "Stop (config.json)"
+  
+}
+
+
 case $1 in
 "coldstart")
   coldstart_lisk
   ;;
 "start")
-  start_postgresql
-  sleep 2
   start_lisk
   ;;
 "stop")
   stop_lisk
-  stop_postgresql
   ;;
 "reload")
   stop_lisk
-  start_lisk
-  ;;
-"restart")
-  stop_lisk
-  stop_postgresql
-  start_postgresql
-  sleep 1
   start_lisk
   ;;
 "rebuild")
@@ -271,15 +268,25 @@ case $1 in
   rebuild_lisk
   start_lisk
   ;;
+"start_db")
+  start_postgresql
+  sleep 2
+  ;;
+"stop_db")
+  stop_postgresql
+  ;;
 "status")
   check_status
   ;;
 "logs")
   tail_logs
   ;;
+"help")
+  lisk_help
+  ;;
 *)
   echo "Error: Unrecognized command."
   echo ""
-  echo "Available commands are: coldstart start stop reload restart rebuild status logs "
+  echo "Available commands are: start stop start_db stop_db reload rebuild coldstart logs status help"
   ;;
 esac
