@@ -241,13 +241,16 @@ tail_logs() {
 help() {
   echo -e "\nCommand Options for Lisk.sh"
   echo -e "\nstart <config.json>\t\t\tStarts the Nodejs process for Lisk"
+  echo -e "\nstartall <config.json>\t\t\tStarts the Nodejs process and PostgreSQL Database for Lisk"
   echo -e "stop <config.json>\t\t\tStops the Nodejs process for Lisk"
+  echo -e "\nstopall <config.json>\t\t\tStop the Nodejs process and PostgreSQL Database for Lisk"
   echo -e "reload <config.json>\t\t\tRestarts the Nodejs process for Lisk"
   echo -e "rebuild <config.json>\t\t\tRebuilds the PostgreSQL database"
   echo -e "start_db <config.json>\t\t\tStarts the PostgreSQL database"
   echo -e "stop_db <config.json>\t\t\tStops the PostgreSQL database"
   echo -e "coldstart\t\t\t\tCreates the PostgreSQL database and configures config.json for Lisk"
   echo -e "logs <config.json>\t\t\tTails the log file for the supplied config.json"
+  echo -e "status <config.json>\t\t\tDisplays the status for the supplied config.json"
   echo -e "help\t\t\t\t\tDisplays this message"
 }
 
@@ -259,8 +262,17 @@ case $1 in
 "start")
   start_lisk
   ;;
+"startall")
+  start_postgresql
+  sleep 2
+  start_lisk
+  ;;
 "stop")
   stop_lisk
+  ;;
+"stopall")
+  stop_lisk
+  stop_postgresql
   ;;
 "reload")
   stop_lisk
@@ -276,7 +288,6 @@ case $1 in
   ;;
 "start_db")
   start_postgresql
-  sleep 2
   ;;
 "stop_db")
   stop_postgresql
@@ -293,6 +304,7 @@ case $1 in
 *)
   echo "Error: Unrecognized command."
   echo ""
-  echo "Available commands are: start stop start_db stop_db reload rebuild coldstart logs status help"
+  echo "Available commands are: start stop startall stopall start_db stop_db reload rebuild coldstart logs status help"
+  help
   ;;
 esac
