@@ -17,15 +17,16 @@ fi
 UNAME=$(uname)
 NETWORK="test"
 LISK_CONFIG=${2:-config.json}
+CONFIG_NAME=`echo $LISK_CONFIG | cut -f 1 -d '.'`
 
 DB_NAME=`grep "database" $LISK_CONFIG | awk -d'"' '{print $4}' | cut -f 2 -d '"'`
 DB_USER=$USER
 DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
-DB_LOG_FILE="$(pwd)/pgsql.log"
+DB_LOG_FILE="$(pwd)/log/pgsql.log"
 
-LOG_FILE="$(pwd)/$LISK_CONFIG.app.log"
-PID_FILE="$(pwd)/$LISK_CONFIG.pid"
+LOG_FILE="$(pwd)/log/$CONFIG_NAME.app.log"
+PID_FILE="$(pwd)/pid/$CONFIG_NAME.pid"
 
 CMDS=("curl" "forever" "gunzip" "node" "tar" "psql" "createdb" "createuser" "dropdb" "dropuser")
 check_cmds CMDS[@]
@@ -174,7 +175,7 @@ stop_postgresql() {
   fi
 }
 
-start_lisk() {   
+start_lisk() {
   if check_status == 1 &> /dev/null; then
     check_status
     exit 1
@@ -188,7 +189,7 @@ start_lisk() {
   fi
 }
 
-stop_lisk() {  
+stop_lisk() {
   if check_status != 1 &> /dev/null; then
     stopLisk=0
     while [[ $stopLisk < 5 ]] &> /dev/null; do
@@ -202,7 +203,7 @@ stop_lisk() {
       sleep .5
       stopLisk=$[$stopLisk+1]
     done
-  else    
+  else
     echo "√ Lisk is not running."
   fi
 }
@@ -215,7 +216,7 @@ rebuild_lisk() {
 
 check_status() {
   if [ -f "$PID_FILE" ]; then
-    PID=$(cat "$PID_FILE")    
+    PID=$(cat "$PID_FILE")
   fi
   if [ ! -z "$PID" ]; then
     ps -p "$PID" > /dev/null 2>&1
@@ -241,9 +242,9 @@ tail_logs() {
 help() {
   echo -e "\nCommand Options for Lisk.sh"
   echo -e "\nstart <config.json>\t\t\tStarts the Nodejs process for Lisk"
-  echo -e "startall <config.json>\t\t\tStarts the Nodejs process and PostgreSQL Database for Lisk"
+  echo -e "\nstartall <config.json>\t\t\tStarts the Nodejs process and PostgreSQL Database for Lisk"
   echo -e "stop <config.json>\t\t\tStops the Nodejs process for Lisk"
-  echo -e "stopall <config.json>\t\t\tStop the Nodejs process and PostgreSQL Database for Lisk"
+  echo -e "\nstopall <config.json>\t\t\tStop the Nodejs process and PostgreSQL Database for Lisk"
   echo -e "reload <config.json>\t\t\tRestarts the Nodejs process for Lisk"
   echo -e "rebuild <config.json>\t\t\tRebuilds the PostgreSQL database"
   echo -e "start_db <config.json>\t\t\tStarts the PostgreSQL database"
