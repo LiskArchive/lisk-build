@@ -106,9 +106,16 @@ echo "Creating archives..."
 echo "--------------------------------------------------------------------------"
 # Create $BUILD_NAME.tar.gz
 exec_cmd "GZIP=-6 tar -czvf ../release/$BUILD_NAME.tar.gz $BUILD_NAME"
+
 # Create $NOVER_BUILD_NAME.tar.gz
 exec_cmd "mv -f $BUILD_NAME $NOVER_BUILD_NAME"
 exec_cmd "GZIP=-6 tar -czvf ../release/$NOVER_BUILD_NAME.tar.gz $NOVER_BUILD_NAME"
+
+# Create lisk-node-$OS-$ARCH.tar.gz
+cd "$NOVER_BUILD_NAME"
+exec_cmd "GZIP=-6 tar -czvf ../../release/lisk-node-$OS-$ARCH.tar.gz nodejs"
+cd ../
+
 # Create lisk-source.tar.gz
 exec_cmd "mv -f $VERSION lisk-source"
 exec_cmd "GZIP=-6 tar -czvf ../release/lisk-source.tar.gz lisk-source"
@@ -118,6 +125,7 @@ echo "--------------------------------------------------------------------------
 cd ../release
 exec_cmd "$MD5_CMD $BUILD_NAME.tar.gz > $BUILD_NAME.tar.gz.md5"
 exec_cmd "$MD5_CMD $NOVER_BUILD_NAME.tar.gz > $NOVER_BUILD_NAME.tar.gz.md5"
+exec_cmd "$MD5_CMD lisk-node-$OS-$ARCH.tar.gz > lisk-node-$OS-$ARCH.tar.gz.md5"
 exec_cmd "$MD5_CMD lisk-source.tar.gz > lisk-source.tar.gz.md5"
 cd ../src
 
