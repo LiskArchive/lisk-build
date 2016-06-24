@@ -241,10 +241,10 @@ tail_logs() {
 
 help() {
   echo -e "\nCommand Options for Lisk.sh"
-  echo -e "\nstart <config.json>\t\t\tStarts the Nodejs process for Lisk"
-  echo -e "\nstartall <config.json>\t\t\tStarts the Nodejs process and PostgreSQL Database for Lisk"
-  echo -e "stop <config.json>\t\t\tStops the Nodejs process for Lisk"
-  echo -e "\nstopall <config.json>\t\t\tStop the Nodejs process and PostgreSQL Database for Lisk"
+  echo -e "\nstart_node <config.json>\t\t\tStarts the Nodejs process for Lisk"
+  echo -e "start <config.json>\t\t\tStarts the Nodejs process and PostgreSQL Database for Lisk"
+  echo -e "stop_node <config.json>\t\t\tStops the Nodejs process for Lisk"
+  echo -e "stop <config.json>\t\t\tStop the Nodejs process and PostgreSQL Database for Lisk"
   echo -e "reload <config.json>\t\t\tRestarts the Nodejs process for Lisk"
   echo -e "rebuild <config.json>\t\t\tRebuilds the PostgreSQL database"
   echo -e "start_db <config.json>\t\t\tStarts the PostgreSQL database"
@@ -260,18 +260,18 @@ case $1 in
 "coldstart")
   coldstart_lisk
   ;;
-"start")
+"start_node")
   start_lisk
   ;;
-"startall")
+"start")
   start_postgresql
   sleep 2
   start_lisk
   ;;
-"stop")
+"stop_node")
   stop_lisk
   ;;
-"stopall")
+"stop")
   stop_lisk
   stop_postgresql
   ;;
@@ -305,7 +305,7 @@ case $1 in
 *)
   echo "Error: Unrecognized command."
   echo ""
-  echo "Available commands are: start stop startall stopall start_db stop_db reload rebuild coldstart logs status help"
+  echo "Available commands are: start stop start_node stop_node start_db stop_db reload rebuild coldstart logs status help"
   help
   ;;
 esac
