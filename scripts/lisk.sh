@@ -19,7 +19,7 @@ NETWORK="test"
 LISK_CONFIG=${2:-config.json}
 CONFIG_NAME=`echo $LISK_CONFIG | cut -f 1 -d '.'`
 
-DB_NAME=`grep "database" $LISK_CONFIG | awk --field-separator='"' '{print $2}'| cut -f 2 -d '"'` `
+DB_NAME=`grep "database" $LISK_CONFIG | awk --field-separator='"' '{print $2}'| cut -f 2 -d '"'`
 DB_USER=$USER
 DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
