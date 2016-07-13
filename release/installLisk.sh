@@ -19,7 +19,7 @@ export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 
 #Verification Checks
-if [ "$USER" == "root" ]; then
+if [ "\$USER" == "root" ]; then
   echo "Error: Lisk should not be installed be as root. Exiting."
   exit 1
 fi
@@ -82,14 +82,14 @@ elif [[ -f ~/.bash_profile && ! "$(grep "en_US.UTF-8" ~/.bash_profile)" ]]; then
 fi
 
 user_prompts() {
-  read -r -p "Where do you want to install Lisk to? (Default $defaultLiskLocation): " liskLocation
+  [ "$liskLocation" ] || read -r -p "Where do you want to install Lisk to? (Default $defaultLiskLocation): " liskLocation
   liskLocation=${liskLocation:-$defaultLiskLocation}
   if [[ ! -r "$liskLocation" ]]; then
     echo "$liskLocation is not valid, please check and re-excute"
     exit 2;
   fi
 
-  read -r -p "Would you like to install the Main or Test Client? (Default $defaultRelease): " release
+  [ "$release" ] || read -r -p "Would you like to install the Main or Test Client? (Default $defaultRelease): " release
   release=${release:-$defaultRelease}
   if [[ ! "$release" == "main" && ! "$release" == "test" ]]; then
     echo "$release is not valid, please check and re-excute"
@@ -105,8 +105,8 @@ ntp_checks() {
         echo "√ NTP is running"
       else
         echo "X NTP is not running"
-        read -r -n 1 -p "Would like to install NTP? (y/n): " $REPLY
-        if [[  $REPLY =~ ^[Yy]$ ]]; then
+        [ "$installNtp" ] || read -r -n 1 -p "Would like to install NTP? (y/n): " $REPLY
+        if [[ "$installNtp" || $REPLY =~ ^[Yy]$ ]]; then
           echo -e "\nInstalling NTP, please provide sudo password.\n"
           sudo apt-get install ntp -yyq
           sudo service ntp stop
@@ -131,8 +131,8 @@ ntp_checks() {
           echo "√ Chrony is running"
         else
           echo "X NTP and Chrony are not running"
-          read -r -n 1 -p "Would like to install NTP? (y/n): " $REPLY
-          if [[  $REPLY =~ ^[Yy]$ ]]; then
+          [ "$installNtp" ] || read -r -n 1 -p "Would like to install NTP? (y/n): " $REPLY
+          if [[ "$installNtp" || $REPLY =~ ^[Yy]$ ]]; then
             echo -e "\nInstalling NTP, please provide sudo password.\n"
             sudo yum -yq install ntp ntpdate ntp-doc
             sudo chkconfig ntpd on
@@ -159,8 +159,8 @@ ntp_checks() {
       echo "√ NTP is running"
     else
       echo "X NTP is not running"
-      read -r -n 1 -p "Would like to install NTP? (y/n): " $REPLY
-      if [[  $REPLY =~ ^[Yy]$ ]]; then
+      [ "$installNtp" ] || read -r -n 1 -p "Would like to install NTP? (y/n): " $REPLY
+      if [[ "$installNtp" || $REPLY =~ ^[Yy]$ ]]; then
         echo -e "\nInstalling NTP, please provide sudo password.\n"
         sudo pkg install ntp
         sudo sh -c "echo 'ntpd_enable=\"YES\"' >> /etc/rc.conf"
@@ -297,9 +297,42 @@ check_blockheight() {
 
 }
 
+usage() {
+  echo "Usage: $0 <install|upgrade> [-d <directory] [-r <main|test>] [-n]"
+  echo "install         -- install lisk"
+  echo " -d <directory> -- install location"
+  echo " -r <release>   -- choose main or test"
+  echo " -n             -- install ntp if not installed"
+  echo "upgrade         -- upgrade list"
+  echo " -d <directory> -- install directory"
+  echo " -r <release>   -- choose main or test"
+}
+
+parse_option() {
+  OPTIND=2
+  while getopts d:r:n opt
+  do
+    case $opt in
+      d) liskLocation=$OPTARG ;;
+      r) release=$OPTARG ;;
+      n) installNtp=1 ;;
+    esac
+  done
+
+  if [ "$release" ]
+  then
+    if [[ "$release" != test && "$release" != "main" ]]
+    then
+      echo "-r <test|main>"
+      usage
+      exit 1
+    fi
+  fi
+}
 
 case $1 in
 "install")
+  parse_option $@
   prereq_checks
   user_prompts
   ntp_checks
@@ -308,6 +341,7 @@ case $1 in
   check_blockheight
   ;;
 "upgrade")
+  parse_option $@
   user_prompts
   backup_lisk
   install_lisk
@@ -318,5 +352,7 @@ case $1 in
   echo "Error: Unrecognized command."
   echo ""
   echo "Available commands are: install upgrade"
+  usage
+  exit 1
   ;;
 esac
