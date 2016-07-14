@@ -17,16 +17,16 @@ fi
 UNAME=$(uname)
 NETWORK="test"
 LISK_CONFIG=${2:-config.json}
-CONFIG_NAME=`echo $LISK_CONFIG | cut -f 1 -d '.'`
+#CONFIG_NAME=`echo $LISK_CONFIG | cut -f 1 -d '.'`
 
-DB_NAME=`grep "database" $LISK_CONFIG | awk --field-separator='"' '{print $2}'| cut -f 2 -d '"'`
+DB_NAME=`grep "database" $LISK_CONFIG | awk --field-separator '"' '{print $2}'| cut -f 2 -d '"'`
 DB_USER=$USER
 DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
 DB_LOG_FILE="$(pwd)/log/pgsql.log"
 
-LOG_FILE="$(pwd)/log/$CONFIG_NAME.app.log"
-PID_FILE="$(pwd)/pid/$CONFIG_NAME.pid"
+LOG_FILE="$(pwd)/log/$DB_NAME.app.log"
+PID_FILE="$(pwd)/pid/$DB_NAME.pid"
 
 CMDS=("curl" "forever" "gunzip" "node" "tar" "psql" "createdb" "createuser" "dropdb" "dropuser")
 check_cmds CMDS[@]
