@@ -68,7 +68,7 @@ download_blockchain() {
   echo "Downloading blockchain snapshot..."
   curl -o blockchain.db.gz "https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.gz" &> /dev/null
   if [ $? == 0 ] && [ -f blockchain.db.gz ]; then
-    gunzip -q blockchain.db.gz &> /dev/null
+    gunzip -fq blockchain.db.gz &> /dev/null
   fi
   if [ $? != 0 ]; then
     rm -f blockchain.*
