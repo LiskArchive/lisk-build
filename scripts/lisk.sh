@@ -241,9 +241,9 @@ tail_logs() {
 
 help() {
   echo -e "\nCommand Options for Lisk.sh"
-  echo -e "\nstart_node <config.json>\t\tStarts the Nodejs process for Lisk"
+  echo -e "\nstart_node <config.json>\t\tStarts a Nodejs process for Lisk"
   echo -e "start <config.json>\t\t\tStarts the Nodejs process and PostgreSQL Database for Lisk"
-  echo -e "stop_node <config.json>\t\t\tStops the Nodejs process for Lisk"
+  echo -e "stop_node <config.json>\t\t\tStops a Nodejs process for Lisk"
   echo -e "stop <config.json>\t\t\tStop the Nodejs process and PostgreSQL Database for Lisk"
   echo -e "reload <config.json>\t\t\tRestarts the Nodejs process for Lisk"
   echo -e "rebuild <config.json>\t\t\tRebuilds the PostgreSQL database"
