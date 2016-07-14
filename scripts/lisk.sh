@@ -19,13 +19,13 @@ NETWORK="test"
 LISK_CONFIG=${2:-config.json}
 #CONFIG_NAME=`echo $LISK_CONFIG | cut -f 1 -d '.'`
 
-DB_NAME=`grep "database" $LISK_CONFIG | awk --field-separator '"' '{print $2}'| cut -f 2 -d '"'`
+DB_NAME=`grep "database" $LISK_CONFIG | awk --field-separator '"' '{print $4}'| cut -f 2 -d '"'`
 DB_USER=$USER
 DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
-DB_LOG_FILE="$(pwd)/log/pgsql.log"
+DB_LOG_FILE="$(pwd)/logs/pgsql.log"
 
-LOG_FILE="$(pwd)/log/$DB_NAME.app.log"
+LOG_FILE="$(pwd)/logs/$DB_NAME.app.log"
 PID_FILE="$(pwd)/pid/$DB_NAME.pid"
 
 CMDS=("curl" "forever" "gunzip" "node" "tar" "psql" "createdb" "createuser" "dropdb" "dropuser")
@@ -241,7 +241,7 @@ tail_logs() {
 
 help() {
   echo -e "\nCommand Options for Lisk.sh"
-  echo -e "\nstart_node <config.json>\t\t\tStarts the Nodejs process for Lisk"
+  echo -e "\nstart_node <config.json>\t\tStarts the Nodejs process for Lisk"
   echo -e "start <config.json>\t\t\tStarts the Nodejs process and PostgreSQL Database for Lisk"
   echo -e "stop_node <config.json>\t\t\tStops the Nodejs process for Lisk"
   echo -e "stop <config.json>\t\t\tStop the Nodejs process and PostgreSQL Database for Lisk"
