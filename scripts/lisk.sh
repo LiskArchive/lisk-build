@@ -15,16 +15,18 @@ if [ "$USER" == "root" ]; then
 fi
 
 UNAME=$(uname)
-NETWORK="main"
+NETWORK="test"
+LISK_CONFIG=${2:-config.json}
+#CONFIG_NAME=`echo $LISK_CONFIG | cut -f 1 -d '.'`
 
-DB_NAME="lisk_$NETWORK"
+DB_NAME=`grep "database" $LISK_CONFIG | cut -f 4 -d '"'`
 DB_USER=$USER
 DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
-DB_LOG_FILE="$(pwd)/pgsql.log"
+DB_LOG_FILE="$(pwd)/logs/pgsql.log"
 
-LOG_FILE="$(pwd)/app.log"
-PID_FILE="$(pwd)/app.pid"
+LOG_FILE="$(pwd)/logs/$DB_NAME.app.log"
+PID_FILE="$(pwd)/pid/$DB_NAME.pid"
 
 CMDS=("curl" "forever" "gunzip" "node" "tar" "psql" "createdb" "createuser" "dropdb" "dropuser")
 check_cmds CMDS[@]
@@ -66,7 +68,7 @@ download_blockchain() {
   echo "Downloading blockchain snapshot..."
   curl -o blockchain.db.gz "https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.gz" &> /dev/null
   if [ $? == 0 ] && [ -f blockchain.db.gz ]; then
-    gunzip -q blockchain.db.gz &> /dev/null
+    gunzip -fq blockchain.db.gz &> /dev/null
   fi
   if [ $? != 0 ]; then
     rm -f blockchain.*
@@ -174,11 +176,11 @@ stop_postgresql() {
 }
 
 start_lisk() {
-  if pgrep -x "node" &> /dev/null; then
-    echo "√ Lisk is running."
+  if check_status == 1 &> /dev/null; then
+    check_status
     exit 1
   else
-    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js &> /dev/null
+    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG &> /dev/null
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully."
     else
@@ -188,12 +190,10 @@ start_lisk() {
 }
 
 stop_lisk() {
-  stopLisk=0
-  if ! pgrep -x "node" &> /dev/null; then
-    echo "√ Lisk is not running."
-  else
+  if check_status != 1 &> /dev/null; then
+    stopLisk=0
     while [[ $stopLisk < 5 ]] &> /dev/null; do
-      forever stop lisk &> /dev/null
+      forever stop -t $PID  &> /dev/null
       if [ $? !=  0 ]; then
         echo "X Failed to stop lisk."
       else
@@ -203,10 +203,8 @@ stop_lisk() {
       sleep .5
       stopLisk=$[$stopLisk+1]
     done
-    if pgrep -x "node" &> /dev/null; then
-      pkill -x node -9  &> /dev/null;
-      echo "√ Lisk Killed."
-    fi
+  else
+    echo "√ Lisk is not running."
   fi
 }
 
@@ -218,18 +216,20 @@ rebuild_lisk() {
 
 check_status() {
   if [ -f "$PID_FILE" ]; then
-    local PID=$(cat "$PID_FILE")
+    PID=$(cat "$PID_FILE")
   fi
   if [ ! -z "$PID" ]; then
     ps -p "$PID" > /dev/null 2>&1
-    local STATUS=$?
+    STATUS=$?
   else
-    local STATUS=1
+    STATUS=1
   fi
   if [ -f $PID_FILE ] && [ ! -z "$PID" ] && [ $STATUS == 0 ]; then
     echo "√ Lisk is running (as process $PID)."
+    return 0
   else
     echo "X Lisk is not running."
+    return 1
   fi
 }
 
@@ -239,14 +239,36 @@ tail_logs() {
   fi
 }
 
+help() {
+  echo -e "\nCommand Options for Lisk.sh"
+  echo -e "\nstart_node <config.json>\t\tStarts a Nodejs process for Lisk"
+  echo -e "start <config.json>\t\t\tStarts the Nodejs process and PostgreSQL Database for Lisk"
+  echo -e "stop_node <config.json>\t\t\tStops a Nodejs process for Lisk"
+  echo -e "stop <config.json>\t\t\tStop the Nodejs process and PostgreSQL Database for Lisk"
+  echo -e "reload <config.json>\t\t\tRestarts the Nodejs process for Lisk"
+  echo -e "rebuild <config.json>\t\t\tRebuilds the PostgreSQL database"
+  echo -e "start_db <config.json>\t\t\tStarts the PostgreSQL database"
+  echo -e "stop_db <config.json>\t\t\tStops the PostgreSQL database"
+  echo -e "coldstart\t\t\t\tCreates the PostgreSQL database and configures config.json for Lisk"
+  echo -e "logs <config.json>\t\t\tTails the log file for the supplied config.json"
+  echo -e "status <config.json>\t\t\tDisplays the status for the supplied config.json"
+  echo -e "help\t\t\t\t\tDisplays this message"
+}
+
 case $1 in
 "coldstart")
   coldstart_lisk
+  ;;
+"start_node")
+  start_lisk
   ;;
 "start")
   start_postgresql
   sleep 2
   start_lisk
+  ;;
+"stop_node")
+  stop_lisk
   ;;
 "stop")
   stop_lisk
@@ -254,13 +276,6 @@ case $1 in
   ;;
 "reload")
   stop_lisk
-  start_lisk
-  ;;
-"restart")
-  stop_lisk
-  stop_postgresql
-  start_postgresql
-  sleep 1
   start_lisk
   ;;
 "rebuild")
@@ -271,15 +286,25 @@ case $1 in
   rebuild_lisk
   start_lisk
   ;;
+"start_db")
+  start_postgresql
+  ;;
+"stop_db")
+  stop_postgresql
+  ;;
 "status")
   check_status
   ;;
 "logs")
   tail_logs
   ;;
+"help")
+  help
+  ;;
 *)
   echo "Error: Unrecognized command."
   echo ""
-  echo "Available commands are: coldstart start stop reload restart rebuild status logs "
+  echo "Available commands are: start stop start_node stop_node start_db stop_db reload rebuild coldstart logs status help"
+  help
   ;;
 esac

@@ -13,7 +13,6 @@ UNAME=$(uname)-$(uname -m)
 defaultLiskLocation=~
 defaultRelease=main
 
-
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
@@ -61,8 +60,8 @@ prereq_checks() {
       echo -e "Sudo authenticated.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
     else
       echo -e "Unable to authenticate Sudo.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-  	echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
-  	exit 2
+      echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+      exit 2
     fi
   fi
 
@@ -82,6 +81,7 @@ elif [[ -f ~/.bash_profile && ! "$(grep "en_US.UTF-8" ~/.bash_profile)" ]]; then
 fi
 
 user_prompts() {
+
   [ "$liskLocation" ] || read -r -p "Where do you want to install Lisk to? (Default $defaultLiskLocation): " liskLocation
   liskLocation=${liskLocation:-$defaultLiskLocation}
   if [[ ! -r "$liskLocation" ]]; then
@@ -95,9 +95,11 @@ user_prompts() {
     echo "$release is not valid, please check and re-excute"
     exit 2;
   fi
+
 }
 
 ntp_checks() {
+
   #Install NTP or Chrony for Time Management - Physical Machines only
   if [[ "$(uname)" == "Linux" ]]; then
     if [[ -f "/etc/debian_version" &&  ! -f "/proc/user_beancounters" ]]; then
@@ -191,10 +193,13 @@ ntp_checks() {
       fi
     fi  #End Darwin Checks
   fi #End NTP Checks
+
 }
 
 install_lisk() {
+
   liskVersion=lisk-$UNAME.tar.gz
+
   liskDir=`echo $liskVersion | cut -d'.' -f1`
 
   echo -e "\nDownloading current Lisk binaries: "$liskVersion
@@ -268,6 +273,9 @@ backup_lisk() {
   mkdir -p $liskLocation/backup/
   mv -f $liskLocation/lisk-$release $liskLocation/backup/
 
+  mkdir -p $liskLocation/backup/
+  mv -f $liskLocation/lisk-$release $liskLocation/backup/
+
 }
 
 upgrade_lisk() {
@@ -298,6 +306,7 @@ check_blockheight() {
 }
 
 usage() {
+
   echo "Usage: $0 <install|upgrade> [-d <directory] [-r <main|test>] [-n]"
   echo "install         -- install lisk"
   echo " -d <directory> -- install location"
@@ -306,9 +315,11 @@ usage() {
   echo "upgrade         -- upgrade list"
   echo " -d <directory> -- install directory"
   echo " -r <release>   -- choose main or test"
+
 }
 
 parse_option() {
+
   OPTIND=2
   while getopts d:r:n opt
   do
@@ -328,6 +339,7 @@ parse_option() {
       exit 1
     fi
   fi
+
 }
 
 case $1 in
