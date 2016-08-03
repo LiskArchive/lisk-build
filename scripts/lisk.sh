@@ -19,14 +19,19 @@ NETWORK="test"
 LISK_CONFIG=${2:-config.json}
 #CONFIG_NAME=`echo $LISK_CONFIG | cut -f 1 -d '.'`
 
+LOGS_DIR="$(pwd)/logs"
+PIDS_DIR="$(pwd)/pids"
+
+mkdir -p "$(pwd)/logs" "$(pwd)/pids"
+
 DB_NAME=`grep "database" $LISK_CONFIG | cut -f 4 -d '"'`
 DB_USER=$USER
 DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
-DB_LOG_FILE="$(pwd)/logs/pgsql.log"
+DB_LOG_FILE="$LOGS_DIR/pgsql.log"
 
-LOG_FILE="$(pwd)/logs/$DB_NAME.app.log"
-PID_FILE="$(pwd)/pid/$DB_NAME.pid"
+LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
+PID_FILE="$PIDS_DIR/$DB_NAME.pid"
 
 CMDS=("curl" "forever" "gunzip" "node" "tar" "psql" "createdb" "createuser" "dropdb" "dropuser")
 check_cmds CMDS[@]
