@@ -273,9 +273,6 @@ backup_lisk() {
   mkdir -p $liskLocation/backup/
   mv -f $liskLocation/lisk-$release $liskLocation/backup/
 
-  mkdir -p $liskLocation/backup/
-  mv -f $liskLocation/lisk-$release $liskLocation/backup/
-
 }
 
 upgrade_lisk() {
