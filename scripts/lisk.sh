@@ -22,8 +22,6 @@ LISK_CONFIG=${2:-config.json}
 LOGS_DIR="$(pwd)/logs"
 PIDS_DIR="$(pwd)/pids"
 
-mkdir -p "$(pwd)/logs" "$(pwd)/pids"
-
 DB_NAME=`grep "database" $LISK_CONFIG | cut -f 4 -d '"'`
 DB_USER=$USER
 DB_PASS="password"
