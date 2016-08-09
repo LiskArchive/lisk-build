@@ -17,7 +17,7 @@ fi
 
 
 UNAME=$(uname)
-NETWORK="test"
+NETWORK="main"
 LISK_CONFIG=config.json
 
 LOGS_DIR="$(pwd)/logs"
