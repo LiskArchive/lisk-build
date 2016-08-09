@@ -305,14 +305,11 @@ check_blockheight() {
 usage() {
 
   echo "Usage: $0 <install|upgrade> [-d <directory] [-r <main|test>] [-n]"
-  echo "install         -- install lisk"
+  echo "install         -- install Lisk"
+  echo "upgrade         -- upgrade Lisk"
   echo " -d <directory> -- install location"
   echo " -r <release>   -- choose main or test"
   echo " -n             -- install ntp if not installed"
-  echo "upgrade         -- upgrade list"
-  echo " -d <directory> -- install directory"
-  echo " -r <release>   -- choose main or test"
-
 }
 
 parse_option() {
