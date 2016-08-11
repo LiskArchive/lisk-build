@@ -267,11 +267,11 @@ backup_lisk() {
 
   if [[ -d "$liskLocation/backup/lisk-$release" ]];then
     echo -e "\nRemoving old backup folder"
-    rm -f $liskLocation/backup/lisk-$release
+    rm -rf $liskLocation/backup/lisk-$release &> /dev/null
   fi
 
-  mkdir -p $liskLocation/backup/
-  mv -f $liskLocation/lisk-$release $liskLocation/backup/
+  mkdir -p $liskLocation/backup/ &> /dev/null
+  mv -f $liskLocation/lisk-$release $liskLocation/backup/ &> /dev/null
 
 }
 
