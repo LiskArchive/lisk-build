@@ -33,7 +33,7 @@ createdb "$DB_NAME" &> /dev/null
 echo -e "\nExporting active database to snapshot instance"
 pg_dump lisk_$NETWORK | psql "$DB_NAME" &> /dev/null
 
-echo -e "\nCleaing old log files"
+echo -e "\nClearing old log files"
 cat /dev/null > ./logs/lisk_snapshot.log
 
 echo -e "\nBeginning snapshot process at "$(date)""
@@ -44,7 +44,8 @@ until tail -n10 ./logs/lisk_snapshot.log | grep -q "Cleaned up successfully"; do
   ###TODO CHECK IF SNAPSHOT FAILS
 done
 echo -e "\nSnapshot process completed at "$(date)""
-
+PID="$(bash lisk.sh status -c snapshot.json| grep PID| cut -d: -f 2)"
+kill -9 $PID
 
 echo -e "\nCleaning peers table"
 psql -d lisk_snapshot -c 'delete from peers;'  &> /dev/null

@@ -50,6 +50,7 @@ network() {
     NETWORK="local"
   fi
 }
+
 create_user() {
   dropuser --if-exists "$DB_USER" &> /dev/null
   createuser --createdb "$DB_USER" &> /dev/null
@@ -196,7 +197,7 @@ else
   if [ $? == 0 ]; then
     echo "√ Lisk started successfully in snapshot mode."
   else
-    echo "X Failed to start lisk."
+    echo "X Failed to start Lisk."
   fi
 fi
 }
@@ -209,10 +210,10 @@ start_lisk() {
     forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG &> /dev/null
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully."
-      sleep 1
+      sleep 3
       check_status
     else
-      echo "X Failed to start lisk."
+      echo "X Failed to start Lisk."
     fi
   fi
 }
@@ -223,7 +224,7 @@ stop_lisk() {
     while [[ $stopLisk < 5 ]] &> /dev/null; do
       forever stop -t $PID --killSignal=SIGTERM &> /dev/null
       if [ $? !=  0 ]; then
-        echo "X Failed to stop lisk."
+        echo "X Failed to stop Lisk."
       else
         echo "√ Lisk stopped successfully."
         break
@@ -241,14 +242,14 @@ rebuild_lisk() {
   if [ "$DB_SNAPSHOT" = "blockchain.db.gz" ]; then
     download_blockchain
   else
-    echo -e "√ Using Local Snapshot"
+    echo -e "√ Using Local Snapshot."
   fi
   restore_blockchain
 }
 
 check_status() {
   if [ -f "$PID_FILE" ]; then
-    PID="$(cat "$PID_FILE")""
+    PID="$(cat "$PID_FILE")"
   fi
   if [ ! -z "$PID" ]; then
     ps -p "$PID" > /dev/null 2>&1
@@ -257,7 +258,7 @@ check_status() {
     STATUS=1
   fi
   if [ -f $PID_FILE ] && [ ! -z "$PID" ] && [ $STATUS == 0 ]; then
-    echo "√ Lisk is running as PID: $PID."
+    echo "√ Lisk is running as PID: $PID"
     blockheight
     return 0
   else
