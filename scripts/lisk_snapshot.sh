@@ -44,7 +44,8 @@ until tail -n10 ./logs/lisk_snapshot.log | grep -q "Cleaned up successfully"; do
   ###TODO CHECK IF SNAPSHOT FAILS
 done
 echo -e "\nSnapshot process completed at "$(date)""
-
+PID="$(bash lisk.sh status -c snapshot.json| grep PID| cut -d: -f 2)"
+kill -9 $PID
 
 echo -e "\nCleaning peers table"
 psql -d lisk_snapshot -c 'delete from peers;'  &> /dev/null
