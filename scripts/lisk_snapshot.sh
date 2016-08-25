@@ -36,16 +36,14 @@ pg_dump lisk_$NETWORK | psql "$DB_NAME" &> /dev/null
 echo -e "\nClearing old log files"
 cat /dev/null > ./logs/lisk_snapshot.log
 
-echo -e "\nBeginning snapshot process at "$(date)""
+echo -e "\nBeginning snapshot verification process at "$(date)""
 bash lisk.sh snapshot -s 100000 -c snapshot.json
 
 until tail -n10 ./logs/lisk_snapshot.log | grep -q "Cleaned up successfully"; do
   sleep 60
   ###TODO CHECK IF SNAPSHOT FAILS
 done
-echo -e "\nSnapshot process completed at "$(date)""
-PID="$(bash lisk.sh status -c snapshot.json| grep PID| cut -d: -f 2)"
-kill -9 $PID
+echo -e "\nSnapshot verification process completed at "$(date)""
 
 echo -e "\nCleaning peers table"
 psql -d lisk_snapshot -c 'delete from peers;'  &> /dev/null
@@ -55,4 +53,4 @@ HEIGHT="$(psql -d lisk_snapshot -t -c 'select height from blocks order by height
 echo -e "\nDumping snapshot"
 pg_dump -O "$DB_NAME" | gzip > ./backups/lisk_backup-"$(echo $HEIGHT)".gz
 
-echo "\nSnapshot Complete"
+echo -e "\nSnapshot Complete"
