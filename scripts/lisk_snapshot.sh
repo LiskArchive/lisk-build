@@ -15,9 +15,9 @@ mkdir -p $BACKUP_LOCATION  &> /dev/null
 echo -e "\nClearing old snapshots on disk"
 find $BACKUP_LOCATION -name lisk_backup* -mtime +$TIME_TO_KEEP -exec rm {} \;
 
-if [ "$(grep "nethash" $LISK_CONFIG | cut -f 4 -d '"')" = "da3ed6a45429278bac2666961289ca17ad86595d33b31037615d4b8e8f158bba" ];then
+if [ "$(grep "da3ed6a45429278bac2666961289ca17ad86595d33b31037615d4b8e8f158bba" $LISK_CONFIG )" ];then
   NETWORK="test"
-elif [ "$(grep "nethash" $LISK_CONFIG | cut -f 4 -d '"')" = "ed14889723f24ecc54871d058d98ce91ff2f973192075c0155ba2b7b70ad2511" ];then
+elif [ "$(grep "ed14889723f24ecc54871d058d98ce91ff2f973192075c0155ba2b7b70ad2511" $LISK_CONFIG )" ];then
   NETWORK="main"
 else
   NETWORK="local"
