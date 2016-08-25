@@ -248,7 +248,7 @@ rebuild_lisk() {
 
 check_status() {
   if [ -f "$PID_FILE" ]; then
-    PID=$(cat "$PID_FILE")
+    PID="$(cat "$PID_FILE")""
   fi
   if [ ! -z "$PID" ]; then
     ps -p "$PID" > /dev/null 2>&1
@@ -280,7 +280,7 @@ help() {
   echo -e "stop_node\t\tStops a Nodejs process for Lisk"
   echo -e "stop\t\t\tStop the Nodejs process and PostgreSQL Database for Lisk"
   echo -e "reload\t\t\tRestarts the Nodejs process for Lisk"
-  echo -e "rebuild\t\t\tRebuilds the PostgreSQL database"
+  echo -e "rebuild (-f file.db.gz)\tRebuilds the PostgreSQL database"
   echo -e "start_db\t\tStarts the PostgreSQL database"
   echo -e "stop_db\t\t\tStops the PostgreSQL database"
   echo -e "coldstart\t\tCreates the PostgreSQL database and configures config.json for Lisk"
