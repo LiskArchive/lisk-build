@@ -14,23 +14,11 @@ if [ "$USER" == "root" ]; then
   exit 1
 fi
 
-
-
 UNAME=$(uname)
 LISK_CONFIG=config.json
 
-if [ "$(grep "nethash" $LISK_CONFIG | cut -f 4 -d '"')" = "da3ed6a45429278bac2666961289ca17ad86595d33b31037615d4b8e8f158bba" ];then
-  NETWORK="test"
-elif [ "$(grep "nethash" $LISK_CONFIG | cut -f 4 -d '"')" = "ed14889723f24ecc54871d058d98ce91ff2f973192075c0155ba2b7b70ad2511" ];then
-  NETWORK="main"
-else
-  NETWORK="local"
-fi
-
 LOGS_DIR="$(pwd)/logs"
 PIDS_DIR="$(pwd)/pids"
-
-
 
 DB_NAME="$(grep "database" $LISK_CONFIG | cut -f 4 -d '"')"
 DB_USER=$USER
@@ -53,6 +41,15 @@ blockheight() {
   echo -e "Current Block Height:"$HEIGHT
 }
 
+network() {
+  if [ "$(grep "nethash" $LISK_CONFIG | cut -f 4 -d '"')" = "da3ed6a45429278bac2666961289ca17ad86595d33b31037615d4b8e8f158bba" ];then
+    NETWORK="test"
+  elif [ "$(grep "nethash" $LISK_CONFIG | cut -f 4 -d '"')" = "ed14889723f24ecc54871d058d98ce91ff2f973192075c0155ba2b7b70ad2511" ];then
+    NETWORK="main"
+  else
+    NETWORK="local"
+  fi
+}
 create_user() {
   dropuser --if-exists "$DB_USER" &> /dev/null
   createuser --createdb "$DB_USER" &> /dev/null
@@ -309,7 +306,7 @@ parse_option() {
 
    c) if [ -f $OPTARG ]; then
           LISK_CONFIG=$OPTARG
-          DB_NAME=`grep "database" $LISK_CONFIG | cut -f 4 -d '"'`
+          DB_NAME="$(grep "database" $LISK_CONFIG | cut -f 4 -d '"')"
           LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
           PID_FILE="$PIDS_DIR/$DB_NAME.pid"
         else
@@ -332,6 +329,7 @@ parse_option() {
 }
 
 parse_option $@
+network
 
 case $1 in
 "coldstart")
