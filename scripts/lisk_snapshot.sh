@@ -65,8 +65,8 @@ parse_option() {
 usage() {
 
   echo "Usage: $0 [-s <snapshot.json>] [-c <config.json>] [-b <backup directory>] [-d <days to keep>]"
-  echo " -s <snapshot.json>        -- config.json to copy to"
-  echo " -c <config.json>          -- config.json to copy from"
+  echo " -s <snapshot.json>        -- config.json to use for validation"
+  echo " -c <config.json>          -- config.json to create target database"
   echo " -b <backup directory>     -- backup direcory"
   echo " -d <days to keep>         -- Days to keep backups"
 }
