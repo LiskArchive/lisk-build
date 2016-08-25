@@ -257,7 +257,7 @@ check_status() {
     STATUS=1
   fi
   if [ -f $PID_FILE ] && [ ! -z "$PID" ] && [ $STATUS == 0 ]; then
-    echo "√ Lisk is running as PID: $PID)."
+    echo "√ Lisk is running as PID: $PID."
     blockheight
     return 0
   else
