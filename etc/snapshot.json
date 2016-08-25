@@ -1,0 +1,63 @@
+{
+    "port": 9000,
+    "address": "0.0.0.0",
+    "serveHttpAPI": false,
+    "serveHttpWallet": false,
+    "version": "snapshot",
+    "fileLogLevel": "info",
+    "logFileName": "logs/lisk_snapshot.log",
+    "consoleLogLevel": "log",
+    "db": {
+        "host": "localhost",
+        "port": 5432,
+        "database": "lisk_snapshot",
+        "user": null,
+        "password": "password",
+        "poolSize": 20,
+        "poolIdleTimeout": 30000,
+        "reapIntervalMillis": 1000,
+        "logEvents": [
+            "error"
+        ]
+    },
+    "api": {
+        "access": {
+            "whiteList": ["127.0.0.1"]
+        }
+    },
+    "peers": {
+        "list": [],
+        "blackList": [],
+        "options": {
+            "timeout": 4000
+        }
+    },
+    "forging": {
+        "force": false,
+        "secret": [],
+        "access": {
+            "whiteList": [
+                "127.0.0.1"
+            ]
+        }
+    },
+    "loading": {
+        "verifyOnLoading": false,
+        "loadPerIteration": 101
+    },
+    "ssl": {
+        "enabled": false,
+        "options": {
+            "port": 443,
+            "address": "0.0.0.0",
+            "key": "./ssl/lisk.key",
+            "cert": "./ssl/lisk.crt"
+        }
+    },
+    "dapp": {
+        "masterrequired": false,
+        "masterpassword": "notrequired",
+        "autoexec": []
+    },
+    "nethash": "da3ed6a45429278bac2666961289ca17ad86595d33b31037615d4b8e8f158bba"
+}
