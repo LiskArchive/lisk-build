@@ -83,12 +83,14 @@ parse_option "$@"
 
 echo -e "\nPreparing to take a snapshot of the blockchain."
 
+
+
 mkdir -p $BACKUP_LOCATION  &> /dev/null
 echo -e "\nClearing old snapshots on disk"
 find $BACKUP_LOCATION -name lisk_backup* -mtime +$DAYS_TO_KEEP -exec rm {} \;
 
 echo -e "\nClearing old snapshot instance"
-
+bash lisk.sh stop_node -c $SNAPSHOT_CONFIG &> /dev/null
 dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
 createdb "$TARGET_DB_NAME" &> /dev/null
 
@@ -99,7 +101,7 @@ echo -e "\nClearing old log files"
 cat /dev/null > $LOG_LOCATION
 
 echo -e "\nBeginning snapshot verification process at "$(date)""
-bash lisk.sh snapshot -s 100000 -c snapshot.json
+bash lisk.sh snapshot -s 100000 -c $SNAPSHOT_CONFIG
 
 until tail -n10 $LOG_LOCATION | grep -q "Cleaned up successfully"; do
   sleep 60
