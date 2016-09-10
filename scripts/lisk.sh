@@ -86,7 +86,7 @@ populate_database() {
 download_blockchain() {
   echo "Downloading blockchain snapshot..."
   rm -f blockchain.*
-  curl -o blockchain.db.gz "https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.gz" &> /dev/null
+  curl --progress-bar -o blockchain.db.gz "https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.gz"
   if [ $? != 0 ]; then
     rm -f blockchain.*
     echo "X Failed to download blockchain snapshot."
