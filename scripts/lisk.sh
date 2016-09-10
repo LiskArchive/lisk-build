@@ -26,6 +26,7 @@ DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
 DB_LOG_FILE="$LOGS_DIR/pgsql.log"
 DB_SNAPSHOT="blockchain.db.gz"
+DB_DOWNLOAD=Y
 
 LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
 PID_FILE="$PIDS_DIR/$DB_NAME.pid"
@@ -239,7 +240,7 @@ stop_lisk() {
 
 rebuild_lisk() {
   create_database
-  if [ "$DB_SNAPSHOT" = "blockchain.db.gz" ]; then
+  if [ "$DB_DOWNLOAD" = "Y" ]; then
     download_blockchain
   else
     echo -e "√ Using Local Snapshot."
@@ -295,7 +296,7 @@ help() {
 parse_option() {
 
  OPTIND=2
- while getopts ":s:c:f:" opt
+ while getopts ":s:c:f:" opt;
  do
    case $opt in
    s)   if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
@@ -317,6 +318,7 @@ parse_option() {
 
     f) if [ -f $OPTARG ]; then
         DB_SNAPSHOT=$OPTARG
+        DB_DOWNLOAD=N
       else
         echo "Snapshot not found. Please verify the file exists and try again."
       fi ;;
