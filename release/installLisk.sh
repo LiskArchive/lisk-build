@@ -8,7 +8,7 @@
 #                                                           #
 #############################################################
 
-#Variable Declaration
+# Variable Declaration
 UNAME=$(uname)-$(uname -m)
 defaultLiskLocation=~
 defaultRelease=main
@@ -17,14 +17,13 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 
-#Verification Checks
+# Verification Checks
 if [ "\$USER" == "root" ]; then
   echo "Error: Lisk should not be installed be as root. Exiting."
   exit 1
 fi
 
 prereq_checks() {
-
   echo -e "Checking prerequisites:"
 
   if [ -x "$(command -v curl)" ]; then
@@ -66,10 +65,9 @@ prereq_checks() {
   fi
 
   echo -e "$(tput setaf 2)All preqrequisites passed!$(tput sgr0)"
-
 }
 
-#Adding LC_ALL LANG and LANGUAGE to user profile
+# Adding LC_ALL LANG and LANGUAGE to user profile
 if [[ -f ~/.profile && ! "$(grep "en_US.UTF-8" ~/.profile)" ]]; then
   echo "LC_ALL=en_US.UTF-8" >> ~/.profile
   echo "LANG=en_US.UTF-8"  >> ~/.profile
@@ -81,7 +79,6 @@ elif [[ -f ~/.bash_profile && ! "$(grep "en_US.UTF-8" ~/.bash_profile)" ]]; then
 fi
 
 user_prompts() {
-
   [ "$liskLocation" ] || read -r -p "Where do you want to install Lisk to? (Default $defaultLiskLocation): " liskLocation
   liskLocation=${liskLocation:-$defaultLiskLocation}
   if [[ ! -r "$liskLocation" ]]; then
@@ -95,12 +92,10 @@ user_prompts() {
     echo "$release is not valid, please check and re-excute"
     exit 2;
   fi
-
 }
 
 ntp_checks() {
-
-  #Install NTP or Chrony for Time Management - Physical Machines only
+  # Install NTP or Chrony for Time Management - Physical Machines only
   if [[ "$(uname)" == "Linux" ]]; then
     if [[ -f "/etc/debian_version" &&  ! -f "/proc/user_beancounters" ]]; then
       if sudo pgrep -x "ntpd" > /dev/null; then
@@ -124,7 +119,7 @@ ntp_checks() {
           echo -e "\nLisk requires NTP on Debian based systems, exiting."
           exit 0
         fi
-      fi #End Debian Checks
+      fi # End Debian Checks
     elif [[ -f "/etc/redhat-release" &&  ! -f "/proc/user_beancounters" ]]; then
       if sudo pgrep -x "ntpd" > /dev/null; then
         echo "√ NTP is running"
@@ -152,7 +147,7 @@ ntp_checks() {
             exit 0
           fi
         fi
-      fi #End Redhat Checks
+      fi # End Redhat Checks
     elif [[ -f "/proc/user_beancounters" ]]; then
       echo "_ Running OpenVZ VM, NTP and Chrony are not required"
     fi
@@ -178,7 +173,7 @@ ntp_checks() {
         echo -e "\nLisk requires NTP FreeBSD based systems, exiting."
         exit 0
       fi
-    fi #End FreeBSD Checks
+    fi # End FreeBSD Checks
   elif [[ "$(uname)" == "Darwin" ]]; then
     if pgrep -x "ntpd" > /dev/null; then
       echo "√ NTP is running"
@@ -191,13 +186,11 @@ ntp_checks() {
         echo -e "\nNTP did not start, Please verify its configured on your system"
         exit 0
       fi
-    fi  #End Darwin Checks
-  fi #End NTP Checks
-
+    fi  # End Darwin Checks
+  fi # End NTP Checks
 }
 
 install_lisk() {
-
   liskVersion=lisk-$UNAME.tar.gz
 
   liskDir=`echo $liskVersion | cut -d'.' -f1`
@@ -234,11 +227,9 @@ install_lisk() {
 
   echo -e "\nCleaning up downloaded files"
   rm -f $liskVersion $liskVersion.md5
-
 }
 
 configure_lisk() {
-
   cd $liskLocation/lisk-$release
 
   echo -e "\nColdstarting Lisk for the first time"
@@ -254,29 +245,25 @@ configure_lisk() {
 
   echo -e "\nStarting Lisk with all parameters in place"
   bash lisk.sh start
-
 }
 
 backup_lisk() {
-
   echo -e "\nStopping Lisk to perform a backup"
   cd $liskLocation/lisk-$release
   bash lisk.sh stop
 
   echo -e "\nBacking up existing Lisk Folder"
 
-  if [[ -d "$liskLocation/backup/lisk-$release" ]];then
+  if [[ -d "$liskLocation/backup/lisk-$release" ]]; then
     echo -e "\nRemoving old backup folder"
     rm -rf $liskLocation/backup/lisk-$release &> /dev/null
   fi
 
   mkdir -p $liskLocation/backup/ &> /dev/null
   mv -f $liskLocation/lisk-$release $liskLocation/backup/ &> /dev/null
-
 }
 
 upgrade_lisk() {
-
   echo -e "\nRestoring Database to new Lisk Install"
   mkdir -p -m700 $liskLocation/lisk-$release/pgsql/data
   cp -rf $liskLocation/backup/lisk-$release/pgsql/data/* $liskLocation/lisk-$release/pgsql/data/
@@ -284,11 +271,9 @@ upgrade_lisk() {
   echo -e "\nStarting Lisk"
   cd $liskLocation/lisk-$release
   bash lisk.sh start
-
 }
 
 check_blockheight() {
-
   echo -e "\nWaiting to check Block Height"
 
   sleep 5
@@ -299,11 +284,9 @@ check_blockheight() {
   fi
 
   echo -e "\nCurrent Block Height: " $blockHeight
-
 }
 
 usage() {
-
   echo "Usage: $0 <install|upgrade> [-d <directory] [-r <main|test>] [-n]"
   echo "install         -- install Lisk"
   echo "upgrade         -- upgrade Lisk"
@@ -313,10 +296,8 @@ usage() {
 }
 
 parse_option() {
-
   OPTIND=2
-  while getopts d:r:n opt
-  do
+  while getopts d:r:n opt; do
     case $opt in
       d) liskLocation=$OPTARG ;;
       r) release=$OPTARG ;;
@@ -324,16 +305,13 @@ parse_option() {
     esac
   done
 
-  if [ "$release" ]
-  then
-    if [[ "$release" != test && "$release" != "main" ]]
-    then
+  if [ "$release" ]; then
+    if [[ "$release" != test && "$release" != "main" ]]; then
       echo "-r <test|main>"
       usage
       exit 1
     fi
   fi
-
 }
 
 case $1 in

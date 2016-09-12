@@ -25,10 +25,10 @@ echo "Not enough ram, taking defaults."
 exit 0
 fi
 
-#Copying template into pgsql/data folder
+# Copying template into pgsql/data folder
 rm -f ./pgsql/data/postgresql.conf
 cp ./etc/postgresql.conf ./pgsql/data/postgresql.conf
-  
+
 if [ ! -d ./pgsql/data ]; then
   echo "Failed to open ./pgsql/data folder"
   exit 1
@@ -81,7 +81,6 @@ update_config() {
     echo "Updates completed"
   fi
 }
-
 
 max_connections=200
 shared_buffers=$(expr $memoryBase / 4)"kB"
