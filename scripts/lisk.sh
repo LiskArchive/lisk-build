@@ -14,22 +14,19 @@ if [ "$USER" == "root" ]; then
   exit 1
 fi
 
-
-
 UNAME=$(uname)
-NETWORK="main"
 LISK_CONFIG=config.json
 
 LOGS_DIR="$(pwd)/logs"
 PIDS_DIR="$(pwd)/pids"
 
-
-
-DB_NAME=`grep "database" $LISK_CONFIG | cut -f 4 -d '"'`
+DB_NAME="$(grep "database" $LISK_CONFIG | cut -f 4 -d '"')"
 DB_USER=$USER
 DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
 DB_LOG_FILE="$LOGS_DIR/pgsql.log"
+DB_SNAPSHOT="blockchain.db.gz"
+DB_DOWNLOAD=Y
 
 LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
 PID_FILE="$PIDS_DIR/$DB_NAME.pid"
@@ -39,6 +36,21 @@ CMDS=("curl" "forever" "gunzip" "node" "tar" "psql" "createdb" "createuser" "dro
 check_cmds CMDS[@]
 
 ################################################################################
+
+blockheight() {
+  HEIGHT="$(psql -d $DB_NAME -t -c 'select height from blocks order by height desc limit 1;')"
+  echo -e "Current Block Height:"$HEIGHT
+}
+
+network() {
+  if [ "$(grep "da3ed6a45429278bac2666961289ca17ad86595d33b31037615d4b8e8f158bba" $LISK_CONFIG )" ];then
+    NETWORK="test"
+  elif [ "$(grep "ed14889723f24ecc54871d058d98ce91ff2f973192075c0155ba2b7b70ad2511" $LISK_CONFIG )" ];then
+    NETWORK="main"
+  else
+    NETWORK="local"
+  fi
+}
 
 create_user() {
   dropuser --if-exists "$DB_USER" &> /dev/null
@@ -73,10 +85,8 @@ populate_database() {
 
 download_blockchain() {
   echo "Downloading blockchain snapshot..."
-  curl -o blockchain.db.gz "https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.gz" &> /dev/null
-  if [ $? == 0 ] && [ -f blockchain.db.gz ]; then
-    gunzip -fq blockchain.db.gz &> /dev/null
-  fi
+  rm -f blockchain.*
+  curl --progress-bar -o blockchain.db.gz "https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.gz"
   if [ $? != 0 ]; then
     rm -f blockchain.*
     echo "X Failed to download blockchain snapshot."
@@ -87,11 +97,8 @@ download_blockchain() {
 }
 
 restore_blockchain() {
-  echo "Restoring blockchain..."
-  if [ -f blockchain.db ]; then
-    psql -qd "$DB_NAME" < blockchain.db &> /dev/null
-  fi
-  rm -f blockchain.*
+  echo "Restoring blockchain with $DB_SNAPSHOT"
+  gunzip -fcq $DB_SNAPSHOT | psql -q -U "$DB_USER" -d "$DB_NAME" &> /dev/null
   if [ $? != 0 ]; then
     echo "X Failed to restore blockchain."
     exit 1
@@ -191,7 +198,7 @@ else
   if [ $? == 0 ]; then
     echo "√ Lisk started successfully in snapshot mode."
   else
-    echo "X Failed to start lisk."
+    echo "X Failed to start Lisk."
   fi
 fi
 }
@@ -204,8 +211,10 @@ start_lisk() {
     forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG &> /dev/null
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully."
+      sleep 3
+      check_status
     else
-      echo "X Failed to start lisk."
+      echo "X Failed to start Lisk."
     fi
   fi
 }
@@ -214,9 +223,9 @@ stop_lisk() {
   if check_status != 1 &> /dev/null; then
     stopLisk=0
     while [[ $stopLisk < 5 ]] &> /dev/null; do
-      forever stop -t $PID  &> /dev/null
+      forever stop -t $PID --killSignal=SIGTERM &> /dev/null
       if [ $? !=  0 ]; then
-        echo "X Failed to stop lisk."
+        echo "X Failed to stop Lisk."
       else
         echo "√ Lisk stopped successfully."
         break
@@ -231,13 +240,17 @@ stop_lisk() {
 
 rebuild_lisk() {
   create_database
-  download_blockchain
+  if [ "$DB_DOWNLOAD" = "Y" ]; then
+    download_blockchain
+  else
+    echo -e "√ Using Local Snapshot."
+  fi
   restore_blockchain
 }
 
 check_status() {
   if [ -f "$PID_FILE" ]; then
-    PID=$(cat "$PID_FILE")
+    PID="$(cat "$PID_FILE")"
   fi
   if [ ! -z "$PID" ]; then
     ps -p "$PID" > /dev/null 2>&1
@@ -246,7 +259,8 @@ check_status() {
     STATUS=1
   fi
   if [ -f $PID_FILE ] && [ ! -z "$PID" ] && [ $STATUS == 0 ]; then
-    echo "√ Lisk is running (as process $PID)."
+    echo "√ Lisk is running as PID: $PID"
+    blockheight
     return 0
   else
     echo "X Lisk is not running."
@@ -268,7 +282,7 @@ help() {
   echo -e "stop_node\t\tStops a Nodejs process for Lisk"
   echo -e "stop\t\t\tStop the Nodejs process and PostgreSQL Database for Lisk"
   echo -e "reload\t\t\tRestarts the Nodejs process for Lisk"
-  echo -e "rebuild\t\t\tRebuilds the PostgreSQL database"
+  echo -e "rebuild (-f file.db.gz)\tRebuilds the PostgreSQL database"
   echo -e "start_db\t\tStarts the PostgreSQL database"
   echo -e "stop_db\t\t\tStops the PostgreSQL database"
   echo -e "coldstart\t\tCreates the PostgreSQL database and configures config.json for Lisk"
@@ -278,10 +292,11 @@ help() {
   echo -e "help\t\t\tDisplays this message"
 }
 
+
 parse_option() {
 
  OPTIND=2
- while getopts ":s:c:" opt
+ while getopts ":s:c:f:" opt;
  do
    case $opt in
    s)   if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
@@ -289,21 +304,27 @@ parse_option() {
         else
           echo "Snapshot flag must be a number and greater than 0"
           exit 1
-        fi
-      ;;
+        fi ;;
 
    c) if [ -f $OPTARG ]; then
           LISK_CONFIG=$OPTARG
-          DB_NAME=`grep "database" $LISK_CONFIG | cut -f 4 -d '"'`
+          DB_NAME="$(grep "database" $LISK_CONFIG | cut -f 4 -d '"')"
           LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
           PID_FILE="$PIDS_DIR/$DB_NAME.pid"
         else
-          echo "Invalid config.json entry. Please verify the file exists and try again."
+          echo "Config.json not found. Please verify the file exists and try again."
           exit 1
       fi ;;
-   
+
+    f) if [ -f $OPTARG ]; then
+        DB_SNAPSHOT=$OPTARG
+        DB_DOWNLOAD=N
+      else
+        echo "Snapshot not found. Please verify the file exists and try again."
+      fi ;;
+
    :) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
-   
+
    *) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
    esac
  done
@@ -311,6 +332,7 @@ parse_option() {
 }
 
 parse_option $@
+network
 
 case $1 in
 "coldstart")
@@ -339,6 +361,7 @@ case $1 in
   ;;
 "reload")
   stop_lisk
+  sleep 2
   start_lisk
   ;;
 "rebuild")
