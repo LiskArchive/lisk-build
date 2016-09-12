@@ -31,6 +31,7 @@ DB_DOWNLOAD=Y
 LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
 PID_FILE="$PIDS_DIR/$DB_NAME.pid"
 
+
 CMDS=("curl" "forever" "gunzip" "node" "tar" "psql" "createdb" "createuser" "dropdb" "dropuser")
 check_cmds CMDS[@]
 
@@ -170,7 +171,7 @@ stop_postgresql() {
   if ! pgrep -x "postgres" &> /dev/null; then
     echo "√ Postgresql is not running."
   else
-    while [[ $stopPg < 5 ]] &> /dev/null; do
+   while [[ $stopPg < 5 ]] &> /dev/null; do
       pg_ctl -D $DB_DATA -l $DB_LOG_FILE stop &> /dev/null
       if [ $? == 0 ]; then
         echo "√ Postgresql stopped successfully."
@@ -189,17 +190,17 @@ stop_postgresql() {
 }
 
 snapshot_lisk() {
-  if check_status == 1 &> /dev/null; then
-    check_status
-    exit 1
+if check_status == 1 &> /dev/null; then
+  check_status
+  exit 1
+else
+  forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG -s $SNAPSHOT &> /dev/null
+  if [ $? == 0 ]; then
+    echo "√ Lisk started successfully in snapshot mode."
   else
-    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG -s $SNAPSHOT &> /dev/null
-    if [ $? == 0 ]; then
-      echo "√ Lisk started successfully in snapshot mode."
-    else
-      echo "X Failed to start Lisk."
-    fi
+    echo "X Failed to start Lisk."
   fi
+fi
 }
 
 start_lisk() {
@@ -275,59 +276,59 @@ tail_logs() {
 
 help() {
   echo -e "\nCommand Options for Lisk.sh"
-  echo -e "\nAll options may be passed\t -c <config.json>"
-  echo -e "\nstart_node\t\tStarts a Nodejs process for Lisk"
-  echo -e "start\t\t\tStarts the Nodejs process and PostgreSQL Database for Lisk"
-  echo -e "stop_node\t\tStops a Nodejs process for Lisk"
-  echo -e "stop\t\t\tStop the Nodejs process and PostgreSQL Database for Lisk"
-  echo -e "reload\t\t\tRestarts the Nodejs process for Lisk"
-  echo -e "rebuild (-f file.db.gz)\tRebuilds the PostgreSQL database"
-  echo -e "start_db\t\tStarts the PostgreSQL database"
-  echo -e "stop_db\t\t\tStops the PostgreSQL database"
-  echo -e "coldstart\t\tCreates the PostgreSQL database and configures config.json for Lisk"
-  echo -e "snapshot -s ###\t\tStarts Lisk in snapshot mode"
-  echo -e "logs\t\t\tDisplays and tails logs for Lisk"
-  echo -e "status\t\t\tDisplays the status of the PID associated with Lisk"
-  echo -e "help\t\t\tDisplays this message"
+  echo -e "\nAll options may be passed\t\t -c <config.json>"
+  echo -e "\nstart_node\t\t\t\tStarts a Nodejs process for Lisk"
+  echo -e "start\t\t\t\t\tStarts the Nodejs process and PostgreSQL Database for Lisk"
+  echo -e "stop_node\t\t\t\tStops a Nodejs process for Lisk"
+  echo -e "stop\t\t\t\t\tStop the Nodejs process and PostgreSQL Database for Lisk"
+  echo -e "reload\t\t\t\t\tRestarts the Nodejs process for Lisk"
+  echo -e "rebuild (-f file.db.gz) (-u URL) (-l) \tRebuilds the PostgreSQL database"
+  echo -e "start_db\t\t\t\tStarts the PostgreSQL database"
+  echo -e "stop_db\t\t\t\t\tStops the PostgreSQL database"
+  echo -e "coldstart\t\t\t\tCreates the PostgreSQL database and configures config.json for Lisk"
+  echo -e "snapshot -s ###\t\t\t\tStarts Lisk in snapshot mode"
+  echo -e "logs\t\t\t\t\tDisplays and tails logs for Lisk"
+  echo -e "status\t\t\t\t\tDisplays the status of the PID associated with Lisk"
+  echo -e "help\t\t\t\t\tDisplays this message"
 }
 
 
 parse_option() {
-  OPTIND=2
-  while getopts ":s:c:f:" opt; do
-    case $opt in
-      s)
-        if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
-          SNAPSHOT=$OPTARG
+
+ OPTIND=2
+ while getopts ":s:c:f:" opt;
+ do
+   case $opt in
+   s)   if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
+         SNAPSHOT=$OPTARG
         else
           echo "Snapshot flag must be a number and greater than 0"
           exit 1
         fi ;;
 
-      c)
-        if [ -f $OPTARG ]; then
+   c) if [ -f $OPTARG ]; then
           LISK_CONFIG=$OPTARG
           DB_NAME="$(grep "database" $LISK_CONFIG | cut -f 4 -d '"')"
           LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
           PID_FILE="$PIDS_DIR/$DB_NAME.pid"
         else
-          echo "Config.json not found. Please verify the file exists and try again."
+          echo "Config.json not found. Please verify the filae exists and try again."
           exit 1
-        fi ;;
+      fi ;;
 
-      f)
-        if [ -f $OPTARG ]; then
-          DB_SNAPSHOT=$OPTARG
-          DB_DOWNLOAD=N
-        else
-          echo "Snapshot not found. Please verify the file exists and try again."
-        fi ;;
+    f) if [ -f $OPTARG ]; then
+        DB_SNAPSHOT=$OPTARG
+        DB_DOWNLOAD=N
+      else
+        echo "Snapshot not found. Please verify the file exists and try again."
+      fi ;;
 
-      :) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
+   :) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
 
-      *) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
-    esac
-  done
+   *) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
+   esac
+ done
+
 }
 
 parse_option $@
