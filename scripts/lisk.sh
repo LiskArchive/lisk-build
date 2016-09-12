@@ -9,7 +9,7 @@ if [ ! -f "$(pwd)/app.js" ]; then
   exit 1
 fi
 
-if [ "$USER" == "root" ]; then
+if [ "\$USER" == "root" ]; then
   echo "Error: Lisk should not be run be as root. Exiting."
   exit 1
 fi
@@ -27,6 +27,7 @@ DB_DATA="$(pwd)/pgsql/data"
 DB_LOG_FILE="$LOGS_DIR/pgsql.log"
 DB_SNAPSHOT="blockchain.db.gz"
 DB_DOWNLOAD=Y
+DB_REMOTE=N
 
 LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
 PID_FILE="$PIDS_DIR/$DB_NAME.pid"
@@ -84,16 +85,26 @@ populate_database() {
 }
 
 download_blockchain() {
-  echo "Downloading blockchain snapshot..."
-  rm -f blockchain.*
-  curl --progress-bar -o blockchain.db.gz "https://downloads.lisk.io/lisk/$NETWORK/blockchain.db.gz"
-  if [ $? != 0 ]; then
-    rm -f blockchain.*
-    echo "X Failed to download blockchain snapshot."
-    exit 1
+
+  if [ "$DB_DOWNLOAD" = "Y" ]; then
+    rm -f $DB_SNAPSHOT
+    echo "√ Downloading $DB_SNAPSHOT from $BLOCKCHAIN_URL"
+      if [ "$DB_REMOTE" = "Y" ]; then
+        curl --progress-bar -o $DB_SNAPSHOT "$BLOCKCHAIN_URL/$DB_SNAPSHOT"
+      else
+        curl --progress-bar -o $DB_SNAPSHOT "https://downloads.lisk.io/lisk/$NETWORK/$DB_SNAPSHOT"
+      fi
+      if [ $? != 0 ]; then
+        rm -f $DB_SNAPSHOT
+        echo "X Failed to download blockchain snapshot."
+        exit 1
+      else
+        echo "√ Blockchain snapshot downloaded successfully."
+      fi
   else
-    echo "√ Blockchain snapshot downloaded successfully."
+    echo -e "√ Using Local Snapshot."
   fi
+
 }
 
 restore_blockchain() {
@@ -240,11 +251,7 @@ stop_lisk() {
 
 rebuild_lisk() {
   create_database
-  if [ "$DB_DOWNLOAD" = "Y" ]; then
-    download_blockchain
-  else
-    echo -e "√ Using Local Snapshot."
-  fi
+  download_blockchain
   restore_blockchain
 }
 
@@ -296,7 +303,7 @@ help() {
 parse_option() {
 
  OPTIND=2
- while getopts ":s:c:f:" opt;
+ while getopts ":s:c:f:u:l:" opt;
  do
    case $opt in
    s)   if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
@@ -316,11 +323,21 @@ parse_option() {
           exit 1
       fi ;;
 
-    f) if [ -f $OPTARG ]; then
+    u) DB_REMOTE=Y
+       DB_DOWNLOAD=Y
+       BLOCKCHAIN_URL=$OPTARG
+       ;;
+
+    f) DB_SNAPSHOT=$OPTARG
+       ;;
+
+    l) if [ -f $OPTARG ]; then
         DB_SNAPSHOT=$OPTARG
         DB_DOWNLOAD=N
+        DB_REMOTE=N
       else
         echo "Snapshot not found. Please verify the file exists and try again."
+        exit 1
       fi ;;
 
    :) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
