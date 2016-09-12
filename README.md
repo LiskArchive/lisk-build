@@ -202,6 +202,7 @@ To build a package, perform the following on an x86 machine, that has a Debian/U
 
 ## Authors
 
+- Isabella Dell <isabella@lisk.io>
 - Oliver Beddows <oliver@lisk.io>
 
 ## License
