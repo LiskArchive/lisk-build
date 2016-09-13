@@ -98,7 +98,7 @@ echo -e "\nClearing old log files"
 cat /dev/null > $LOG_LOCATION
 
 echo -e "\nBeginning snapshot verification process at "$(date)""
-bash lisk.sh snapshot -s 100000 -c $SNAPSHOT_CONFIG
+bash lisk.sh snapshot -s highest -c $SNAPSHOT_CONFIG
 
 until tail -n10 $LOG_LOCATION | grep -q "Cleaned up successfully"; do
   sleep 60
