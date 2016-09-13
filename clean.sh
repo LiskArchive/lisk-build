@@ -11,6 +11,10 @@ check_cmds CMDS[@]
 echo "Cleaning up..."
 echo "--------------------------------------------------------------------------"
 
+cd release
+exec_cmd "rm -vrf lisk-*"
+cd ../
+
 mkdir -p src
 cd src
 
