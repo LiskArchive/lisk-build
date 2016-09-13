@@ -7,7 +7,7 @@ cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 . "$(pwd)/shared.sh"
 . "$(pwd)/env.sh"
 
-SNAPSHOT_CONFIG="snapshot.json"
+SNAPSHOT_CONFIG="$(pwd)/etc/snapshot.json"
 TARGET_DB_NAME="$(grep "database" $SNAPSHOT_CONFIG | cut -f 4 -d '"')"
 LOG_LOCATION="$(grep "logFileName" $SNAPSHOT_CONFIG | cut -f 4 -d '"')"
 
