@@ -32,7 +32,6 @@ DB_REMOTE=N
 LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
 PID_FILE="$PIDS_DIR/$DB_NAME.pid"
 
-
 CMDS=("curl" "forever" "gunzip" "node" "tar" "psql" "createdb" "createuser" "dropdb" "dropuser")
 check_cmds CMDS[@]
 
@@ -85,7 +84,6 @@ populate_database() {
 }
 
 download_blockchain() {
-
   if [ "$DB_DOWNLOAD" = "Y" ]; then
     rm -f $DB_SNAPSHOT
     echo "√ Downloading $DB_SNAPSHOT from $BLOCKCHAIN_URL"
@@ -104,7 +102,6 @@ download_blockchain() {
   else
     echo -e "√ Using Local Snapshot."
   fi
-
 }
 
 restore_blockchain() {
@@ -201,17 +198,17 @@ stop_postgresql() {
 }
 
 snapshot_lisk() {
-if check_status == 1 &> /dev/null; then
-  check_status
-  exit 1
-else
-  forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG -s $SNAPSHOT &> /dev/null
-  if [ $? == 0 ]; then
-    echo "√ Lisk started successfully in snapshot mode."
+  if check_status == 1 &> /dev/null; then
+    check_status
+    exit 1
   else
-    echo "X Failed to start Lisk."
+    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG -s $SNAPSHOT &> /dev/null
+    if [ $? == 0 ]; then
+      echo "√ Lisk started successfully in snapshot mode."
+    else
+      echo "X Failed to start Lisk."
+    fi
   fi
-fi
 }
 
 start_lisk() {
@@ -301,19 +298,19 @@ help() {
 
 
 parse_option() {
-
- OPTIND=2
- while getopts ":s:c:f:u:l:" opt;
- do
-   case $opt in
-   s)   if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
-         SNAPSHOT=$OPTARG
+  OPTIND=2
+  while getopts ":s:c:f:u:l:" opt; do
+    case $opt in
+      s)
+        if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
+          SNAPSHOT=$OPTARG
         else
           echo "Snapshot flag must be a number and greater than 0"
           exit 1
         fi ;;
 
-   c) if [ -f $OPTARG ]; then
+      c)
+        if [ -f $OPTARG ]; then
           LISK_CONFIG=$OPTARG
           DB_NAME="$(grep "database" $LISK_CONFIG | cut -f 4 -d '"')"
           LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
@@ -321,31 +318,33 @@ parse_option() {
         else
           echo "Config.json not found. Please verify the filae exists and try again."
           exit 1
-      fi ;;
+        fi ;;
 
-    u) DB_REMOTE=Y
-       DB_DOWNLOAD=Y
-       BLOCKCHAIN_URL=$OPTARG
-       ;;
+      u)
+        DB_REMOTE=Y
+        DB_DOWNLOAD=Y
+        BLOCKCHAIN_URL=$OPTARG
+        ;;
 
-    f) DB_SNAPSHOT=$OPTARG
-       ;;
-
-    l) if [ -f $OPTARG ]; then
+      f)
         DB_SNAPSHOT=$OPTARG
-        DB_DOWNLOAD=N
-        DB_REMOTE=N
-      else
-        echo "Snapshot not found. Please verify the file exists and try again."
-        exit 1
-      fi ;;
+        ;;
 
-   :) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
+      l)
+        if [ -f $OPTARG ]; then
+          DB_SNAPSHOT=$OPTARG
+          DB_DOWNLOAD=N
+          DB_REMOTE=N
+        else
+          echo "Snapshot not found. Please verify the file exists and try again."
+          exit 1
+        fi ;;
 
-   *) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
-   esac
- done
+       :) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
 
+       *) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
+    esac
+  done
 }
 
 parse_option $@
