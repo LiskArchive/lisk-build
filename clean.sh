@@ -20,9 +20,12 @@ cd src
 
 exec_cmd "rm -vrf $VERSION.*"
 exec_cmd "rm -vrf lisk-$VERSION-*"
-exec_cmd "rm -vrf $POSTGRESQL_DIR"
-exec_cmd "rm -vrf $LISK_NODE_DIR"
-exec_cmd "rm -vrf $NODE_DIR"
-exec_cmd "rm -vrf *.tar.gz"
+
+if [ "$1" = "all" ]; then
+  exec_cmd "rm -vrf $POSTGRESQL_DIR"
+  exec_cmd "rm -vrf $LISK_NODE_DIR"
+  exec_cmd "rm -vrf $NODE_DIR"
+  exec_cmd "rm -vrf *.tar.gz"
+fi
 
 cd ../
