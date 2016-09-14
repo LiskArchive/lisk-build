@@ -86,19 +86,18 @@ populate_database() {
 download_blockchain() {
   if [ "$DB_DOWNLOAD" = "Y" ]; then
     rm -f $DB_SNAPSHOT
+    if [ "$BLOCKCHAIN_URL" = "" ]; then
+      BLOCKCHAIN_URL="https://downloads.lisk.io/lisk/$NETWORK"
+    fi
     echo "√ Downloading $DB_SNAPSHOT from $BLOCKCHAIN_URL"
-      if [ "$DB_REMOTE" = "Y" ]; then
-        curl --progress-bar -o $DB_SNAPSHOT "$BLOCKCHAIN_URL/$DB_SNAPSHOT"
-      else
-        curl --progress-bar -o $DB_SNAPSHOT "https://downloads.lisk.io/lisk/$NETWORK/$DB_SNAPSHOT"
-      fi
-      if [ $? != 0 ]; then
-        rm -f $DB_SNAPSHOT
-        echo "X Failed to download blockchain snapshot."
-        exit 1
-      else
-        echo "√ Blockchain snapshot downloaded successfully."
-      fi
+    curl --progress-bar -o $DB_SNAPSHOT "$BLOCKCHAIN_URL/$DB_SNAPSHOT"
+    if [ $? != 0 ]; then
+      rm -f $DB_SNAPSHOT
+      echo "X Failed to download blockchain snapshot."
+      exit 1
+    else
+      echo "√ Blockchain snapshot downloaded successfully."
+    fi
   else
     echo -e "√ Using Local Snapshot."
   fi
