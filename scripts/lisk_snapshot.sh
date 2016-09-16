@@ -18,9 +18,11 @@ BACKUP_LOCATION="./backups"
 
 DAYS_TO_KEEP="7"
 
+SNAPSHOT_ROUND="highest"
+
 parse_option() {
   OPTIND=1
-  while getopts :s:t:b:d: opt; do
+  while getopts :s:t:b:d:r: opt; do
     case $opt in
       t)
         if [ -f $OPTARG ]; then
@@ -58,6 +60,16 @@ parse_option() {
           exit 1
         fi ;;
 
+      r)
+        if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
+          SNAPSHOT=$OPTARG
+        elif [ "$OPTARG" == "highest" ]; then
+          SNAPSHOT=$OPTARG
+        else
+          echo "Snapshot flag must be a greater than 0 or set to highest"
+          exit 1
+        fi ;;
+
       ?) usage; exit 1 ;;
 
       :) echo "Missing option argument for -$OPTARG" >&2; exit 1 ;;
@@ -68,11 +80,12 @@ parse_option() {
 }
 
 usage() {
-  echo "Usage: $0 [-s <config.json>] [-t <snapshot.json>] [-b <backup directory>] [-d <days to keep>]"
+  echo "Usage: $0 [-t <snapshot.json>] [-s <config.json>] [-b <backup directory>] [-d <days to keep>] [-r <round>]"
   echo " -t <snapshot.json>        -- config.json to use for validation"
   echo " -s <config.json>          -- config.json to create target database"
-  echo " -b <backup directory>     -- backup direcory"
+  echo " -b <backup directory>     -- Backup direcory"
   echo " -d <days to keep>         -- Days to keep backups"
+  echo " -r <round>                -- Round height to snapshot at"
 }
 
 parse_option "$@"
@@ -98,7 +111,7 @@ echo -e "\nClearing old log files"
 cat /dev/null > $LOG_LOCATION
 
 echo -e "\nBeginning snapshot verification process at "$(date)""
-bash lisk.sh snapshot -s highest -c $SNAPSHOT_CONFIG
+bash lisk.sh snapshot -s $SNAPSHOT_ROUND -c $SNAPSHOT_CONFIG
 
 until tail -n10 $LOG_LOCATION | grep -q "Cleaned up successfully"; do
   sleep 60
