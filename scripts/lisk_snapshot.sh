@@ -102,7 +102,7 @@ echo -e "\nPreparing to take a snapshot of the blockchain."
 
 mkdir -p $BACKUP_LOCATION  &> /dev/null
 echo -e "\nClearing old snapshots on disk"
-find $BACKUP_LOCATION -name "${TARGET_DB_NAME}*.gz" -mtime +$DAYS_TO_KEEP -exec rm {} \;
+find $BACKUP_LOCATION -name "${SOURCE_DB_NAME}*.gz" -mtime +$DAYS_TO_KEEP -exec rm {} \;
 
 echo -e "\nClearing old snapshot instance"
 bash lisk.sh stop_node -c $SNAPSHOT_CONFIG &> /dev/null
@@ -129,7 +129,7 @@ psql -d $TARGET_DB_NAME -c 'delete from peers;'  &> /dev/null
 
 HEIGHT="$(psql -d lisk_snapshot -t -c 'select height from blocks order by height desc limit 1;' | xargs)"
 
-BACKUP_FULLPATH="${BACKUP_LOCATION}/${TARGET_DB_NAME}_backup-${HEIGHT}.gz"
+BACKUP_FULLPATH="${BACKUP_LOCATION}/${SOURCE_DB_NAME}_backup-${HEIGHT}.gz"
 
 echo -e "\nDumping snapshot"
 pg_dump -O "$TARGET_DB_NAME" | gzip > $BACKUP_FULLPATH
