@@ -102,7 +102,7 @@ echo -e "\nPreparing to take a snapshot of the blockchain."
 
 mkdir -p $BACKUP_LOCATION  &> /dev/null
 echo -e "\nClearing old snapshots on disk"
-find $BACKUP_LOCATION -name "*.gz" -mtime +$DAYS_TO_KEEP -exec rm {} \;
+find $BACKUP_LOCATION -name "${TARGET_DB_NAME}*.gz" -mtime +$DAYS_TO_KEEP -exec rm {} \;
 
 echo -e "\nClearing old snapshot instance"
 bash lisk.sh stop_node -c $SNAPSHOT_CONFIG &> /dev/null
