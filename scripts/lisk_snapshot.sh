@@ -20,9 +20,11 @@ DAYS_TO_KEEP="7"
 
 SNAPSHOT_ROUND="highest"
 
+GENERIC_COPY="0"
+
 parse_option() {
   OPTIND=1
-  while getopts :s:t:b:d:r: opt; do
+  while getopts :s:t:b:d:r:g: opt; do
     case $opt in
       t)
         if [ -f $OPTARG ]; then
@@ -70,6 +72,8 @@ parse_option() {
           exit 1
         fi ;;
 
+      g) GENERIC_COPY="1" ;;
+
       ?) usage; exit 1 ;;
 
       :) echo "Missing option argument for -$OPTARG" >&2; exit 1 ;;
@@ -80,12 +84,13 @@ parse_option() {
 }
 
 usage() {
-  echo "Usage: $0 [-t <snapshot.json>] [-s <config.json>] [-b <backup directory>] [-d <days to keep>] [-r <round>]"
+  echo "Usage: $0 [-t <snapshot.json>] [-s <config.json>] [-b <backup directory>] [-d <days to keep>] [-r <round>] [-g]"
   echo " -t <snapshot.json>        -- config.json to use for validation"
   echo " -s <config.json>          -- config.json to create target database"
   echo " -b <backup directory>     -- Backup direcory"
   echo " -d <days to keep>         -- Days to keep backups"
   echo " -r <round>                -- Round height to snapshot at"
+  echo " -g                        -- Make a copy of backup file named blockchain.db.gz"
 }
 
 parse_option "$@"
@@ -97,7 +102,7 @@ echo -e "\nPreparing to take a snapshot of the blockchain."
 
 mkdir -p $BACKUP_LOCATION  &> /dev/null
 echo -e "\nClearing old snapshots on disk"
-find $BACKUP_LOCATION -name lisk_backup* -mtime +$DAYS_TO_KEEP -exec rm {} \;
+find $BACKUP_LOCATION -name "$($TARGET_DB_NAME)_backup*" -mtime +$DAYS_TO_KEEP -exec rm {} \;
 
 echo -e "\nClearing old snapshot instance"
 bash lisk.sh stop_node -c $SNAPSHOT_CONFIG &> /dev/null
@@ -124,7 +129,14 @@ psql -d lisk_snapshot -c 'delete from peers;'  &> /dev/null
 
 HEIGHT="$(psql -d lisk_snapshot -t -c 'select height from blocks order by height desc limit 1;')"
 
+BACKUP_FULLPATH="$($BACKUP_LOCATION)/$($TARGET_DB_NAME)_backup_$($HEIGHT).gz"
+
 echo -e "\nDumping snapshot"
-pg_dump -O "$TARGET_DB_NAME" | gzip > $BACKUP_LOCATION/lisk_backup-"$(echo $HEIGHT)".gz
+pg_dump -O "$TARGET_DB_NAME" | gzip > $BACKUP_FULLPATH
+
+if [ "$GENERIC_COPY" -gt "0" ] 2> /dev/null; then
+  echo -e "\nOverwriting Generic Copy"
+  cp $BACKUP_FULLPATH $BACKUP_LOCATION/blockchain.db.gz
+fi
 
 echo -e "\nSnapshot Complete"
