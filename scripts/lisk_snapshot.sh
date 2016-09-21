@@ -64,9 +64,9 @@ parse_option() {
 
       r)
         if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
-          SNAPSHOT=$OPTARG
+          SNAPSHOT_ROUND=$OPTARG
         elif [ "$OPTARG" == "highest" ]; then
-          SNAPSHOT=$OPTARG
+          SNAPSHOT_ROUND=$OPTARG
         else
           echo "Snapshot flag must be a greater than 0 or set to highest"
           exit 1
