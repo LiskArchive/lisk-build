@@ -233,7 +233,7 @@ configure_lisk() {
   cd $liskLocation/lisk-$release
 
   echo -e "\nColdstarting Lisk for the first time"
-  bash lisk.sh coldstart
+  bash lisk.sh coldstart -l $liskLocation/lisk-$release/etc/blockchain.db.gz
 
   sleep 5
 
@@ -244,7 +244,7 @@ configure_lisk() {
   bash tune.sh
 
   echo -e "\nStarting Lisk with all parameters in place"
-  bash lisk.sh start
+  bash lisk.sh rebuild
 }
 
 backup_lisk() {
@@ -271,19 +271,6 @@ upgrade_lisk() {
   echo -e "\nStarting Lisk"
   cd $liskLocation/lisk-$release
   bash lisk.sh start
-}
-
-check_blockheight() {
-  echo -e "\nWaiting to check Block Height"
-
-  sleep 5
-  if [[ $release == main ]]; then
-    blockHeight=`curl -s http://localhost:8000/api/loader/status/sync | cut -d: -f5 | cut -d} -f1`
-  else
-    blockHeight=`curl -s http://localhost:7000/api/loader/status/sync | cut -d: -f5 | cut -d} -f1`
-  fi
-
-  echo -e "\nCurrent Block Height: " $blockHeight
 }
 
 usage() {
@@ -322,7 +309,6 @@ case $1 in
   ntp_checks
   install_lisk
   configure_lisk
-  check_blockheight
   ;;
 "upgrade")
   parse_option $@
@@ -330,7 +316,6 @@ case $1 in
   backup_lisk
   install_lisk
   upgrade_lisk
-  check_blockheight
   ;;
 *)
   echo "Error: Unrecognized command."
