@@ -38,7 +38,8 @@ check_cmds CMDS[@]
 ################################################################################
 
 blockheight() {
-  HEIGHT="$(psql -d $DB_NAME -t -c 'select height from blocks order by height desc limit 1;')"
+  DB_HEIGHT="$(psql -d $DB_NAME -t -c 'select height from blocks order by height desc limit 1;')"
+  HEIGHT="${DB_HEIGHT:- Unavailable}"
   echo -e "Current Block Height:"$HEIGHT
 }
 
