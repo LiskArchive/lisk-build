@@ -87,7 +87,7 @@ usage() {
   echo "Usage: $0 [-t <snapshot.json>] [-s <config.json>] [-b <backup directory>] [-d <days to keep>] [-r <round>] [-g]"
   echo " -t <snapshot.json>        -- config.json to use for validation"
   echo " -s <config.json>          -- config.json to create target database"
-  echo " -b <backup directory>     -- Backup direcory"
+  echo " -b <backup directory>     -- Backup directory"
   echo " -d <days to keep>         -- Days to keep backups"
   echo " -r <round>                -- Round height to snapshot at"
   echo " -g                        -- Make a copy of backup file named blockchain.db.gz"
