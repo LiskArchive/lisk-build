@@ -266,7 +266,15 @@ backup_lisk() {
 upgrade_lisk() {
   echo -e "\nRestoring Database to new Lisk Install"
   mkdir -p -m700 $liskLocation/lisk-$release/pgsql/data
-  cp -rf $liskLocation/backup/lisk-$release/pgsql/data/* $liskLocation/lisk-$release/pgsql/data/
+
+  if [[ $liskLocation/lisk-$release/pgsql/bin/postgres -V != "postgres (PostgreSQL) 9.6.0" ]]; then
+    $liskLocation/lisk-$release/pgsql/bin/pg_upgrade -b $liskLocation/backup/lisk-$release/pgsql/bin -B $liskLocation/lisk-$release/pgsql/bin/pg_upgrade -d $liskLocation/backup/lisk-$release/pgsql/data -D $liskLocation/lisk-$release/pgsql/data
+    bash $liskLocation/lisk-$release/analyze_new_cluster.sh
+  else
+    cp -rf $liskLocation/backup/lisk-$release/pgsql/data/* $liskLocation/lisk-$release/pgsql/data/
+  fi
+
+  $liskLocation/lisk-$release/bin/node $liskLocation/lisk-$release/updateConfig.js -o $liskLocation/backup/lisk-$release/config.json -n $liskLocation/lisk-$release/config.json
 
   echo -e "\nStarting Lisk"
   cd $liskLocation/lisk-$release
