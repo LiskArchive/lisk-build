@@ -206,7 +206,7 @@ install_lisk() {
   elif [[ "$(uname)" == "FreeBSD" ]]; then
     md5=`md5 $liskVersion | awk '{print $1}'`
   elif [[ "$(uname)" == "Darwin" ]]; then
-    md5=`md5 $liskVersion | awk '{print $1}'`
+    md5=`md5 $liskVersion | awk '{print $4}'`
   fi
 
   md5_compare=`grep "$liskVersion" $liskVersion.md5 | awk '{print $1}'`
