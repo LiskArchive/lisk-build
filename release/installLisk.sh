@@ -281,6 +281,40 @@ upgrade_lisk() {
   bash lisk.sh start
 }
 
+log_rotate() {
+  if [[ "$(uname)" == "Linux" ]]; then
+    sudo bash -c "cat > /etc/logrotate.d/lisk-$release-log << EOF_lisk-logrotate
+    $liskLocation/lisk-$release/logs/lisk.log {
+    create 666 $USER $USER
+    weekly
+    size=100M
+    dateext
+    copytruncate
+    missingok
+    rotate 2
+    compress
+    delaycompress
+    notifempty
+    }
+
+    $liskLocation/lisk-$release/logs/lisk_$release.log
+    {
+    create 666 $USER $USER
+    weekly
+    size=100M
+    dateext
+    copytruncate
+    missingok
+    rotate 2
+    compress
+    delaycompress
+    notifempty
+    }
+
+    EOF_lisk-logrotate"
+    fi
+}
+
 usage() {
   echo "Usage: $0 <install|upgrade> [-d <directory] [-r <main|test>] [-n]"
   echo "install         -- install Lisk"
@@ -317,6 +351,7 @@ case $1 in
   ntp_checks
   install_lisk
   configure_lisk
+  log_rotate
   ;;
 "upgrade")
   parse_option $@
@@ -324,6 +359,7 @@ case $1 in
   backup_lisk
   install_lisk
   upgrade_lisk
+  log_rotate
   ;;
 *)
   echo "Error: Unrecognized command."
