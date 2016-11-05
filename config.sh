@@ -32,9 +32,9 @@ NODE_URL="https://nodejs.org/download/release/v0.12.16/$NODE_FILE"
 NODE_OUT="compiled"
 NODE_CONFIG=""
 
-POSTGRESQL_DIR="postgresql-9.5.2"
+POSTGRESQL_DIR="postgresql-9.6.1"
 POSTGRESQL_FILE="$POSTGRESQL_DIR.tar.gz"
-POSTGRESQL_URL="https://ftp.postgresql.org/pub/source/v9.5.2/$POSTGRESQL_FILE"
+POSTGRESQL_URL="https://ftp.postgresql.org/pub/source/v9.6.1/$POSTGRESQL_FILE"
 POSTGRESQL_OUT="pgsql"
 
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
