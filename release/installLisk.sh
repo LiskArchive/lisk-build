@@ -242,7 +242,7 @@ configure_lisk() {
 
   echo -e "\nExecuting database tuning operation"
   bash tune.sh
-  
+
   log_rotate
 
   echo -e "\nStarting Lisk with all parameters in place"
@@ -279,7 +279,7 @@ upgrade_lisk() {
 
   echo -e "\nCopying config.json entries from previous installation"
   $liskLocation/lisk-$release/bin/node $liskLocation/lisk-$release/updateConfig.js -o $liskLocation/backup/lisk-$release/config.json -n $liskLocation/lisk-$release/config.json
-    
+
   echo -e "\nStarting Lisk"
   cd $liskLocation/lisk-$release
   bash lisk.sh start
@@ -355,7 +355,7 @@ case $1 in
   user_prompts
   ntp_checks
   install_lisk
-  configure_lisk  
+  configure_lisk
   ;;
 "upgrade")
   parse_option $@
