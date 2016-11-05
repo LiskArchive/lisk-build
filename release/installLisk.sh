@@ -242,6 +242,8 @@ configure_lisk() {
 
   echo -e "\nExecuting database tuning operation"
   bash tune.sh
+  
+  log_rotate
 
   echo -e "\nStarting Lisk with all parameters in place"
   bash lisk.sh rebuild
@@ -268,6 +270,7 @@ upgrade_lisk() {
   mkdir -p -m700 $liskLocation/lisk-$release/pgsql/data
 
   if [[ $liskLocation/lisk-$release/pgsql/bin/postgres -V != "postgres (PostgreSQL) 9.6.0" ]]; then
+    echo -e "Upgrading database from PostgreSQL 9.5.2 to PostgreSQL 9.6"
     $liskLocation/lisk-$release/pgsql/bin/pg_upgrade -b $liskLocation/backup/lisk-$release/pgsql/bin -B $liskLocation/lisk-$release/pgsql/bin/pg_upgrade -d $liskLocation/backup/lisk-$release/pgsql/data -D $liskLocation/lisk-$release/pgsql/data
     bash $liskLocation/lisk-$release/analyze_new_cluster.sh
   else
@@ -276,7 +279,7 @@ upgrade_lisk() {
 
   echo -e "\nCopying config.json entries from previous installation"
   $liskLocation/lisk-$release/bin/node $liskLocation/lisk-$release/updateConfig.js -o $liskLocation/backup/lisk-$release/config.json -n $liskLocation/lisk-$release/config.json
-
+    
   echo -e "\nStarting Lisk"
   cd $liskLocation/lisk-$release
   bash lisk.sh start
@@ -284,6 +287,7 @@ upgrade_lisk() {
 
 log_rotate() {
   if [[ "$(uname)" == "Linux" ]]; then
+     echo -e "Configuring Logrotate for Lisk"
     sudo bash -c "cat > /etc/logrotate.d/lisk-$release-log << EOF_lisk-logrotate
     $liskLocation/lisk-$release/logs/lisk.log {
     create 666 $USER $USER
@@ -351,8 +355,7 @@ case $1 in
   user_prompts
   ntp_checks
   install_lisk
-  configure_lisk
-  log_rotate
+  configure_lisk  
   ;;
 "upgrade")
   parse_option $@
@@ -360,7 +363,6 @@ case $1 in
   backup_lisk
   install_lisk
   upgrade_lisk
-  log_rotate
   ;;
 *)
   echo "Error: Unrecognized command."
