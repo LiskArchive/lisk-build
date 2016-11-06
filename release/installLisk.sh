@@ -269,7 +269,7 @@ upgrade_lisk() {
   echo -e "\nRestoring Database to new Lisk Install"
   mkdir -p -m700 $liskLocation/lisk-$release/pgsql/data
 
-  if [[ $($liskLocation/lisk-$release/pgsql/bin/postgres -V)" != "postgres (PostgreSQL) 9.6".* ]]; then
+  if [[ "$($liskLocation/lisk-$release/pgsql/bin/postgres -V)" != "postgres (PostgreSQL) 9.6".* ]]; then
     echo -e "Upgrading database from PostgreSQL 9.5 to PostgreSQL 9.6"
     $liskLocation/lisk-$release/pgsql/bin/pg_upgrade -b $liskLocation/backup/lisk-$release/pgsql/bin -B $liskLocation/lisk-$release/pgsql/bin/pg_upgrade -d $liskLocation/backup/lisk-$release/pgsql/data -D $liskLocation/lisk-$release/pgsql/data
     bash $liskLocation/lisk-$release/analyze_new_cluster.sh
@@ -316,7 +316,7 @@ log_rotate() {
     notifempty
     }
 
-    EOF_lisk-logrotate"
+EOF_lisk-logrotate"
     fi
 }
 
