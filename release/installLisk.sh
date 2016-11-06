@@ -280,6 +280,8 @@ upgrade_lisk() {
   echo -e "\nCopying config.json entries from previous installation"
   $liskLocation/lisk-$release/bin/node $liskLocation/lisk-$release/updateConfig.js -o $liskLocation/backup/lisk-$release/config.json -n $liskLocation/lisk-$release/config.json
 
+  log_rotate
+
   echo -e "\nStarting Lisk"
   cd $liskLocation/lisk-$release
   bash lisk.sh start
