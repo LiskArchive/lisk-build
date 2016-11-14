@@ -82,14 +82,14 @@ user_prompts() {
   [ "$liskLocation" ] || read -r -p "Where do you want to install Lisk to? (Default $defaultLiskLocation): " liskLocation
   liskLocation=${liskLocation:-$defaultLiskLocation}
   if [[ ! -r "$liskLocation" ]]; then
-    echo "$liskLocation is not valid, please check and re-excute"
+    echo "$liskLocation is not valid, please check and re-execute"
     exit 2;
   fi
 
   [ "$release" ] || read -r -p "Would you like to install the Main or Test Client? (Default $defaultRelease): " release
   release=${release:-$defaultRelease}
   if [[ ! "$release" == "main" && ! "$release" == "test" ]]; then
-    echo "$release is not valid, please check and re-excute"
+    echo "$release is not valid, please check and re-execute"
     exit 2;
   fi
 }
