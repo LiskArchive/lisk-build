@@ -99,7 +99,7 @@ ntp_checks() {
   if [[ "$(uname)" == "Linux" ]]; then
     if [[ -f "/etc/debian_version" &&  ! -f "/proc/user_beancounters" ]]; then
       if sudo pgrep -x "ntpd" > /dev/null; then
-        echo "v NTP is running"
+        echo "√ NTP is running"
       else
         echo "X NTP is not running"
         [ "$installNtp" ] || read -r -n 1 -p "Would like to install NTP? (y/n): " $REPLY
@@ -110,7 +110,7 @@ ntp_checks() {
           sudo ntpdate pool.ntp.org
           sudo service ntp start
           if sudo pgrep -x "ntpd" > /dev/null; then
-            echo "v NTP is running"
+            echo "√ NTP is running"
           else
             echo -e "\nLisk requires NTP running on Debian based systems. Please check /etc/ntp.conf and correct any issues."
             exit 0
@@ -122,10 +122,10 @@ ntp_checks() {
       fi # End Debian Checks
     elif [[ -f "/etc/redhat-release" &&  ! -f "/proc/user_beancounters" ]]; then
       if sudo pgrep -x "ntpd" > /dev/null; then
-        echo "v NTP is running"
+        echo "√ NTP is running"
       else
         if sudo pgrep -x "chronyd" > /dev/null; then
-          echo "v Chrony is running"
+          echo "√ Chrony is running"
         else
           echo "X NTP and Chrony are not running"
           [ "$installNtp" ] || read -r -n 1 -p "Would like to install NTP? (y/n): " $REPLY
@@ -137,7 +137,7 @@ ntp_checks() {
             sudo ntpdate pool.ntp.org
             sudo service ntpd start
             if pgrep -x "ntpd" > /dev/null; then
-              echo "v NTP is running"
+              echo "√ NTP is running"
               else
               echo -e "\nLisk requires NTP running on Debian based systems. Please check /etc/ntp.conf and correct any issues."
               exit 0
@@ -153,7 +153,7 @@ ntp_checks() {
     fi
   elif [[ "$(uname)" == "FreeBSD" ]]; then
     if sudo pgrep -x "ntpd" > /dev/null; then
-      echo "v NTP is running"
+      echo "√ NTP is running"
     else
       echo "X NTP is not running"
       [ "$installNtp" ] || read -r -n 1 -p "Would like to install NTP? (y/n): " $REPLY
@@ -176,12 +176,12 @@ ntp_checks() {
     fi # End FreeBSD Checks
   elif [[ "$(uname)" == "Darwin" ]]; then
     if pgrep -x "ntpd" > /dev/null; then
-      echo "v NTP is running"
+      echo "√ NTP is running"
     else
       sudo launchctl load /System/Library/LaunchDaemons/org.ntp.ntpd.plist
       sleep 1
       if pgrep -x "ntpd" > /dev/null; then
-        echo "v NTP is running"
+        echo "√ NTP is running"
       else
         echo -e "\nNTP did not start, Please verify its configured on your system"
         exit 0
@@ -212,9 +212,9 @@ install_lisk() {
   md5_compare=`grep "$liskVersion" $liskVersion.md5 | awk '{print $1}'`
 
   if [[ "$md5" == "$md5_compare" ]]; then
-    echo "\nChecksum Passed!"
+    echo -e "\nChecksum Passed!"
   else
-    echo "\nChecksum Failed, aborting installation"
+    echo -e "\nChecksum Failed, aborting installation"
     rm -f $liskVersion $liskVersion.md5
     exit 0
   fi
