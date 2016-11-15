@@ -99,7 +99,7 @@ ntp_checks() {
   if [[ "$(uname)" == "Linux" ]]; then
     if [[ -f "/etc/debian_version" &&  ! -f "/proc/user_beancounters" ]]; then
       if sudo pgrep -x "ntpd" > /dev/null; then
-        echo "√ NTP is running"
+        echo "v NTP is running"
       else
         echo "X NTP is not running"
         [ "$installNtp" ] || read -r -n 1 -p "Would like to install NTP? (y/n): " $REPLY
@@ -110,7 +110,7 @@ ntp_checks() {
           sudo ntpdate pool.ntp.org
           sudo service ntp start
           if sudo pgrep -x "ntpd" > /dev/null; then
-            echo "√ NTP is running"
+            echo "v NTP is running"
           else
             echo -e "\nLisk requires NTP running on Debian based systems. Please check /etc/ntp.conf and correct any issues."
             exit 0
@@ -122,10 +122,10 @@ ntp_checks() {
       fi # End Debian Checks
     elif [[ -f "/etc/redhat-release" &&  ! -f "/proc/user_beancounters" ]]; then
       if sudo pgrep -x "ntpd" > /dev/null; then
-        echo "√ NTP is running"
+        echo "v NTP is running"
       else
         if sudo pgrep -x "chronyd" > /dev/null; then
-          echo "√ Chrony is running"
+          echo "v Chrony is running"
         else
           echo "X NTP and Chrony are not running"
           [ "$installNtp" ] || read -r -n 1 -p "Would like to install NTP? (y/n): " $REPLY
@@ -137,7 +137,7 @@ ntp_checks() {
             sudo ntpdate pool.ntp.org
             sudo service ntpd start
             if pgrep -x "ntpd" > /dev/null; then
-              echo "√ NTP is running"
+              echo "v NTP is running"
               else
               echo -e "\nLisk requires NTP running on Debian based systems. Please check /etc/ntp.conf and correct any issues."
               exit 0
@@ -153,7 +153,7 @@ ntp_checks() {
     fi
   elif [[ "$(uname)" == "FreeBSD" ]]; then
     if sudo pgrep -x "ntpd" > /dev/null; then
-      echo "√ NTP is running"
+      echo "v NTP is running"
     else
       echo "X NTP is not running"
       [ "$installNtp" ] || read -r -n 1 -p "Would like to install NTP? (y/n): " $REPLY
@@ -164,7 +164,7 @@ ntp_checks() {
         sudo ntpdate -u pool.ntp.org
         sudo service ntpd start
         if pgrep -x "ntpd" > /dev/null; then
-          echo "√ NTP is running"
+          echo "v NTP is running"
         else
           echo -e "\nLisk requires NTP running on FreeBSD based systems. Please check /etc/ntp.conf and correct any issues."
           exit 0
@@ -176,12 +176,12 @@ ntp_checks() {
     fi # End FreeBSD Checks
   elif [[ "$(uname)" == "Darwin" ]]; then
     if pgrep -x "ntpd" > /dev/null; then
-      echo "√ NTP is running"
+      echo "v NTP is running"
     else
       sudo launchctl load /System/Library/LaunchDaemons/org.ntp.ntpd.plist
       sleep 1
       if pgrep -x "ntpd" > /dev/null; then
-        echo "√ NTP is running"
+        echo "v NTP is running"
       else
         echo -e "\nNTP did not start, Please verify its configured on your system"
         exit 0
@@ -212,14 +212,14 @@ install_lisk() {
   md5_compare=`grep "$liskVersion" $liskVersion.md5 | awk '{print $1}'`
 
   if [[ "$md5" == "$md5_compare" ]]; then
-    echo "Checksum Passed!"
+    echo "\nChecksum Passed!"
   else
-    echo "Checksum Failed, aborting installation"
+    echo "\nChecksum Failed, aborting installation"
     rm -f $liskVersion $liskVersion.md5
     exit 0
   fi
 
-  echo -e "Extracting Lisk binaries to "$liskLocation/lisk-$release
+  echo -e "\nExtracting Lisk binaries to "$liskLocation/lisk-$release
 
   tar -xzf $liskVersion -C $liskLocation
 
@@ -270,14 +270,12 @@ upgrade_lisk() {
   mkdir -p -m700 $liskLocation/lisk-$release/pgsql/data
 
   if [[ "$($liskLocation/backup/lisk-$release/pgsql/bin/postgres -V)" != "postgres (PostgreSQL) 9.6".* ]]; then
-    echo -e "Upgrading database from PostgreSQL 9.5 to PostgreSQL 9.6"
-
+    echo -e "\nUpgrading database from PostgreSQL 9.5 to PostgreSQL 9.6"
     . "$liskLocation/lisk-$release/shared.sh"
     . "$liskLocation/lisk-$release/env.sh"
-    pg_ctl initdb -D $liskLocation/lisk-$release/pgsql/data
-
-    $liskLocation/lisk-$release/pgsql/bin/pg_upgrade -b $liskLocation/backup/lisk-$release/pgsql/bin -B $liskLocation/lisk-$release/pgsql/bin -d $liskLocation/backup/lisk-$release/pgsql/data -D $liskLocation/lisk-$release/pgsql/data
-    bash $liskLocation/lisk-$release/analyze_new_cluster.sh
+    pg_ctl initdb -D $liskLocation/lisk-$release/pgsql/data &> /dev/null
+    $liskLocation/lisk-$release/pgsql/bin/pg_upgrade -b $liskLocation/backup/lisk-$release/pgsql/bin -B $liskLocation/lisk-$release/pgsql/bin -d $liskLocation/backup/lisk-$release/pgsql/data -D $liskLocation/lisk-$release/pgsql/data  &> /dev/null
+    pgUpgrade=true
   else
     cp -rf $liskLocation/backup/lisk-$release/pgsql/data/* $liskLocation/lisk-$release/pgsql/data/
   fi
@@ -290,11 +288,16 @@ upgrade_lisk() {
   echo -e "\nStarting Lisk"
   cd $liskLocation/lisk-$release
   bash lisk.sh start
+
+  if [[ $pgUpgrade == true ]]; then
+  bash $liskLocation/lisk-$release/analyze_new_cluster.sh &> /dev/null
+  rm -f $liskLocation/lisk-$release/*cluster*  &> /dev/null
+  fi
 }
 
 log_rotate() {
   if [[ "$(uname)" == "Linux" ]]; then
-     echo -e "Configuring Logrotate for Lisk"
+    echo -e "\nConfiguring Logrotate for Lisk"
     sudo bash -c "cat > /etc/logrotate.d/lisk-$release-log << EOF_lisk-logrotate
     $liskLocation/lisk-$release/logs/lisk.log {
     create 666 $USER $USER
@@ -323,7 +326,7 @@ log_rotate() {
     notifempty
     }
 
-EOF_lisk-logrotate"
+EOF_lisk-logrotate" &> /dev/null
     fi
 }
 
