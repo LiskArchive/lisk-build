@@ -14,6 +14,10 @@ var oldConfig, newConfig;
 if (program.old) {
 	oldConfig = JSON.parse(fs.readFileSync(program.old, 'utf8'));
 	delete oldConfig.version;
+
+        if (oldConfig.db.user == null) {
+                delete oldConfig.db.user;
+        }
 } else {
 	console.log('Old config.json not provided, please populate entries manually');
 	process.exit(1);
