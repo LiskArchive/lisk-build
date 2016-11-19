@@ -1,15 +1,18 @@
 {
     "port": 9000,
     "address": "0.0.0.0",
-    "version": "snapshot",
+    "version": "9.9.9",
+    "minVersion": "9.9.9",
     "fileLogLevel": "info",
     "logFileName": "logs/lisk_snapshot.log",
     "consoleLogLevel": "log",
+    "trustProxy": false,
+    "topAccounts": false,
     "db": {
         "host": "localhost",
         "port": 5432,
         "database": "lisk_snapshot",
-        "user": null,
+        "user": "",
         "password": "password",
         "poolSize": 20,
         "poolIdleTimeout": 30000,
@@ -21,14 +24,35 @@
     "api": {
         "access": {
             "whiteList": ["127.0.0.1"]
+        },
+        "options": {
+            "limits": {
+                "max": 0,
+                "delayMs": 0,
+                "delayAfter": 0,
+                "windowMs": 60000
+            }
         }
     },
     "peers": {
         "list": [],
         "blackList": [],
         "options": {
-            "timeout": 4000
+            "limits": {
+                "max": 0,
+                "delayMs": 0,
+                "delayAfter": 0,
+                "windowMs": 60000
+            },
+            "timeout": 5000
         }
+    },
+    "broadcasts": {
+        "broadcastInterval": 5000,
+        "broadcastLimit": 20,
+        "parallelLimit": 20,
+        "releaseLimit": 5,
+        "relayLimit": 5
     },
     "forging": {
         "force": false,
