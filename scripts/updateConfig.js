@@ -15,6 +15,7 @@ if (program.old) {
 	oldConfig = JSON.parse(fs.readFileSync(program.old, 'utf8'));
 	delete oldConfig.version;
 	delete oldConfig.minVersion;
+	delete oldConfig.forging.force;
 
 	if (oldConfig.db.user == null) {
 		delete oldConfig.db.user;
