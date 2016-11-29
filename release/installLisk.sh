@@ -246,7 +246,11 @@ configure_lisk() {
   log_rotate
 
   echo -e "\nStarting Lisk with all parameters in place"
-  bash lisk.sh rebuild
+  if [[ $url ]]; then
+      bash lisk.sh rebuild -u $url
+   else
+      bash lisk.sh rebuild
+   fi
 }
 
 backup_lisk() {
@@ -285,13 +289,25 @@ upgrade_lisk() {
 
   log_rotate
 
-  echo -e "\nStarting Lisk"
-  cd $liskLocation/lisk-$release
-  bash lisk.sh start
+  if [[ $rebuild == true ]]; then
+    if [[ $url ]]; then
+      echo -e "\nStarting Lisk with snapshot"
+      cd $liskLocation/lisk-$release
+      bash lisk.sh rebuild -u $url 
+    else
+      echo -e "\nStarting Lisk with snapshot"
+      cd $liskLocation/lisk-$release
+      bash lisk.sh rebuild 
+    fi
+  else
+   echo -e "\nStarting Lisk"
+   cd $liskLocation/lisk-$release
+   bash lisk.sh start
+  fi
 
   if [[ $pgUpgrade == true ]]; then
-  bash $liskLocation/lisk-$release/analyze_new_cluster.sh &> /dev/null
-  rm -f $liskLocation/lisk-$release/*cluster*  &> /dev/null
+    bash $liskLocation/lisk-$release/analyze_new_cluster.sh &> /dev/null
+    rm -f $liskLocation/lisk-$release/*cluster*  &> /dev/null
   fi
 }
 
@@ -299,7 +315,7 @@ log_rotate() {
   if [[ "$(uname)" == "Linux" ]]; then
     echo -e "\nConfiguring Logrotate for Lisk"
     sudo bash -c "cat > /etc/logrotate.d/lisk-$release-log << EOF_lisk-logrotate
-    $liskLocation/lisk-$release/logs/lisk.log {
+    $liskLocation/lisk-$release/logs/*.log {
     create 666 $USER $USER
     weekly
     size=100M
@@ -311,21 +327,6 @@ log_rotate() {
     delaycompress
     notifempty
     }
-
-    $liskLocation/lisk-$release/logs/lisk_$release.app.log
-    {
-    create 666 $USER $USER
-    weekly
-    size=100M
-    dateext
-    copytruncate
-    missingok
-    rotate 2
-    compress
-    delaycompress
-    notifempty
-    }
-
 EOF_lisk-logrotate" &> /dev/null
     fi
 }
@@ -337,17 +338,21 @@ usage() {
   echo " -d <directory> -- install location"
   echo " -r <release>   -- choose main or test"
   echo " -n             -- install ntp if not installed"
+  echo " -h <url>	-- rebuild instead of copying database"
+  echo " -u <url>       -- URL to rebuild from"
 }
 
 parse_option() {
   OPTIND=2
-  while getopts d:r:n opt; do
-    case $opt in
-      d) liskLocation=$OPTARG ;;
-      r) release=$OPTARG ;;
-      n) installNtp=1 ;;
-    esac
-  done
+  while getopts :d:r:u:hn opt; do
+     case $opt in
+       d) liskLocation=$OPTARG ;;
+       r) release=$OPTARG ;;
+       n) installNtp=1 ;;
+       h) rebuild=true ;;
+       u) url=$OPTARG ;;
+     esac
+   done
 
   if [ "$release" ]; then
     if [[ "$release" != test && "$release" != "main" ]]; then
