@@ -22,6 +22,8 @@ exec_cmd "rm -vrf $VERSION.*"
 exec_cmd "rm -vrf lisk-$VERSION-*"
 
 if [ "$1" = "all" ]; then
+  exec_cmd "rm -vrf $SODIUM_DIR"
+  exec_cmd "rm -vrf $NODE_SODIUM_DIR"
   exec_cmd "rm -vrf $POSTGRESQL_DIR"
   exec_cmd "rm -vrf $LISK_NODE_DIR"
   exec_cmd "rm -vrf $NODE_DIR"

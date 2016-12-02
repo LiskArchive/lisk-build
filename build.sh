@@ -35,6 +35,21 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
   cd ../
 fi
 
+echo "Building libsodium..."
+echo "--------------------------------------------------------------------------"
+if [ ! -f "$SODIUM_FILE" ]; then
+  exec_cmd "wget $SODIUM_URL -O $SODIUM_FILE"
+fi
+if [ ! -f "$SODIUM_DIR/$SODIUM_OUT/lib/libsodium.a" ]; then
+  exec_cmd "rm -rf $SODIUM_DIR"
+  exec_cmd "tar -zxvf $SODIUM_FILE"
+  cd "$SODIUM_DIR"
+  exec_cmd "./configure --prefix=$(pwd)/$SODIUM_OUT $SODIUM_CONFIG"
+  exec_cmd "make --jobs=$JOBS"
+  exec_cmd "make install"
+  cd ../
+fi
+
 echo "Building lisk..."
 echo "--------------------------------------------------------------------------"
 if [ ! -f "$LISK_FILE" ]; then
@@ -46,6 +61,20 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "cp -Rf $VERSION $BUILD_NAME"
   exec_cmd "cp -vR $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
   exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
+
+  echo "Preinstalling node-sodium..."
+  echo "--------------------------------------------------------------------------"
+  exec_cmd "rm -rf $NODE_SODIUM_DIR $NODE_SODIUM_FILE"
+  exec_cmd "wget $NODE_SODIUM_URL -O $NODE_SODIUM_FILE"
+  exec_cmd "tar -zxvf $NODE_SODIUM_FILE"
+  exec_cmd "mkdir -p $NODE_SODIUM_DIR/deps/build/lib"
+  exec_cmd "cp -vR $SODIUM_DIR/$SODIUM_OUT $NODE_SODIUM_DIR/deps/build/"
+  exec_cmd "mkdir -p $BUILD_NAME/node_modules/sodium"
+  exec_cmd "cp -vR $NODE_SODIUM_DIR/* $BUILD_NAME/node_modules/sodium/"
+  cd "$BUILD_NAME/node_modules/sodium"
+  exec_cmd "npm install --production $LISK_CONFIG"
+  cd ../../../
+
   cd "$BUILD_NAME"
   exec_cmd "npm install --production $LISK_CONFIG"
   cd ../

@@ -37,6 +37,15 @@ POSTGRESQL_FILE="$POSTGRESQL_DIR.tar.gz"
 POSTGRESQL_URL="https://ftp.postgresql.org/pub/source/v9.6.1/$POSTGRESQL_FILE"
 POSTGRESQL_OUT="pgsql"
 
+SODIUM_DIR="libsodium-1.0.11"
+SODIUM_FILE="$SODIUM_DIR.tar.gz"
+SODIUM_URL="https://download.libsodium.org/libsodium/releases/$SODIUM_FILE"
+SODIUM_OUT="compiled"
+
+NODE_SODIUM_DIR="node-sodium"
+NODE_SODIUM_FILE="$NODE_SODIUM_DIR.tar.gz"
+NODE_SODIUM_URL="https://github.com/LiskHQ/node-sodium/archive/master.tar.gz"
+
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
 if [ $(uname -s) == "Darwin" ] || [ $(uname -s) == "FreeBSD" ]; then
@@ -65,6 +74,7 @@ if [ "$ARCH" == "armv6l" ]; then
   LISK_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
   NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --with-arm-float-abi=hard"
   POSTGRESQL_CONFIG="--host=arm-linux --without-readline --without-zlib --disable-spinlocks"
+  SODIUM_CONFIG="--host=arm-linux-gnueabihf"
 fi
 
 if [ "$ARCH" == "armv7l" ]; then
@@ -82,6 +92,7 @@ if [ "$ARCH" == "armv7l" ]; then
   LISK_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
   NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --with-arm-float-abi=hard"
   POSTGRESQL_CONFIG="--host=arm-linux --without-readline --without-zlib --disable-spinlocks"
+  SODIUM_CONFIG="--host=arm-linux-gnueabihf"
 fi
 
 if [ "$TARGET" != "" ]; then
