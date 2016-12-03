@@ -42,7 +42,7 @@ SODIUM_FILE="$SODIUM_DIR.tar.gz"
 SODIUM_URL="https://download.libsodium.org/libsodium/releases/$SODIUM_FILE"
 SODIUM_OUT="compiled"
 
-NODE_SODIUM_DIR="node-sodium"
+NODE_SODIUM_DIR="node-sodium-master"
 NODE_SODIUM_FILE="$NODE_SODIUM_DIR.tar.gz"
 NODE_SODIUM_URL="https://github.com/LiskHQ/node-sodium/archive/master.tar.gz"
 

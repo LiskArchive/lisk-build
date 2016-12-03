@@ -64,18 +64,24 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
 
   echo "Preinstalling node-sodium..."
   echo "--------------------------------------------------------------------------"
-  exec_cmd "rm -rf $NODE_SODIUM_DIR $NODE_SODIUM_FILE"
-  exec_cmd "wget $NODE_SODIUM_URL -O $NODE_SODIUM_FILE"
+  exec_cmd "rm -rf $NODE_SODIUM_DIR"
+  if [ ! -f "$NODE_SODIUM_FILE" ]; then
+    exec_cmd "wget $NODE_SODIUM_URL -O $NODE_SODIUM_FILE"
+  fi
   exec_cmd "tar -zxvf $NODE_SODIUM_FILE"
-  exec_cmd "mkdir -p $NODE_SODIUM_DIR/deps/build/lib"
-  exec_cmd "cp -vR $SODIUM_DIR/$SODIUM_OUT $NODE_SODIUM_DIR/deps/build/"
+
+  exec_cmd "mkdir -p $NODE_SODIUM_DIR/deps/build"
+  exec_cmd "cp -vR $SODIUM_DIR/$SODIUM_OUT/* $NODE_SODIUM_DIR/deps/build/"
+
+  cd "$NODE_SODIUM_DIR"
+  exec_cmd "npm install --production $LISK_CONFIG"
+  cd ../
+
   exec_cmd "mkdir -p $BUILD_NAME/node_modules/sodium"
   exec_cmd "cp -vR $NODE_SODIUM_DIR/* $BUILD_NAME/node_modules/sodium/"
-  cd "$BUILD_NAME/node_modules/sodium"
-  exec_cmd "npm install --production $LISK_CONFIG"
-  cd ../../../
 
   cd "$BUILD_NAME"
+  exec_cmd "sed $SED_OPTS 's/LiskHQ\/node-sodium#07ba174/=1.2.3/' package.json"
   exec_cmd "npm install --production $LISK_CONFIG"
   cd ../
 fi
