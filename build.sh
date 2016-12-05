@@ -44,7 +44,7 @@ if [ ! -f "$SODIUM_DIR/$SODIUM_OUT/lib/libsodium.a" ]; then
   exec_cmd "rm -rf $SODIUM_DIR"
   exec_cmd "tar -zxvf $SODIUM_FILE"
   cd "$SODIUM_DIR"
-  exec_cmd "./configure --prefix=$(pwd)/$SODIUM_OUT $SODIUM_CONFIG"
+  exec_cmd "./configure --enable-static --enable-shared --with-pic --prefix=$(pwd)/$SODIUM_OUT $SODIUM_CONFIG"
   exec_cmd "make --jobs=$JOBS"
   exec_cmd "make install"
   cd ../
