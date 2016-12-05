@@ -82,6 +82,12 @@ update_config() {
   fi
 }
 
+
+#Hard code memory limit for systems above 16gb
+if [[ "$memoryBase" -gt 16777216 ]]; then
+        memoryBase=16777216
+fi
+
 max_connections=200
 shared_buffers=$(expr $memoryBase / 4)"kB"
 effective_cache_size=$(expr $memoryBase  / 4)"kB"
