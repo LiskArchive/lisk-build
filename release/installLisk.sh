@@ -10,7 +10,7 @@
 
 # Variable Declaration
 UNAME=$(uname)-$(uname -m)
-defaultLiskLocation=~
+defaultLiskLocation=$(pwd)
 defaultRelease=main
 
 export LC_ALL=en_US.UTF-8
