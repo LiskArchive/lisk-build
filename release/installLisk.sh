@@ -332,13 +332,13 @@ EOF_lisk-logrotate" &> /dev/null
 }
 
 usage() {
-  echo "Usage: $0 <install|upgrade> [-d <directory] [-r <main|test>] [-n]"
+  echo "Usage: $0 <install|upgrade> [-d <directory] [-r <main|test>] [-n] [-h] [-u <url>]"
   echo "install         -- install Lisk"
   echo "upgrade         -- upgrade Lisk"
   echo " -d <directory> -- install location"
   echo " -r <release>   -- choose main or test"
   echo " -n             -- install ntp if not installed"
-  echo " -h <url>	-- rebuild instead of copying database"
+  echo " -h 	        -- rebuild instead of copying database"
   echo " -u <url>       -- URL to rebuild from"
 }
 
