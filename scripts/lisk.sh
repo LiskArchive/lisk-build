@@ -27,10 +27,15 @@ DB_DATA="$(pwd)/pgsql/data"
 DB_LOG_FILE="$LOGS_DIR/pgsql.log"
 DB_SNAPSHOT="blockchain.db.gz"
 DB_DOWNLOAD=Y
-DB_REMOTE=N
 
 LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
 PID_FILE="$PIDS_DIR/$DB_NAME.pid"
+
+SH_LOG_FILE="$LOGS_DIR/lisk.out"
+
+#setup logging
+exec > >(tee -ia $SH_LOG_FILE)
+exec 2>&1
 
 CMDS=("curl" "forever" "gunzip" "node" "tar" "psql" "createdb" "createuser" "dropdb" "dropuser")
 check_cmds CMDS[@]
@@ -54,9 +59,9 @@ network() {
 }
 
 create_user() {
-  dropuser --if-exists "$DB_USER" &> /dev/null
-  createuser --createdb "$DB_USER" &> /dev/null
-  psql -qd postgres -c "ALTER USER "$DB_USER" WITH PASSWORD '$DB_PASS';" &> /dev/null
+  dropuser --if-exists "$DB_USER" &>> $SH_LOG_FILE
+  createuser --createdb "$DB_USER" &>> $SH_LOG_FILE
+  psql -qd postgres -c "ALTER USER "$DB_USER" WITH PASSWORD '$DB_PASS';" &>> $SH_LOG_FILE
   if [ $? != 0 ]; then
     echo "X Failed to create Postgresql user."
     exit 1
@@ -66,8 +71,8 @@ create_user() {
 }
 
 create_database() {
-  dropdb --if-exists "$DB_NAME" &> /dev/null
-  createdb "$DB_NAME" &> /dev/null
+  dropdb --if-exists "$DB_NAME" &>> $SH_LOG_FILE
+  createdb "$DB_NAME" &>> $SH_LOG_FILE
   if [ $? != 0 ]; then
     echo "X Failed to create Postgresql database."
     exit 1
@@ -77,7 +82,7 @@ create_database() {
 }
 
 populate_database() {
-  psql -ltAq | grep -q "^$DB_NAME|" &> /dev/null
+  psql -ltAq | grep -q "^$DB_NAME|" &>> $SH_LOG_FILE
   if [ $? == 0 ]; then
     download_blockchain
     restore_blockchain
@@ -106,7 +111,7 @@ download_blockchain() {
 
 restore_blockchain() {
   echo "Restoring blockchain with $DB_SNAPSHOT"
-  gunzip -fcq $DB_SNAPSHOT | psql -q -U "$DB_USER" -d "$DB_NAME" &> /dev/null
+  gunzip -fcq $DB_SNAPSHOT | psql -q -U "$DB_USER" -d "$DB_NAME" &>> $SH_LOG_FILE
   if [ $? != 0 ]; then
     echo "X Failed to restore blockchain."
     exit 1
@@ -118,7 +123,7 @@ restore_blockchain() {
 autostart_cron() {
   local cmd="crontab"
 
-  command -v "$cmd" &> /dev/null
+  command -v "$cmd" &>> $SH_LOG_FILE
 
   if [ $? != 0 ]; then
     echo "X Failed to execute crontab."
@@ -133,7 +138,7 @@ autostart_cron() {
 	EOF
   )
 
-  printf "$crontab\n" | $cmd - &> /dev/null
+  printf "$crontab\n" | $cmd - &>> $SH_LOG_FILE
 
   if [ $? != 0 ]; then
     echo "X Failed to update crontab."
@@ -145,10 +150,10 @@ autostart_cron() {
 }
 
 coldstart_lisk() {
-  stop_lisk &> /dev/null
-  stop_postgresql &> /dev/null
+  stop_lisk &>> $SH_LOG_FILE
+  stop_postgresql &>> $SH_LOG_FILE
   rm -rf $DB_DATA
-  pg_ctl initdb -D $DB_DATA &> /dev/null
+  pg_ctl initdb -D $DB_DATA &>> $SH_LOG_FILE
   sleep 2
   start_postgresql
   sleep 1
@@ -160,10 +165,10 @@ coldstart_lisk() {
 }
 
 start_postgresql() {
-  if pgrep -x "postgres" &> /dev/null; then
+  if pgrep -x "postgres" &>> $SH_LOG_FILE; then
     echo "√ Postgresql is running."
   else
-    pg_ctl -D $DB_DATA -l $DB_LOG_FILE start &> /dev/null
+    pg_ctl -D $DB_DATA -l $DB_LOG_FILE start &>> $SH_LOG_FILE
     sleep 1
     if [ $? != 0 ]; then
       echo "X Failed to start Postgresql."
@@ -176,11 +181,11 @@ start_postgresql() {
 
 stop_postgresql() {
   stopPg=0
-  if ! pgrep -x "postgres" &> /dev/null; then
+  if ! pgrep -x "postgres" &>> $SH_LOG_FILE; then
     echo "√ Postgresql is not running."
   else
-   while [[ $stopPg < 5 ]] &> /dev/null; do
-      pg_ctl -D $DB_DATA -l $DB_LOG_FILE stop &> /dev/null
+   while [[ $stopPg < 5 ]] &>> $SH_LOG_FILE; do
+      pg_ctl -D $DB_DATA -l $DB_LOG_FILE stop &>> $SH_LOG_FILE
       if [ $? == 0 ]; then
         echo "√ Postgresql stopped successfully."
         break
@@ -190,19 +195,19 @@ stop_postgresql() {
       sleep .5
       stopPg=$[$stopPg+1]
     done
-    if pgrep -x "postgres" &> /dev/null; then
-      pkill -x postgres -9  &> /dev/null;
+    if pgrep -x "postgres" &>> $SH_LOG_FILE; then
+      pkill -x postgres -9  &>> $SH_LOG_FILE;
       echo "√ Postgresql Killed."
     fi
   fi
 }
 
 snapshot_lisk() {
-  if check_status == 1 &> /dev/null; then
+  if check_status == 1 &>> $SH_LOG_FILE; then
     check_status
     exit 1
   else
-    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG -s $SNAPSHOT &> /dev/null
+    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG -s $SNAPSHOT &>> $SH_LOG_FILE
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully in snapshot mode."
     else
@@ -212,11 +217,11 @@ snapshot_lisk() {
 }
 
 start_lisk() {
-  if check_status == 1 &> /dev/null; then
+  if check_status == 1 &>> $SH_LOG_FILE; then
     check_status
     exit 1
   else
-    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG &> /dev/null
+    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG &>> $SH_LOG_FILE
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully."
       sleep 3
@@ -228,10 +233,10 @@ start_lisk() {
 }
 
 stop_lisk() {
-  if check_status != 1 &> /dev/null; then
+  if check_status != 1 &>> $SH_LOG_FILE; then
     stopLisk=0
-    while [[ $stopLisk < 5 ]] &> /dev/null; do
-      forever stop -t $PID --killSignal=SIGTERM &> /dev/null
+    while [[ $stopLisk < 5 ]] &>> $SH_LOG_FILE; do
+      forever stop -t $PID --killSignal=SIGTERM &>> $SH_LOG_FILE
       if [ $? !=  0 ]; then
         echo "X Failed to stop Lisk."
       else
@@ -280,26 +285,26 @@ tail_logs() {
 
 help() {
   echo -e "\nCommand Options for Lisk.sh"
-  echo -e "\nAll options may be passed\t\t -c <config.json>"
-  echo -e "\nstart_node\t\t\t\tStarts a Nodejs process for Lisk"
-  echo -e "start\t\t\t\t\tStarts the Nodejs process and PostgreSQL Database for Lisk"
-  echo -e "stop_node\t\t\t\tStops a Nodejs process for Lisk"
-  echo -e "stop\t\t\t\t\tStop the Nodejs process and PostgreSQL Database for Lisk"
-  echo -e "reload\t\t\t\t\tRestarts the Nodejs process for Lisk"
-  echo -e "rebuild (-f file.db.gz) (-u URL) (-l) \tRebuilds the PostgreSQL database"
-  echo -e "start_db\t\t\t\tStarts the PostgreSQL database"
-  echo -e "stop_db\t\t\t\t\tStops the PostgreSQL database"
-  echo -e "coldstart\t\t\t\tCreates the PostgreSQL database and configures config.json for Lisk"
-  echo -e "snapshot -s ###\t\t\t\tStarts Lisk in snapshot mode"
-  echo -e "logs\t\t\t\t\tDisplays and tails logs for Lisk"
-  echo -e "status\t\t\t\t\tDisplays the status of the PID associated with Lisk"
-  echo -e "help\t\t\t\t\tDisplays this message"
+  echo -e "\nAll options may be passed [-c <config.json>]"
+  echo -e "\nstart_node                          Starts a Nodejs process for Lisk"
+  echo -e "start                                 Starts the Nodejs process and PostgreSQL Database for Lisk"
+  echo -e "stop_node                             Stops a Nodejs process for Lisk"
+  echo -e "stop                                  Stop the Nodejs process and PostgreSQL Database for Lisk"
+  echo -e "reload                                Restarts the Nodejs process for Lisk"
+  echo -e "rebuild [-u URL] [-f file.db.gz] [-0] Rebuilds the PostgreSQL database"
+  echo -e "start_db                              Starts the PostgreSQL database"
+  echo -e "stop_db                               Stops the PostgreSQL database"
+  echo -e "coldstart                             Creates the PostgreSQL database and configures config.json for Lisk"
+  echo -e "snapshot -s #                         Starts Lisk in snapshot mode"
+  echo -e "logs                                  Displays and tails logs for Lisk"
+  echo -e "status                                Displays the status of the PID associated with Lisk"
+  echo -e "help                                  Displays this message"
 }
 
 
 parse_option() {
   OPTIND=2
-  while getopts ":s:c:f:u:l:" opt; do
+  while getopts ":s:c:f:u:l:0" opt; do
     case $opt in
       s)
         if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
@@ -318,29 +323,24 @@ parse_option() {
           LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
           PID_FILE="$PIDS_DIR/$DB_NAME.pid"
         else
-          echo "Config.json not found. Please verify the filae exists and try again."
+          echo "Config.json not found. Please verify the file exists and try again."
           exit 1
         fi ;;
 
       u)
-        DB_REMOTE=Y
-        DB_DOWNLOAD=Y
         BLOCKCHAIN_URL=$OPTARG
         ;;
 
       f)
         DB_SNAPSHOT=$OPTARG
-        ;;
-
-      l)
         if [ -f $OPTARG ]; then
-          DB_SNAPSHOT=$OPTARG
           DB_DOWNLOAD=N
-          DB_REMOTE=N
-        else
-          echo "Snapshot not found. Please verify the file exists and try again."
-          exit 1
         fi ;;
+
+      0)
+        DB_SNAPSHOT="$(pwd)/etc/blockchain.db.gz"
+        DB_DOWNLOAD=N
+        ;;
 
        :) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
 
