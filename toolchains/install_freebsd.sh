@@ -8,7 +8,7 @@ if [ ! $(uname -s) == "FreeBSD" ]; then
   exit 1
 fi
 
-sudo pkg install -y autoconf automake curl gcc git gmake libtool node012 npm012 postgresql95-server postgresql95-contrib python security/ca_root_nss wget unzip
+sudo pkg install -y autoconf automake curl gcc git gmake libtool node012 npm012 postgresql96-server postgresql96-contrib python security/ca_root_nss wget unzip
 
 if [ ! -e "/usr/local/bin/make" ] && [ -e "/usr/bin/make" ]; then
   sudo mv /usr/bin/make /usr/bin/make.moved
