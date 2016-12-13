@@ -1,17 +1,15 @@
 #!/bin/bash
-#############################################################
-# Lisk Installation Script                                  #
-# by: Isabella Dell                                         #
-# Date: 03/08/2016                                          #
-#                                                           #
-#                                                           #
-#                                                           #
-#############################################################
 
 # Variable Declaration
 UNAME=$(uname)-$(uname -m)
 defaultLiskLocation=$(pwd)
 defaultRelease=main
+defaultSync=no
+logFile=installLisk.out
+
+#setup logging
+exec > >(tee -ia $logFile)
+exec 2>&1
 
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
@@ -90,6 +88,13 @@ user_prompts() {
   release=${release:-$defaultRelease}
   if [[ ! "$release" == "main" && ! "$release" == "test" ]]; then
     echo "$release is not valid, please check and re-execute"
+    exit 2;
+  fi
+
+  [ "$sync" ] || read -r -p "Would you like to sync from the Genesis Block? (Default $defaultSync): " sync
+  sync=${sync:-$defaultSync}
+  if [[ ! "$sync" == "no" && ! "$sync" == "yes" ]]; then
+    echo "$sync is not valid, please check and re-execute"
     exit 2;
   fi
 }
@@ -197,7 +202,7 @@ install_lisk() {
 
   echo -e "\nDownloading current Lisk binaries: "$liskVersion
 
-  curl -s "https://downloads.lisk.io/lisk/$release/$liskVersion" -o $liskVersion
+  curl --progress-bar -o $liskVersion "https://downloads.lisk.io/lisk/$release/$liskVersion"
 
   curl -s "https://downloads.lisk.io/lisk/$release/$liskVersion.md5" -o $liskVersion.md5
 
@@ -235,22 +240,13 @@ configure_lisk() {
   echo -e "\nColdstarting Lisk for the first time"
   bash lisk.sh coldstart -l $liskLocation/lisk-$release/etc/blockchain.db.gz
 
-  sleep 5
+  sleep 5 #we sleep here to allow the DAPP password to generate and write back to the config.json
 
   echo -e "\nStopping Lisk to perform database tuning"
   bash lisk.sh stop
 
   echo -e "\nExecuting database tuning operation"
   bash tune.sh
-
-  log_rotate
-
-  echo -e "\nStarting Lisk with all parameters in place"
-  if [[ $url ]]; then
-      bash lisk.sh rebuild -u $url
-   else
-      bash lisk.sh rebuild
-   fi
 }
 
 backup_lisk() {
@@ -269,6 +265,29 @@ backup_lisk() {
   mv -f $liskLocation/lisk-$release $liskLocation/backup/ &> /dev/null
 }
 
+start_lisk() { #Here we parse the various startup flags
+  if [[ $rebuild == true ]]; then
+    if [[ $url ]]; then
+      echo -e "\nStarting Lisk with specified snapshot"
+      cd $liskLocation/lisk-$release
+      bash lisk.sh rebuild -u $url
+    else
+      echo -e "\nStarting Lisk with official snapshot"
+      cd $liskLocation/lisk-$release
+      bash lisk.sh rebuild
+    fi
+  else
+    if [[ "$sync" == "yes" ]]; then
+        echo -e "\nStarting Lisk from genesis"
+        bash lisk.sh rebuild -l etc/blockchain.db.gz
+     else
+       echo -e "\nStarting Lisk with current blockchain"
+       cd $liskLocation/lisk-$release
+       bash lisk.sh start
+    fi
+  fi
+}
+
 upgrade_lisk() {
   echo -e "\nRestoring Database to new Lisk Install"
   mkdir -p -m700 $liskLocation/lisk-$release/pgsql/data
@@ -277,38 +296,17 @@ upgrade_lisk() {
     echo -e "\nUpgrading database from PostgreSQL 9.5 to PostgreSQL 9.6"
     . "$liskLocation/lisk-$release/shared.sh"
     . "$liskLocation/lisk-$release/env.sh"
-    pg_ctl initdb -D $liskLocation/lisk-$release/pgsql/data &> /dev/null
-    $liskLocation/lisk-$release/pgsql/bin/pg_upgrade -b $liskLocation/backup/lisk-$release/pgsql/bin -B $liskLocation/lisk-$release/pgsql/bin -d $liskLocation/backup/lisk-$release/pgsql/data -D $liskLocation/lisk-$release/pgsql/data  &> /dev/null
-    pgUpgrade=true
+    pg_ctl initdb -D $liskLocation/lisk-$release/pgsql/data &>> $logFile
+    $liskLocation/lisk-$release/pgsql/bin/pg_upgrade -b $liskLocation/backup/lisk-$release/pgsql/bin -B $liskLocation/lisk-$release/pgsql/bin -d $liskLocation/backup/lisk-$release/pgsql/data -D $liskLocation/lisk-$release/pgsql/data &>> $logFile
+      bash $liskLocation/lisk-$release/lisk.sh start_db &>> $logFile
+      bash $liskLocation/lisk-$release/analyze_new_cluster.sh &>> $logFile
+      rm -f $liskLocation/lisk-$release/*cluster*
   else
     cp -rf $liskLocation/backup/lisk-$release/pgsql/data/* $liskLocation/lisk-$release/pgsql/data/
   fi
 
   echo -e "\nCopying config.json entries from previous installation"
   $liskLocation/lisk-$release/bin/node $liskLocation/lisk-$release/updateConfig.js -o $liskLocation/backup/lisk-$release/config.json -n $liskLocation/lisk-$release/config.json
-
-  log_rotate
-
-  if [[ $rebuild == true ]]; then
-    if [[ $url ]]; then
-      echo -e "\nStarting Lisk with snapshot"
-      cd $liskLocation/lisk-$release
-      bash lisk.sh rebuild -u $url 
-    else
-      echo -e "\nStarting Lisk with snapshot"
-      cd $liskLocation/lisk-$release
-      bash lisk.sh rebuild 
-    fi
-  else
-   echo -e "\nStarting Lisk"
-   cd $liskLocation/lisk-$release
-   bash lisk.sh start
-  fi
-
-  if [[ $pgUpgrade == true ]]; then
-    bash $liskLocation/lisk-$release/analyze_new_cluster.sh &> /dev/null
-    rm -f $liskLocation/lisk-$release/*cluster*  &> /dev/null
-  fi
 }
 
 log_rotate() {
@@ -332,25 +330,27 @@ EOF_lisk-logrotate" &> /dev/null
 }
 
 usage() {
-  echo "Usage: $0 <install|upgrade> [-d <directory] [-r <main|test>] [-n] [-h] [-u <url>]"
+  echo "Usage: $0 <install|upgrade> [-d <directory] [-r <main|test>] [-n] [-h [-u <url>] ] "
   echo "install         -- install Lisk"
   echo "upgrade         -- upgrade Lisk"
   echo " -d <directory> -- install location"
   echo " -r <release>   -- choose main or test"
   echo " -n             -- install ntp if not installed"
-  echo " -h 	        -- rebuild instead of copying database"
-  echo " -u <url>       -- URL to rebuild from"
+  echo " -h 	          -- rebuild instead of copying database"
+  echo " -u <url>       -- URL to rebuild from - Requires -h"
+  echo " -0             -- Force sync from 0"
 }
 
 parse_option() {
   OPTIND=2
-  while getopts :d:r:u:hn opt; do
+  while getopts :d:r:u:hn0 opt; do
      case $opt in
        d) liskLocation=$OPTARG ;;
        r) release=$OPTARG ;;
        n) installNtp=1 ;;
        h) rebuild=true ;;
        u) url=$OPTARG ;;
+       0) sync=yes ;;
      esac
    done
 
@@ -371,6 +371,8 @@ case $1 in
   ntp_checks
   install_lisk
   configure_lisk
+  log_rotate
+  start_lisk
   ;;
 "upgrade")
   parse_option $@
@@ -378,6 +380,7 @@ case $1 in
   backup_lisk
   install_lisk
   upgrade_lisk
+  start_lisk
   ;;
 *)
   echo "Error: Unrecognized command."
