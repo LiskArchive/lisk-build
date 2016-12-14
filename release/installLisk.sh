@@ -270,16 +270,16 @@ start_lisk() { #Here we parse the various startup flags
     if [[ $URL ]]; then
       echo -e "\nStarting Lisk with specified snapshot"
       cd $LISK_LOCATION/lisk-$RELEASE
-      bash lisk.sh REBUILD -u $URL
+      bash lisk.sh rebuild -u $URL
     else
       echo -e "\nStarting Lisk with official snapshot"
       cd $LISK_LOCATION/lisk-$RELEASE
-      bash lisk.sh REBUILD
+      bash lisk.sh rebuild
     fi
   else
     if [[ "$SYNC" == "yes" ]]; then
         echo -e "\nStarting Lisk from genesis"
-        bash lisk.sh REBUILD -l etc/blockchain.db.gz
+        bash lisk.sh rebuild -l etc/blockchain.db.gz
      else
        echo -e "\nStarting Lisk with current blockchain"
        cd $LISK_LOCATION/lisk-$RELEASE
@@ -333,12 +333,12 @@ usage() {
   echo "Usage: $0 <install|upgrade> [-d <directory] [-r <main|test>] [-n] [-h [-u <URL>] ] "
   echo "install         -- install Lisk"
   echo "upgrade         -- upgrade Lisk"
-  echo " -d <directory> -- install location"
+  echo " -d <DIRECTORY> -- install location"
   echo " -r <RELEASE>   -- choose main or test"
   echo " -n             -- install ntp if not installed"
-  echo " -h 	          -- REBUILD instead of copying database"
-  echo " -u <URL>       -- URL to REBUILD from - Requires -h"
-  echo " -0             -- Force SYNC from 0"
+  echo " -h 	          -- rebuild instead of copying database"
+  echo " -u <URL>       -- URL to rebuild from - Requires -h"
+  echo " -0             -- Forces sync from 0"
 }
 
 parse_option() {
