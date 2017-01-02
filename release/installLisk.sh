@@ -105,7 +105,7 @@ ntp_checks() {
         [ "$installNtp" ] || read -r -n 1 -p "Would like to install NTP? (y/n): " $REPLY
         if [[ "$installNtp" || $REPLY =~ ^[Yy]$ ]]; then
           echo -e "\nInstalling NTP, please provide sudo password.\n"
-          sudo apt-get install ntp -yyq
+          sudo apt-get install ntp ntpdate -yyq
           sudo service ntp stop
           sudo ntpdate pool.ntp.org
           sudo service ntp start
