@@ -287,6 +287,11 @@ upgrade_lisk() {
   echo -e "\nCopying config.json entries from previous installation"
   $liskLocation/lisk-$release/bin/node $liskLocation/lisk-$release/updateConfig.js -o $liskLocation/backup/lisk-$release/config.json -n $liskLocation/lisk-$release/config.json
 
+  if [[ -e "$liskLocation/backup/lisk-$release/snapshot.json" ]]; then
+    echo -e "\nCopying snapshot.json file from previous installation"
+    cp $liskLocation/backup/lisk-$release/snapshot.json $liskLocation/lisk-$release/
+	fi
+
   log_rotate
 
   if [[ $rebuild == true ]]; then
