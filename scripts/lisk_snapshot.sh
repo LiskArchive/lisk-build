@@ -139,4 +139,7 @@ if [ "$GENERIC_COPY" == "Y" ] 2> /dev/null; then
   cp -f $BACKUP_FULLPATH $BACKUP_LOCATION/blockchain.db.gz &> /dev/null
 fi
 
-echo -e "\nSnapshot Complete"
+echo -e "\nSnapshot Complete, cleaning up forever monitor"
+#This is required to clean up terminated forever processes after snapshot
+bash lisk.sh stop_node -c $SNAPSHOT_CONFIG
+
