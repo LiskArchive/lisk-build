@@ -56,6 +56,7 @@ network() {
   else
     NETWORK="local"
   fi
+  echo -e "Lisk configured for "$NETWORK" network\n" &>> $SH_LOG_FILE
 }
 
 create_user() {
@@ -97,6 +98,8 @@ download_blockchain() {
     fi
     echo "√ Downloading $DB_SNAPSHOT from $BLOCKCHAIN_URL"
     curl --progress-bar -o $DB_SNAPSHOT "$BLOCKCHAIN_URL/$DB_SNAPSHOT"
+    #Required to clean up ugly curl output in the logs
+    sed -i -e '/[#]/d' $SH_LOG_FILE
     if [ $? != 0 ]; then
       rm -f $DB_SNAPSHOT
       echo "X Failed to download blockchain snapshot."
@@ -123,7 +126,7 @@ restore_blockchain() {
 autostart_cron() {
   local cmd="crontab"
 
-  command -v "$cmd" &>> $SH_LOG_FILE
+  command -v "$cmd" &>> /dev/null
 
   if [ $? != 0 ]; then
     echo "X Failed to execute crontab."
@@ -133,9 +136,9 @@ autostart_cron() {
   crontab=$($cmd -l 2> /dev/null | sed '/lisk\.sh start/d' 2> /dev/null)
 
   crontab=$(cat <<-EOF
-	$crontab
-	@reboot $(command -v "bash") $(pwd)/lisk.sh start > $(pwd)/cron.log 2>&1
-	EOF
+        $crontab
+        @reboot $(command -v "bash") $(pwd)/lisk.sh start > $(pwd)/cron.log 2>&1
+EOF
   )
 
   printf "$crontab\n" | $cmd - &>> $SH_LOG_FILE
@@ -165,7 +168,7 @@ coldstart_lisk() {
 }
 
 start_postgresql() {
-  if pgrep -x "postgres" &>> $SH_LOG_FILE; then
+  if pgrep -x "postgres" &>> /dev/null; then
     echo "√ Postgresql is running."
   else
     pg_ctl -D $DB_DATA -l $DB_LOG_FILE start &>> $SH_LOG_FILE
@@ -180,11 +183,11 @@ start_postgresql() {
 }
 
 stop_postgresql() {
-  stopPg=0
-  if ! pgrep -x "postgres" &>> $SH_LOG_FILE; then
+  STOP_PG=0
+  if ! pgrep -x "postgres" &>> /dev/null; then
     echo "√ Postgresql is not running."
   else
-   while [[ $stopPg < 5 ]] &>> $SH_LOG_FILE; do
+   while [[ $STOP_PG < 5 ]] &>> $SH_LOG_FILE; do
       pg_ctl -D $DB_DATA -l $DB_LOG_FILE stop &>> $SH_LOG_FILE
       if [ $? == 0 ]; then
         echo "√ Postgresql stopped successfully."
@@ -193,7 +196,7 @@ stop_postgresql() {
         echo "X Postgresql failed to stop."
       fi
       sleep .5
-      stopPg=$[$stopPg+1]
+      STOP_PG=$[$STOP_PG+1]
     done
     if pgrep -x "postgres" &>> $SH_LOG_FILE; then
       pkill -x postgres -9  &>> $SH_LOG_FILE;
@@ -217,7 +220,7 @@ snapshot_lisk() {
 }
 
 start_lisk() {
-  if check_status == 1 &>> $SH_LOG_FILE; then
+  if check_status == 1 &>> /dev/null; then
     check_status
     exit 1
   else
@@ -233,9 +236,9 @@ start_lisk() {
 }
 
 stop_lisk() {
-  if check_status != 1 &>> $SH_LOG_FILE; then
-    stopLisk=0
-    while [[ $stopLisk < 5 ]] &>> $SH_LOG_FILE; do
+  if check_status != 1 &>> /dev/null; then
+    STOP_LISK=0
+    while [[ $STOP_LISK < 5 ]] &>> $SH_LOG_FILE; do
       forever stop -t $PID --killSignal=SIGTERM &>> $SH_LOG_FILE
       if [ $? !=  0 ]; then
         echo "X Failed to stop Lisk."
@@ -244,7 +247,7 @@ stop_lisk() {
         break
       fi
       sleep .5
-      stopLisk=$[$stopLisk+1]
+      STOP_LISK=$[$STOP_LISK+1]
     done
   else
     echo "√ Lisk is not running."
@@ -259,7 +262,7 @@ rebuild_lisk() {
 
 check_status() {
   if [ -f "$PID_FILE" ]; then
-    PID="$(cat "$PID_FILE")"
+  read PID < $PID_FILE 2>&1 > /dev/null
   fi
   if [ ! -z "$PID" ]; then
     ps -p "$PID" > /dev/null 2>&1
@@ -412,3 +415,6 @@ case $1 in
   help
   ;;
 esac
+
+#Required to clean up colour characters that don't translate well from Tee
+sed -i -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" $SH_LOG_FILE
