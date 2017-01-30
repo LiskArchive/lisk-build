@@ -22,6 +22,8 @@ SNAPSHOT_ROUND="highest"
 
 GENERIC_COPY="N"
 
+USE_LOCK_FILE="N"
+
 parse_option() {
   OPTIND=1
   while getopts :s:t:b:d:r:g opt; do
@@ -73,6 +75,8 @@ parse_option() {
         fi ;;
 
       g) GENERIC_COPY="Y" ;;
+      
+      l) USE_LOCK_FILE="Y" ;;
 
       ?) usage; exit 1 ;;
 
@@ -91,9 +95,27 @@ usage() {
   echo " -d <days to keep>         -- Days to keep backups"
   echo " -r <round>                -- Round height to snapshot at"
   echo " -g                        -- Make a copy of backup file named blockchain.db.gz"
+  echo " -l                        -- Use a lockfile to make sure only one instance is running"
 }
 
 parse_option "$@"
+
+# Check for the lock file if the user is using this option.  If so, create lock file if possible or exit if already locked
+###############################################################################
+if [[ "$USE_LOCK_FILE" == "Y" ]] ; then
+	LOCK_FILE="$(pwd)/etc/snapshot_lock"
+	if [[ ! -e "$LOCK_FILE" ]] ; then
+		touch "$LOCK_FILE"
+	else
+		if [[ "$(find $LOCK_FILE -mmin +1440)" ]]; then
+			echo "Warning: Lock file is over 24 hours old.  Updating timestamp and proceeding"
+			touch "$LOCK_FILE"
+		else
+			echo "Error: Lock file exists, is there another instance still running?"
+			exit 1
+		fi
+	fi
+fi
 
 # Begin Main Process
 ###############################################################################
@@ -140,3 +162,13 @@ if [ "$GENERIC_COPY" == "Y" ] 2> /dev/null; then
 fi
 
 echo -e "\nSnapshot Complete"
+
+# Remove lock file
+###############################################################################
+if [[ "$USE_LOCK_FILE" == "Y" ]] ; then
+	if [[ -e "$LOCK_FILE" ]] ; then
+		rm "$LOCK_FILE"
+	else
+		echo "Warning: Lock file missing"
+	fi
+fi
