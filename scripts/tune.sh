@@ -8,16 +8,18 @@
 #############################################################
 
 if [[ "$(uname)" == "Linux" ]]; then
-  memoryBase=`cat /proc/meminfo | grep MemTotal | awk '{print $2 }' | cut -f1 -d"."`
+  #shellcheck disable=SC2002
+  #erreoneous assumption about meminfo as a script
+  memoryBase=$(cat /proc/meminfo | grep MemTotal | awk '{print $2 }' | cut -f1 -d".")
 fi
 
 if [[ "$(uname)" == "FreeBSD" ]]; then
-  memoryBase=`sysctl hw.physmem | awk '{print $2 / 1024 }'|cut -f1 -d"."`
+  memoryBase=$(sysctl hw.physmem | awk '{print $2 / 1024 }'|cut -f1 -d".")
 fi
 
 ### UNTESTED
 if [[ "$(uname)" == "Darwin" ]]; then
-  memoryBase=`top -l 1 | grep PhysMem: | awk '{print $10}' |cut -f1 -d"."`
+  memoryBase=$(top -l 1 | grep PhysMem: | awk '{print $10}' |cut -f1 -d".")
 fi
 
 if [[ "$memoryBase" -lt "1310720" ]]; then
@@ -89,10 +91,10 @@ if [[ "$memoryBase" -gt 16777216 ]]; then
 fi
 
 max_connections=200
-shared_buffers=$(expr $memoryBase / 4)"kB"
-effective_cache_size=$(expr $memoryBase  / 4)"kB"
-work_mem=$(( ($memoryBase - ( $memoryBase / 4 ))/ ($max_connections * 3  )))"kB"
-maintenance_work_mem=$(( $memoryBase / 16 ))"kB"
+shared_buffers=$( memoryBase / 4)'kB'
+effective_cache_size=$( memoryBase  / 4)'kB'
+work_mem=$(( (memoryBase - ( memoryBase / 4 ))/ (max_connections * 3  )))'kB'
+maintenance_work_mem=$(( memoryBase / 16 ))'kB'
 min_wal_size=1GB
 max_wal_size=2GB
 checkpoint_completion_target=0.9
