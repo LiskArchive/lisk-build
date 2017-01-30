@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# shellcheck disable=SC2129
+
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 . "$(pwd)/shared.sh"
 . "$(pwd)/env.sh"
@@ -9,12 +11,12 @@ if [ ! -f "$(pwd)/app.js" ]; then
   exit 1
 fi
 
+#shellcheck disable=SC2050
 if [ "\$USER" == "root" ]; then
   echo "Error: Lisk should not be run be as root. Exiting."
   exit 1
 fi
 
-UNAME=$(uname)
 LISK_CONFIG=config.json
 
 LOGS_DIR="$(pwd)/logs"
@@ -34,35 +36,34 @@ PID_FILE="$PIDS_DIR/$DB_NAME.pid"
 SH_LOG_FILE="$LOGS_DIR/lisk.out"
 
 #setup logging
-exec > >(tee -ia $SH_LOG_FILE)
+exec > >(tee -ia "$SH_LOG_FILE")
 exec 2>&1
-
-CMDS=("curl" "forever" "gunzip" "node" "tar" "psql" "createdb" "createuser" "dropdb" "dropuser")
-check_cmds CMDS[@]
 
 ################################################################################
 
 blockheight() {
-  DB_HEIGHT="$(psql -d $DB_NAME -t -c 'select height from blocks order by height desc limit 1;')"
+  DB_HEIGHT="$(psql -d "$DB_NAME" -t -c 'select height from blocks order by height desc limit 1;')"
   HEIGHT="${DB_HEIGHT:- Unavailable}"
-  echo -e "Current Block Height:"$HEIGHT
+  echo -e "Current Block Height:" "$HEIGHT"
 }
 
 network() {
-  if [ "$(grep "da3ed6a45429278bac2666961289ca17ad86595d33b31037615d4b8e8f158bba" $LISK_CONFIG )" ];then
+  # shellcheck disable=SC2143
+  if [ "$(grep "da3ed6a45429278bac2666961289ca17ad86595d33b31037615d4b8e8f158bba" "$LISK_CONFIG" )" ];then
     NETWORK="test"
-  elif [ "$(grep "ed14889723f24ecc54871d058d98ce91ff2f973192075c0155ba2b7b70ad2511" $LISK_CONFIG )" ];then
+  elif [ "$(grep "ed14889723f24ecc54871d058d98ce91ff2f973192075c0155ba2b7b70ad2511" "$LISK_CONFIG")" ];then
     NETWORK="main"
   else
     NETWORK="local"
   fi
-  echo -e "Lisk configured for "$NETWORK" network\n" &>> $SH_LOG_FILE
+  echo -e 'Lisk configured for '"$NETWORK"' network\n' &>> "$SH_LOG_FILE"
 }
 
 create_user() {
-  dropuser --if-exists "$DB_USER" &>> $SH_LOG_FILE
-  createuser --createdb "$DB_USER" &>> $SH_LOG_FILE
-  psql -qd postgres -c "ALTER USER "$DB_USER" WITH PASSWORD '$DB_PASS';" &>> $SH_LOG_FILE
+  # shellcheck disable=SC2129
+  dropuser --if-exists "$DB_USER" &>> "$SH_LOG_FILE"
+  createuser --createdb "$DB_USER" &>> "$SH_LOG_FILE"
+  psql -qd postgres -c "ALTER USER '$DB_USER' WITH PASSWORD '$DB_PASS';" &>> "$SH_LOG_FILE"
   if [ $? != 0 ]; then
     echo "X Failed to create Postgresql user."
     exit 1
@@ -72,8 +73,9 @@ create_user() {
 }
 
 create_database() {
-  dropdb --if-exists "$DB_NAME" &>> $SH_LOG_FILE
-  createdb "$DB_NAME" &>> $SH_LOG_FILE
+  # shellcheck disable=SC2129
+  dropdb --if-exists "$DB_NAME" &>> "$SH_LOG_FILE"
+  createdb "$DB_NAME" &>> "$SH_LOG_FILE"
   if [ $? != 0 ]; then
     echo "X Failed to create Postgresql database."
     exit 1
@@ -83,7 +85,7 @@ create_database() {
 }
 
 populate_database() {
-  psql -ltAq | grep -q "^$DB_NAME|" &>> $SH_LOG_FILE
+  psql -ltAq | grep -q "^$DB_NAME|" &>> "$SH_LOG_FILE"
   if [ $? == 0 ]; then
     download_blockchain
     restore_blockchain
@@ -92,16 +94,16 @@ populate_database() {
 
 download_blockchain() {
   if [ "$DB_DOWNLOAD" = "Y" ]; then
-    rm -f $DB_SNAPSHOT
+    rm -f "$DB_SNAPSHOT"
     if [ "$BLOCKCHAIN_URL" = "" ]; then
       BLOCKCHAIN_URL="https://downloads.lisk.io/lisk/$NETWORK"
     fi
-    echo "√ Downloading $DB_SNAPSHOT from $BLOCKCHAIN_URL"
-    curl --progress-bar -o $DB_SNAPSHOT "$BLOCKCHAIN_URL/$DB_SNAPSHOT"
+    echo '√ Downloading '"$DB_SNAPSHOT"' from '"$BLOCKCHAIN_URL"
+    curl --progress-bar -o "$DB_SNAPSHOT" "$BLOCKCHAIN_URL/$DB_SNAPSHOT"
     #Required to clean up ugly curl output in the logs
-    sed -i -e '/[#]/d' $SH_LOG_FILE
+    sed -i -e '/[#]/d' "$SH_LOG_FILE"
     if [ $? != 0 ]; then
-      rm -f $DB_SNAPSHOT
+      rm -f "$DB_SNAPSHOT"
       echo "X Failed to download blockchain snapshot."
       exit 1
     else
@@ -113,8 +115,8 @@ download_blockchain() {
 }
 
 restore_blockchain() {
-  echo "Restoring blockchain with $DB_SNAPSHOT"
-  gunzip -fcq $DB_SNAPSHOT | psql -q -U "$DB_USER" -d "$DB_NAME" &>> $SH_LOG_FILE
+  echo 'Restoring blockchain with '"$DB_SNAPSHOT"
+  gunzip -fcq "$DB_SNAPSHOT" | psql -q -U "$DB_USER" -d "$DB_NAME" &>> "$SH_LOG_FILE"
   if [ $? != 0 ]; then
     echo "X Failed to restore blockchain."
     exit 1
@@ -141,7 +143,7 @@ autostart_cron() {
 EOF
   )
 
-  printf "$crontab\n" | $cmd - &>> $SH_LOG_FILE
+  printf "%s\n" "$crontab" | $cmd - &>> "$SH_LOG_FILE"
 
   if [ $? != 0 ]; then
     echo "X Failed to update crontab."
@@ -153,10 +155,10 @@ EOF
 }
 
 coldstart_lisk() {
-  stop_lisk &>> $SH_LOG_FILE
-  stop_postgresql &>> $SH_LOG_FILE
-  rm -rf $DB_DATA
-  pg_ctl initdb -D $DB_DATA &>> $SH_LOG_FILE
+  stop_lisk &>> "$SH_LOG_FILE"
+  stop_postgresql &>> "$SH_LOG_FILE"
+  rm -rf "$DB_DATA"
+  pg_ctl initdb -D "$DB_DATA" &>> "$SH_LOG_FILE"
   sleep 2
   start_postgresql
   sleep 1
@@ -171,7 +173,7 @@ start_postgresql() {
   if pgrep -x "postgres" &>> /dev/null; then
     echo "√ Postgresql is running."
   else
-    pg_ctl -D $DB_DATA -l $DB_LOG_FILE start &>> $SH_LOG_FILE
+    pg_ctl -D "$DB_DATA" -l "$DB_LOG_FILE" start &>> "$SH_LOG_FILE"
     sleep 1
     if [ $? != 0 ]; then
       echo "X Failed to start Postgresql."
@@ -187,8 +189,8 @@ stop_postgresql() {
   if ! pgrep -x "postgres" &>> /dev/null; then
     echo "√ Postgresql is not running."
   else
-   while [[ $STOP_PG < 5 ]] &>> $SH_LOG_FILE; do
-      pg_ctl -D $DB_DATA -l $DB_LOG_FILE stop &>> $SH_LOG_FILE
+   while [[ $STOP_PG -lt 5 ]] &>> "$SH_LOG_FILE"; do
+      pg_ctl -D "$DB_DATA" -l "$DB_LOG_FILE" stop &>> "$SH_LOG_FILE"
       if [ $? == 0 ]; then
         echo "√ Postgresql stopped successfully."
         break
@@ -196,21 +198,23 @@ stop_postgresql() {
         echo "X Postgresql failed to stop."
       fi
       sleep .5
-      STOP_PG=$[$STOP_PG+1]
+      STOP_PG=$(STOP_PG+1)
     done
-    if pgrep -x "postgres" &>> $SH_LOG_FILE; then
-      pkill -x postgres -9  &>> $SH_LOG_FILE;
+    if pgrep -x "postgres" &>> "$SH_LOG_FILE"; then
+      pkill -x postgres -9  &>> "$SH_LOG_FILE";
       echo "√ Postgresql Killed."
     fi
   fi
 }
 
 snapshot_lisk() {
-  if check_status == 1 &>> $SH_LOG_FILE; then
+  #shellcheck disable=SC1068
+  #shellcheck disable=SC2034
+  if check_status==1 &>> "$SH_LOG_FILE"; then
     check_status
     exit 1
   else
-    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG -s $SNAPSHOT &>> $SH_LOG_FILE
+    forever start -u lisk -a -l "$LOG_FILE" --pidFile "$PID_FILE" -m 1 app.js -c "$LISK_CONFIG" -s "$SNAPSHOT" &>> "$SH_LOG_FILE"
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully in snapshot mode."
     else
@@ -220,11 +224,13 @@ snapshot_lisk() {
 }
 
 start_lisk() {
-  if check_status == 1 &>> /dev/null; then
+  #shellcheck disable=SC1068
+  #shellcheck disable=SC2034
+  if check_status==1 &>> /dev/null; then
     check_status
     exit 1
   else
-    forever start -u lisk -a -l $LOG_FILE --pidFile $PID_FILE -m 1 app.js -c $LISK_CONFIG &>> $SH_LOG_FILE
+    forever start -u lisk -a -l "$LOG_FILE" --pidFile "$PID_FILE" -m 1 app.js -c "$LISK_CONFIG" &>> "$SH_LOG_FILE"
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully."
       sleep 3
@@ -236,10 +242,12 @@ start_lisk() {
 }
 
 stop_lisk() {
-  if check_status != 1 &>> /dev/null; then
+  #shellcheck disable=SC1068
+  #shellcheck disable=SC2034
+  if check_status!=1 &>> /dev/null; then
     STOP_LISK=0
-    while [[ $STOP_LISK < 5 ]] &>> $SH_LOG_FILE; do
-      forever stop -t $PID --killSignal=SIGTERM &>> $SH_LOG_FILE
+    while [[ "$STOP_LISK" -lt 5 ]] &>> "$SH_LOG_FILE"; do
+      forever stop -t "$PID" --killSignal=SIGTERM &>> "$SH_LOG_FILE"
       if [ $? !=  0 ]; then
         echo "X Failed to stop Lisk."
       else
@@ -247,7 +255,7 @@ stop_lisk() {
         break
       fi
       sleep .5
-      STOP_LISK=$[$STOP_LISK+1]
+      STOP_LISK=$(STOP_LISK+1)
     done
   else
     echo "√ Lisk is not running."
@@ -262,7 +270,7 @@ rebuild_lisk() {
 
 check_status() {
   if [ -f "$PID_FILE" ]; then
-  read PID < $PID_FILE 2>&1 > /dev/null
+  read PID < "$PID_FILE" 2>&1 > /dev/null
   fi
   if [ ! -z "$PID" ]; then
     ps -p "$PID" > /dev/null 2>&1
@@ -270,8 +278,8 @@ check_status() {
   else
     STATUS=1
   fi
-  if [ -f $PID_FILE ] && [ ! -z "$PID" ] && [ $STATUS == 0 ]; then
-    echo "√ Lisk is running as PID: $PID"
+  if [ -f "$PID_FILE" ] && [ ! -z "$PID" ] && [ "$STATUS" == 0 ]; then
+    echo '√ Lisk is running as PID: '"$PID"
     blockheight
     return 0
   else
@@ -307,22 +315,22 @@ help() {
 
 parse_option() {
   OPTIND=2
-  while getopts ":s:c:f:u:l:0" opt; do
-    case $opt in
+  while getopts ":s:c:f:u:l:0" OPT; do
+    case "$OPT" in
       s)
         if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
-          SNAPSHOT=$OPTARG
+          SNAPSHOT="$OPTARG"
         elif [ "$OPTARG" == "highest" ]; then
-          SNAPSHOT=$OPTARG
+          SNAPSHOT="$OPTARG"
         else
           echo "Snapshot flag must be a greater than 0 or set to highest"
           exit 1
         fi ;;
 
       c)
-        if [ -f $OPTARG ]; then
-          LISK_CONFIG=$OPTARG
-          DB_NAME="$(grep "database" $LISK_CONFIG | cut -f 4 -d '"')"
+        if [ -f "$OPTARG" ]; then
+          LISK_CONFIG="$OPTARG"
+          DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
           LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
           PID_FILE="$PIDS_DIR/$DB_NAME.pid"
         else
@@ -331,12 +339,12 @@ parse_option() {
         fi ;;
 
       u)
-        BLOCKCHAIN_URL=$OPTARG
+        BLOCKCHAIN_URL="$OPTARG"
         ;;
 
       f)
-        DB_SNAPSHOT=$OPTARG
-        if [ -f $OPTARG ]; then
+        DB_SNAPSHOT="$OPTARG"
+        if [ -f "$OPTARG" ]; then
           DB_DOWNLOAD=N
         fi ;;
 
@@ -345,14 +353,14 @@ parse_option() {
         DB_DOWNLOAD=N
         ;;
 
-       :) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
+       :) echo 'Missing option argument for -'"$OPTARG" >&2; exit 1;;
 
-       *) echo "Unimplemented option: -$OPTARG" >&2; exit 1;;
+       *) echo 'Unimplemented option: -'"$OPTARG" >&2; exit 1;;
     esac
   done
 }
 
-parse_option $@
+parse_option "$@"
 network
 
 case $1 in
@@ -417,4 +425,4 @@ case $1 in
 esac
 
 #Required to clean up colour characters that don't translate well from Tee
-sed -i -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" $SH_LOG_FILE
+sed -i -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" "$SH_LOG_FILE"
