@@ -8,11 +8,11 @@ cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
 . "$(pwd)/env.sh"
 
 SNAPSHOT_CONFIG="$(pwd)/etc/snapshot.json"
-TARGET_DB_NAME="$(grep "database" $SNAPSHOT_CONFIG | cut -f 4 -d '"')"
-LOG_LOCATION="$(grep "logFileName" $SNAPSHOT_CONFIG | cut -f 4 -d '"')"
+TARGET_DB_NAME="$(grep "database" "$SNAPSHOT_CONFIG" | cut -f 4 -d '"')"
+LOG_LOCATION="$(grep "logFileName" "$SNAPSHOT_CONFIG" | cut -f 4 -d '"')"
 
 LISK_CONFIG="config.json"
-SOURCE_DB_NAME="$(grep "database" $LISK_CONFIG | cut -f 4 -d '"')"
+SOURCE_DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
 
 BACKUP_LOCATION="$(pwd)/backups"
 
@@ -24,39 +24,39 @@ GENERIC_COPY="N"
 
 parse_option() {
   OPTIND=1
-  while getopts :s:t:b:d:r:g opt; do
-    case $opt in
+  while getopts :s:t:b:d:r:g OPT; do
+    case "$OPT" in
       t)
-        if [ -f $OPTARG ]; then
-          SNAPSHOT_CONFIG=$OPTARG
-          TARGET_DB_NAME="$(grep "database" $SNAPSHOT_CONFIG | cut -f 4 -d '"')"
-          LOG_LOCATION="$(grep "logFileName" $SNAPSHOT_CONFIG | cut -f 4 -d '"')"
+        if [ -f "$OPTARG" ]; then
+          SNAPSHOT_CONFIG="$OPTARG"
+          TARGET_DB_NAME="$(grep "database" "$SNAPSHOT_CONFIG" | cut -f 4 -d '"')"
+          LOG_LOCATION="$(grep "logFileName" "$SNAPSHOT_CONFIG" | cut -f 4 -d '"')"
         else
           echo "Config.json for snapshot not found. Please verify the file exists and try again."
           exit 1
         fi ;;
 
       s)
-        if [ -f $OPTARG ]; then
-          LISK_CONFIG=$OPTARG
-          SOURCE_DB_NAME="$(grep "database" $LISK_CONFIG | cut -f 4 -d '"')"
+        if [ -f "$OPTARG" ]; then
+          LISK_CONFIG="$OPTARG"
+          SOURCE_DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
         else
           echo "Config.json not found. Please verify the file exists and try again."
           exit 1
         fi ;;
 
       b)
-        mkdir -p $OPTARG &> /dev/null
-        if [ -d $OPTARG ]; then
-          BACKUP_LOCATION=$OPTARG
+        mkdir -p "$OPTARG" &> /dev/null
+        if [ -d "$OPTARG" ]; then
+          BACKUP_LOCATION="$OPTARG"
         else
           echo "Backup Location invalid. Please verify the folder exists and try again."
           exit 1
         fi ;;
 
       d)
-        if [ $OPTARG -ge 0 ]; then
-          DAYS_TO_KEEP=$OPTARG
+        if [ "$OPTARG" -ge 0 ]; then
+          DAYS_TO_KEEP="$OPTARG"
         else
           echo "Invalid number for days to keep."
           exit 1
@@ -64,9 +64,9 @@ parse_option() {
 
       r)
         if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
-          SNAPSHOT_ROUND=$OPTARG
+          SNAPSHOT_ROUND="$OPTARG"
         elif [ "$OPTARG" == "highest" ]; then
-          SNAPSHOT_ROUND=$OPTARG
+          SNAPSHOT_ROUND="$OPTARG"
         else
           echo "Snapshot flag must be a greater than 0 or set to highest"
           exit 1
@@ -76,9 +76,9 @@ parse_option() {
 
       ?) usage; exit 1 ;;
 
-      :) echo "Missing option argument for -$OPTARG" >&2; exit 1 ;;
+      :) echo 'Missing option argument for -'"$OPTARG" >&2; exit 1 ;;
 
-      *) echo "Unimplemented option: -$OPTARG" >&2; exit 1 ;;
+      *) echo 'Unimplemented option: -'"$OPTARG" >&2; exit 1 ;;
     esac
   done
 }
@@ -100,46 +100,45 @@ parse_option "$@"
 
 echo -e "\nPreparing to take a snapshot of the blockchain."
 
-mkdir -p $BACKUP_LOCATION  &> /dev/null
+mkdir -p "$BACKUP_LOCATION " &> /dev/null
 echo -e "\nClearing old snapshots on disk"
-find $BACKUP_LOCATION -name "${SOURCE_DB_NAME}*.gz" -mtime +$DAYS_TO_KEEP -exec rm {} \;
+find "$BACKUP_LOCATION" -name "${SOURCE_DB_NAME}*.gz" -mtime +"$DAYS_TO_KEEP" -exec rm {} \;
 
 echo -e "\nClearing old snapshot instance"
-bash lisk.sh stop_node -c $SNAPSHOT_CONFIG &> /dev/null
+bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
 dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
 createdb "$TARGET_DB_NAME" &> /dev/null
 
 echo -e "\nExporting active database to snapshot instance"
-pg_dump $SOURCE_DB_NAME | psql "$TARGET_DB_NAME" &> /dev/null
+pg_dump "$SOURCE_DB_NAME" | psql "$TARGET_DB_NAME" &> /dev/null
 
 echo -e "\nClearing old log files"
-cat /dev/null > $LOG_LOCATION
+cat /dev/null > "$LOG_LOCATION"
 
-echo -e "\nBeginning snapshot verification process at "$(date)""
-bash lisk.sh snapshot -s $SNAPSHOT_ROUND -c $SNAPSHOT_CONFIG
+echo -e '\nBeginning snapshot verification process at '"$(date)"
+bash lisk.sh snapshot -s "$SNAPSHOT_ROUND" -c "$SNAPSHOT_CONFIG"
 
-until tail -n10 $LOG_LOCATION | grep -q "Cleaned up successfully"; do
+until tail -n10 "$LOG_LOCATION" | (grep -q "Snapshot finished"); do
   sleep 60
   # TODO: Check if snapshot fails
 done
-echo -e "\nSnapshot verification process completed at "$(date)""
+echo -e '\nSnapshot verification process completed at '"$(date)"
 
 echo -e "\nCleaning peers table"
-psql -d $TARGET_DB_NAME -c 'delete from peers;'  &> /dev/null
+psql -d "$TARGET_DB_NAME" -c 'delete from peers;'  &> /dev/null
 
 HEIGHT="$(psql -d lisk_snapshot -t -c 'select height from blocks order by height desc limit 1;' | xargs)"
 
 BACKUP_FULLPATH="${BACKUP_LOCATION}/${SOURCE_DB_NAME}_backup-${HEIGHT}.gz"
 
 echo -e "\nDumping snapshot"
-pg_dump -O "$TARGET_DB_NAME" | gzip > $BACKUP_FULLPATH
+pg_dump -O "$TARGET_DB_NAME" | gzip > "$BACKUP_FULLPATH"
 
 if [ "$GENERIC_COPY" == "Y" ] 2> /dev/null; then
   echo -e "\nOverwriting Generic Copy"
-  cp -f $BACKUP_FULLPATH $BACKUP_LOCATION/blockchain.db.gz &> /dev/null
+  cp -f "$BACKUP_FULLPATH" "$BACKUP_LOCATION"/blockchain.db.gz &> /dev/null
 fi
 
 echo -e "\nSnapshot Complete, cleaning up forever monitor"
 #This is required to clean up terminated forever processes after snapshot
-bash lisk.sh stop_node -c $SNAPSHOT_CONFIG
-
+bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG"
