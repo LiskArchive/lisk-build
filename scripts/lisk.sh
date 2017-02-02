@@ -210,9 +210,8 @@ stop_postgresql() {
 }
 
 snapshot_lisk() {
-  #shellcheck disable=SC1068
-  #shellcheck disable=SC2034
-  if check_status==1 &>> "$SH_LOG_FILE"; then
+  check_pid
+  if  [[ "$STATUS" != 1 ]] &>> "$SH_LOG_FILE"; then
     check_status
     exit 1
   else
@@ -226,9 +225,8 @@ snapshot_lisk() {
 }
 
 start_lisk() {
-  #shellcheck disable=SC1068
-  #shellcheck disable=SC2034
-  if check_status==1 &>> /dev/null; then
+    check_pid
+  if [[ "$STATUS" != 1 ]] &>> /dev/null; then
     check_status
     exit 1
   else
@@ -236,6 +234,7 @@ start_lisk() {
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully."
       sleep 3
+      check_pid
       check_status
     else
       echo "X Failed to start Lisk."
@@ -244,9 +243,8 @@ start_lisk() {
 }
 
 stop_lisk() {
-  #shellcheck disable=SC1068
-  #shellcheck disable=SC2034
-  if check_status!=1 &>> /dev/null; then
+  check_pid
+  if [[ "$STATUS" == 0 ]] &>> /dev/null; then
     STOP_LISK=0
     while [[ "$STOP_LISK" -lt 5 ]] &>> "$SH_LOG_FILE"; do
       forever stop -t "$PID" --killSignal=SIGTERM &>> "$SH_LOG_FILE"
@@ -271,22 +269,25 @@ rebuild_lisk() {
 }
 
 check_status() {
-  if [ -f "$PID_FILE" ]; then
-  read PID < "$PID_FILE" 2>&1 > /dev/null
-  fi
-  if [ ! -z "$PID" ]; then
-    ps -p "$PID" > /dev/null 2>&1
-    STATUS=$?
-  else
-    STATUS=1
-  fi
-  if [ -f "$PID_FILE" ] && [ ! -z "$PID" ] && [ "$STATUS" == 0 ]; then
+  if [ -f "$PID_FILE" ] && [ ! -z "$PID" ]; then
     echo '√ Lisk is running as PID: '"$PID"
     blockheight
     return 0
   else
     echo "X Lisk is not running."
     return 1
+  fi
+}
+
+check_pid() {
+  if [ -f "$PID_FILE" ]; then
+  read -r PID < "$PID_FILE" 2>&1 > /dev/null
+  fi
+  if [ ! -z "$PID" ]; then
+    ps -p "$PID" > /dev/null 2>&1
+    STATUS=$?
+  else
+    STATUS=1
   fi
 }
 
@@ -410,6 +411,7 @@ case $1 in
   stop_postgresql
   ;;
 "status")
+  check_pid
   check_status
   ;;
 "logs")
