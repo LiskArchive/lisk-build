@@ -3,7 +3,7 @@
 # Begin Variable Declaration and argument parsing
 ###############################################################################
 
-cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
+cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
 . "$(pwd)/shared.sh"
 . "$(pwd)/env.sh"
 

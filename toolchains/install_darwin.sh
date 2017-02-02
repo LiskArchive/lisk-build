@@ -1,7 +1,6 @@
 #!/bin/bash
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
-#shellcheck source=./../shared.sh
 . "$(pwd)/../shared.sh"
 
 if [ ! "$(uname -s)" == "Darwin" ]; then
