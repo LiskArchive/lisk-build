@@ -126,7 +126,7 @@ if [ ! -f "$NODE_DIR/$NODE_OUT/bin/node" ] || [ ! -f "$NODE_DIR/$NODE_OUT/bin/np
   exec_cmd "./configure --prefix=$(pwd)/compiled $NODE_CONFIG"
   exec_cmd "make --jobs=$JOBS"
   exec_cmd "make install"
-  cd ../
+  cd ../ || exit 2
 fi
 exec_cmd "mkdir -p $BUILD_NAME/bin"
 exec_cmd "cp -vR $NODE_DIR/$NODE_OUT/* $BUILD_NAME/"

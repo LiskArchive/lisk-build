@@ -1,22 +1,26 @@
 #!/bin/bash
 
-cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
+cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
 
-. "$(pwd)/config.sh"
+#shellcheck source=./shared.sh
 . "$(pwd)/shared.sh"
+#shellcheck source=./config.sh
+. "$(pwd)/config.sh"
 
+# shellcheck disable=SC2034
+# ignoring the failure due to shell indirection
 CMDS=("autoconf" "automake" "make");
 check_cmds CMDS[@]
 
 echo "Cleaning up..."
 echo "--------------------------------------------------------------------------"
 
-cd release
+cd release || exit 2
 exec_cmd "rm -vrf lisk-*"
-cd ../
+cd ../ || exit 2
 
 mkdir -p src
-cd src
+cd src || exit 2
 
 exec_cmd "rm -vrf $VERSION.*"
 exec_cmd "rm -vrf lisk-$VERSION-*"
@@ -30,4 +34,4 @@ if [ "$1" = "all" ]; then
   exec_cmd "rm -vrf *.tar.gz"
 fi
 
-cd ../
+cd ../ || exit 2
