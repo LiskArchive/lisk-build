@@ -301,10 +301,10 @@ upgrade_lisk() {
 
   if [[ "$("$LISK_OLD_PG"/bin/postgres -V)" != "postgres (PostgreSQL) 9.6".* ]]; then
     echo -e "\nUpgrading database from PostgreSQL 9.5 to PostgreSQL 9.6"
-    #Disable SC1091 - Its unable to resolve the file but we know its there.
-    # shellcheck disable=SC1091
+    #Disable SC1090 - Its unable to resolve the file but we know its there.
+    # shellcheck disable=SC1090
     . "$LISK_INSTALL"/shared.sh
-    # shellcheck disable=SC1091
+    # shellcheck disable=SC1090
     . "$LISK_INSTALL"/env.sh
     # shellcheck disable=SC2129
     pg_ctl initdb -D "$LISK_NEW_PG"/data &>> $LOG_FILE
