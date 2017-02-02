@@ -7,8 +7,8 @@ Please read [Installing Lisk (from Binaries)](https://github.com/LiskHQ/lisk-doc
 ## Platforms
 
 - [Linux (native)](#linux)
-  - [Linux (armv6l)](#linux-armv6-cross-compiled)
-  - [Linux (armv7l)](#linux-armv7-cross-compiled)
+- [Linux (armv6l)](#linux-armv6-cross-compiled)
+- [Linux (armv7l)](#linux-armv7-cross-compiled)
 - [Darwin (native)](#darwin)
 - [FreeBSD (native)](#freebsd)
 
