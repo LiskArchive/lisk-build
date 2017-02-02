@@ -238,7 +238,7 @@ configure_lisk() {
   cd "$LISK_INSTALL" || exit 2
 
   echo -e "\nColdstarting Lisk for the first time"
-  bash lisk.sh coldstart -l "$LISK_INSTALL"/etc/blockchain.db.gz
+  bash lisk.sh coldstart -f "$LISK_INSTALL"/etc/blockchain.db.gz
 
   sleep 5 #we sleep here to allow the DAPP password to generate and write back to the config.json
 
@@ -286,7 +286,7 @@ start_lisk() { #Here we parse the various startup flags
   else
     if [[ "$SYNC" == "yes" ]]; then
         echo -e "\nStarting Lisk from genesis"
-        bash lisk.sh rebuild -l etc/blockchain.db.gz
+        bash lisk.sh rebuild -f etc/blockchain.db.gz
      else
        echo -e "\nStarting Lisk with current blockchain"
        cd "$LISK_INSTALL" || exit 2
@@ -342,7 +342,7 @@ EOF_lisk-logrotate" &> /dev/null
 }
 
 usage() {
-  echo "Usage: $0 <install|upgrade> [-d <directory] [-r <main|test>] [-n] [-h [-u <URL>] ] "
+  echo "Usage: $0 <install|upgrade> [-d <directory] [-r <main|test|dev>] [-n] [-h [-u <URL>] ] "
   echo "install         -- install Lisk"
   echo "upgrade         -- upgrade Lisk"
   echo " -d <DIRECTORY> -- install location"
@@ -367,8 +367,8 @@ parse_option() {
    done
 
   if [ "$RELEASE" ]; then
-    if [[ "$RELEASE" != test && "$RELEASE" != "main" ]]; then
-      echo "-r <test|main>"
+    if [[ "$RELEASE" != test && "$RELEASE" != "main" && "$RELEASE" != "dev" ]]; then
+      echo "-r <test|main|dev>"
       usage
       exit 1
     fi

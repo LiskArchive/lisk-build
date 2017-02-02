@@ -65,7 +65,7 @@ create_user() {
   # shellcheck disable=SC2129
   dropuser --if-exists "$DB_USER" &>> "$SH_LOG_FILE"
   createuser --createdb "$DB_USER" &>> "$SH_LOG_FILE"
-  psql -qd postgres -c "ALTER USER '$DB_USER' WITH PASSWORD '$DB_PASS';" &>> "$SH_LOG_FILE"
+  psql -qd postgres -c "ALTER USER $DB_USER WITH PASSWORD '$DB_PASS';" &>> "$SH_LOG_FILE"
   if [ $? != 0 ]; then
     echo "X Failed to create Postgresql user."
     exit 1
@@ -318,7 +318,7 @@ help() {
 
 parse_option() {
   OPTIND=2
-  while getopts ":s:c:f:u:l:0" OPT; do
+  while getopts ":s:c:f:u:l:x:y:0" OPT; do
     case "$OPT" in
       s)
         if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
