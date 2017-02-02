@@ -1,6 +1,8 @@
 #!/bin/bash
 # shellcheck disable=SC2034
 # override "unused" variables. This file is used to populate build.sh
+# shellcheck disable=SC2155
+# override declare and assign variables seperately. We dont care about return values for path exports.
 
 if [ ! -z "$1" ]; then
   echo "Overriding architecture with: $1"
@@ -56,7 +58,7 @@ else
   SED_OPTS="-i"
 fi
 
-if [ $(uname -s) == "FreeBSD" ]; then
+if [ "$(uname -s)" == "FreeBSD" ]; then
   MD5_CMD="md5"
 else
   MD5_CMD="md5sum"
