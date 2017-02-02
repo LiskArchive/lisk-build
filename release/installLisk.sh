@@ -235,7 +235,7 @@ install_lisk() {
 }
 
 configure_lisk() {
-  cd "$LISK_INSTALL"
+  cd "$LISK_INSTALL" || exit 2
 
   echo -e "\nColdstarting Lisk for the first time"
   bash lisk.sh coldstart -l "$LISK_INSTALL"/etc/blockchain.db.gz
@@ -251,7 +251,7 @@ configure_lisk() {
 
 backup_lisk() {
   echo -e "\nStopping Lisk to perform a backup"
-  cd "$LISK_INSTALL"
+  cd "$LISK_INSTALL" || exit 2
   bash lisk.sh stop
 
 
@@ -276,11 +276,11 @@ start_lisk() { #Here we parse the various startup flags
   if [[ "$REBUILD" == true ]]; then
     if [[ "$URL" ]]; then
       echo -e "\nStarting Lisk with specified snapshot"
-      cd "$LISK_INSTALL"
+      cd "$LISK_INSTALL" || exit 2
       bash lisk.sh rebuild -u "$URL"
     else
       echo -e "\nStarting Lisk with official snapshot"
-      cd "$LISK_INSTALL"
+      cd "$LISK_INSTALL" || exit 2
       bash lisk.sh rebuild
     fi
   else
@@ -289,7 +289,7 @@ start_lisk() { #Here we parse the various startup flags
         bash lisk.sh rebuild -l etc/blockchain.db.gz
      else
        echo -e "\nStarting Lisk with current blockchain"
-       cd "$LISK_INSTALL"
+       cd "$LISK_INSTALL" || exit 2
        bash lisk.sh start
     fi
   fi
@@ -297,11 +297,13 @@ start_lisk() { #Here we parse the various startup flags
 
 upgrade_lisk() {
   echo -e "\nRestoring Database to new Lisk Install"
-  mkdir -p -m700 "$LISK_INSTALL"/pgsql/data
+  mkdir -m700 "$LISK_INSTALL"/pgsql/data
 
   if [[ "$("$LISK_OLD_PG"/bin/postgres -V)" != "postgres (PostgreSQL) 9.6".* ]]; then
     echo -e "\nUpgrading database from PostgreSQL 9.5 to PostgreSQL 9.6"
+    #shellcheck source=./shared.sh
     . "$LISK_INSTALL"/shared.sh
+    #shellcheck source=./env.sh
     . "$LISK_INSTALL"/env.sh
     # shellcheck disable=SC2129
     pg_ctl initdb -D "$LISK_NEW_PG"/data &>> $LOG_FILE
