@@ -3,9 +3,9 @@
 # shellcheck disable=SC2129
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
-#shellcheck source=./shared.sh
+#shellcheck disable=SC1090
 . "$(pwd)/shared.sh"
-#shellcheck source=./env.sh
+#shellcheck disable=SC1090
 . "$(pwd)/env.sh"
 
 if [ ! -f "$(pwd)/app.js" ]; then

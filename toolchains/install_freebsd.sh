@@ -1,6 +1,7 @@
 #!/bin/bash
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
+#shellcheck disable=SC1090
 . "$(pwd)/../shared.sh"
 
 if [ ! "$(uname -s)" == "FreeBSD" ]; then
