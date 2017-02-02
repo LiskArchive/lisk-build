@@ -2,8 +2,10 @@
 
 # shellcheck disable=SC2129
 
-cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
+cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
+#shellcheck source=./shared.sh
 . "$(pwd)/shared.sh"
+#shellcheck source=./shared.sh
 . "$(pwd)/env.sh"
 
 if [ ! -f "$(pwd)/app.js" ]; then
