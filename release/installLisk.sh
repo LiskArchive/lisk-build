@@ -254,10 +254,7 @@ backup_lisk() {
   cd "$LISK_INSTALL" || exit 2
   bash lisk.sh stop
 
-
-
   echo -e "\nBacking up existing Lisk Folder"
-
 
   LISK_BACKUP="$LISK_LOCATION"'/backup/lisk-'"$RELEASE"
   LISK_OLD_PG="$LISK_BACKUP"'/pgsql/'

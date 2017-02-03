@@ -100,8 +100,6 @@ parse_option "$@"
 # Begin Main Process
 ###############################################################################
 
-
-
 echo -e "\nPreparing to take a snapshot of the blockchain."
 
 echo -e "\nChecking for existing snapshot operation"
@@ -119,7 +117,6 @@ else
     exit 1
   fi
 fi
-
 
 mkdir -p "$BACKUP_LOCATION " &> /dev/null
 echo -e "\nClearing old snapshots on disk"

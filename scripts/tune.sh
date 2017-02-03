@@ -87,7 +87,7 @@ update_config() {
 
 # Hard code memory limit for systems above 16gb
 if [[ "$MEMORY_BASE" -gt 16777216 ]]; then
-        MEMORY_BASE=16777216
+  MEMORY_BASE=16777216
 fi
 
 max_connections=200

@@ -140,8 +140,8 @@ autostart_cron() {
   crontab=$($cmd -l 2> /dev/null | sed '/lisk\.sh start/d' 2> /dev/null)
 
   crontab=$(cat <<-EOF
-        $crontab
-        @reboot $(command -v "bash") $(pwd)/lisk.sh start > $(pwd)/cron.log 2>&1
+    $crontab
+    @reboot $(command -v "bash") $(pwd)/lisk.sh start > $(pwd)/cron.log 2>&1
 EOF
   )
 
@@ -300,7 +300,7 @@ tail_logs() {
 help() {
   echo -e "\nCommand Options for Lisk.sh"
   echo -e "\nAll options may be passed [-c <config.json>]"
-  echo -e "\nstart_node                            Starts a Nodejs process for Lisk"
+  echo -e "\nstart_node                          Starts a Nodejs process for Lisk"
   echo -e "start                                 Starts the Nodejs process and PostgreSQL Database for Lisk"
   echo -e "stop_node                             Stops a Nodejs process for Lisk"
   echo -e "stop                                  Stop the Nodejs process and PostgreSQL Database for Lisk"
