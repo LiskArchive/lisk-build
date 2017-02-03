@@ -87,11 +87,11 @@ parse_option() {
 
 usage() {
   echo "Usage: $0 [-t <snapshot.json>] [-s <config.json>] [-b <backup directory>] [-d <days to keep>] [-r <round>] [-g]"
-  echo " -t <snapshot.json>        -- config.json to use for validation"
-  echo " -s <config.json>          -- config.json to create target database"
-  echo " -b <backup directory>     -- Backup directory"
+  echo " -t <snapshot.json>        -- config.json to use for creating the snapshot"
+  echo " -s <config.json>          -- config.json used by the target database"
+  echo " -b <backup directory>     -- Backup directory to output into"
   echo " -d <days to keep>         -- Days to keep backups"
-  echo " -r <round>                -- Round height to snapshot at"
+  echo " -r <round>                -- Round to end the snapshot at"
   echo " -g                        -- Make a copy of backup file named blockchain.db.gz"
 }
 
@@ -100,7 +100,26 @@ parse_option "$@"
 # Begin Main Process
 ###############################################################################
 
+
+
 echo -e "\nPreparing to take a snapshot of the blockchain."
+
+echo -e "\nChecking for existing snapshot operation"
+
+bash lisk.sh status -c "$SNAPSHOT_CONFIG"
+
+if [ $? == 1 ]; then
+  echo "√ Previous snapshot is not runnning. Proceeding."
+else
+    if [ "$(stat --format=%Y LOG_LOCATION)" -le $(( $(date +%s) - 86400 )) ]; then
+      echo "Snapshot has run over time limit, terminating and continuing with a new snapshot"
+      bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG"
+    else
+    echo "X Previous snapshot is in progress, aborting."
+    exit 1
+  fi
+fi
+
 
 mkdir -p "$BACKUP_LOCATION " &> /dev/null
 echo -e "\nClearing old snapshots on disk"

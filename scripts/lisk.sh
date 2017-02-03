@@ -275,7 +275,7 @@ check_status() {
     return 0
   else
     echo "X Lisk is not running."
-    return 1
+    exit 1
   fi
 }
 
