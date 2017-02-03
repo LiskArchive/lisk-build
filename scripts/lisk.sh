@@ -230,7 +230,7 @@ start_lisk() {
     check_status
     exit 1
   else
-    forever start -u lisk -a -l "$LOG_FILE" --pidFile "$PID_FILE" -m 1 app.js -c "$LISK_CONFIG" &>> "$SH_LOG_FILE"
+    forever start -u lisk -a -l "$LOG_FILE" --pidFile "$PID_FILE" -m 1 app.js -c "$LISK_CONFIG" $SEED_PEERS $SYNC_PEERS &>> "$SH_LOG_FILE"
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully."
       sleep 3
@@ -350,6 +350,13 @@ parse_option() {
         if [ -f "$OPTARG" ]; then
           DB_DOWNLOAD=N
         fi ;;
+
+      x)
+        SEED_PEERS="-x $OPTARG"
+      ;;
+      y)
+        SYNC_PEERS="-y $OPTARG"
+      ;;
 
       0)
         DB_SNAPSHOT="$(pwd)/etc/blockchain.db.gz"
