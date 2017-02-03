@@ -4,6 +4,8 @@ A binary package building tool for [Lisk](https://lisk.io/). Allows automated co
 
 Please read [Installing Lisk (from Binaries)](https://github.com/LiskHQ/lisk-docs/blob/master/BinaryInstall.md) if you are merely looking to install Lisk onto an already supported operating system / architecture.
 
+[![Build Status](https://travis-ci.org/LiskHQ/lisk-build.svg?branch=master)](https://travis-ci.org/LiskHQ/lisk-build)
+
 ## Platforms
 
 - [Linux (native)](#linux)
