@@ -10,19 +10,19 @@
 if [[ "$(uname)" == "Linux" ]]; then
   #shellcheck disable=SC2002
   #erreoneous assumption about meminfo as a script
-  memoryBase=$(cat /proc/meminfo | grep MemTotal | awk '{print $2 }' | cut -f1 -d".")
+  MEMORY_BASE=$(cat /proc/meminfo | grep MemTotal | awk '{print $2 }' | cut -f1 -d".")
 fi
 
 if [[ "$(uname)" == "FreeBSD" ]]; then
-  memoryBase=$(sysctl hw.physmem | awk '{print $2 / 1024 }'|cut -f1 -d".")
+  MEMORY_BASE=$(sysctl hw.physmem | awk '{print $2 / 1024 }'|cut -f1 -d".")
 fi
 
 ### UNTESTED
 if [[ "$(uname)" == "Darwin" ]]; then
-  memoryBase=$(top -l 1 | grep PhysMem: | awk '{print $10}' |cut -f1 -d".")
+  MEMORY_BASE=$(top -l 1 | grep PhysMem: | awk '{print $10}' |cut -f1 -d".")
 fi
 
-if [[ "$memoryBase" -lt "1310720" ]]; then
+if [[ "$MEMORY_BASE" -lt "1310720" ]]; then
 echo "Not enough ram, taking defaults."
 exit 0
 fi
@@ -86,15 +86,15 @@ update_config() {
 
 
 #Hard code memory limit for systems above 16gb
-if [[ "$memoryBase" -gt 16777216 ]]; then
-        memoryBase=16777216
+if [[ "$MEMORY_BASE" -gt 16777216 ]]; then
+        MEMORY_BASE=16777216
 fi
 
 max_connections=200
-shared_buffers=$( memoryBase / 4)'kB'
-effective_cache_size=$( memoryBase  / 4)'kB'
-work_mem=$(( (memoryBase - ( memoryBase / 4 ))/ (max_connections * 3  )))'kB'
-maintenance_work_mem=$(( memoryBase / 16 ))'kB'
+shared_buffers=$(( MEMORY_BASE / 4))'kB'
+effective_cache_size=$(( MEMORY_BASE  / 4))'kB'
+work_mem=$(( (MEMORY_BASE - ( MEMORY_BASE / 4 ))/ (max_connections * 3  )))'kB'
+maintenance_work_mem=$(( MEMORY_BASE / 16 ))'kB'
 min_wal_size=1GB
 max_wal_size=2GB
 checkpoint_completion_target=0.9
