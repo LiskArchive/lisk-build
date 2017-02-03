@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
-#shellcheck disable=SC1090
+# shellcheck disable=SC1090
 . "$(pwd)/../shared.sh"
 
 if [ ! "$(uname -s)" == "Linux" ]; then
@@ -10,7 +10,7 @@ if [ ! "$(uname -s)" == "Linux" ]; then
 fi
 
 # shellcheck disable=SC2034
-# ignoring the failure due to shell indirection
+# Ignoring the failure due to shell indirection
 CMDS=("apt-get" "curl" "sudo")
 check_cmds CMDS[@]
 

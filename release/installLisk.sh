@@ -7,7 +7,7 @@ DEFAULT_RELEASE=main
 DEFAULT_SYNC=no
 LOG_FILE=installLisk.out
 
-#setup logging
+# Setup logging
 exec > >(tee -ia $LOG_FILE)
 exec 2>&1
 
@@ -240,7 +240,7 @@ configure_lisk() {
   echo -e "\nColdstarting Lisk for the first time"
   bash lisk.sh coldstart -f "$LISK_INSTALL"/etc/blockchain.db.gz
 
-  sleep 5 #we sleep here to allow the DAPP password to generate and write back to the config.json
+  sleep 5 # Allow the DApp password to generate and write back to the config.json
 
   echo -e "\nStopping Lisk to perform database tuning"
   bash lisk.sh stop
@@ -272,7 +272,7 @@ backup_lisk() {
   mv -f "$LISK_INSTALL" "$LISK_LOCATION"/backup/ &> /dev/null
 }
 
-start_lisk() { #Here we parse the various startup flags
+start_lisk() { # Parse the various startup flags
   if [[ "$REBUILD" == true ]]; then
     if [[ "$URL" ]]; then
       echo -e "\nStarting Lisk with specified snapshot"
@@ -301,7 +301,7 @@ upgrade_lisk() {
 
   if [[ "$("$LISK_OLD_PG"/bin/postgres -V)" != "postgres (PostgreSQL) 9.6".* ]]; then
     echo -e "\nUpgrading database from PostgreSQL 9.5 to PostgreSQL 9.6"
-    #Disable SC1090 - Its unable to resolve the file but we know its there.
+    # Disable SC1090 - Its unable to resolve the file but we know its there.
     # shellcheck disable=SC1090
     . "$LISK_INSTALL"/shared.sh
     # shellcheck disable=SC1090

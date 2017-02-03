@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
-#shellcheck disable=SC1090
+# shellcheck disable=SC1090
 . "$(pwd)/../shared.sh"
 
 if [ ! "$(uname -s)" == "Linux" ]; then
@@ -10,15 +10,15 @@ if [ ! "$(uname -s)" == "Linux" ]; then
 fi
 
 # shellcheck disable=SC2034
-# ignoring the failure due to shell indirection
+# Ignoring the failure due to shell indirection
 CMDS=("git")
 check_cmds CMDS[@]
 
 rm -rf rpi
 mkdir rpi
 
-#Shellchecks suggested solution brings more issues, we will just override the issue instead since this is the expected behavior.
-#shellcheck disable=SC2103
+# Shellchecks suggested solution brings more issues, we will just override the issue instead since this is the expected behavior.
+# shellcheck disable=SC2103
 cd rpi || exit 2
 exec_cmd "git clone https://github.com/raspberrypi/tools.git"
 cd .. || exit 2

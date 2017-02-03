@@ -4,9 +4,9 @@
 ###############################################################################
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
-#shellcheck disable=SC1090
+# shellcheck disable=SC1090
 . "$(pwd)/shared.sh"
-#shellcheck disable=SC1090
+# shellcheck disable=SC1090
 . "$(pwd)/env.sh"
 
 SNAPSHOT_CONFIG="$(pwd)/etc/snapshot.json"
@@ -161,5 +161,5 @@ if [ "$GENERIC_COPY" == "Y" ] 2> /dev/null; then
 fi
 
 echo -e "\nSnapshot Complete, cleaning up forever monitor"
-#This is required to clean up terminated forever processes after snapshot
+# Required to clean up terminated forever processes after snapshot
 bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG"

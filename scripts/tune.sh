@@ -8,8 +8,8 @@
 #############################################################
 
 if [[ "$(uname)" == "Linux" ]]; then
-  #shellcheck disable=SC2002
-  #erreoneous assumption about meminfo as a script
+  # shellcheck disable=SC2002
+  # Erreoneous assumption about meminfo as a script
   MEMORY_BASE=$(cat /proc/meminfo | grep MemTotal | awk '{print $2 }' | cut -f1 -d".")
 fi
 
@@ -85,7 +85,7 @@ update_config() {
 }
 
 
-#Hard code memory limit for systems above 16gb
+# Hard code memory limit for systems above 16gb
 if [[ "$MEMORY_BASE" -gt 16777216 ]]; then
         MEMORY_BASE=16777216
 fi

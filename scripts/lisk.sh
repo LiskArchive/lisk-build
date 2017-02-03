@@ -3,9 +3,9 @@
 # shellcheck disable=SC2129
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
-#shellcheck disable=SC1090
+# shellcheck disable=SC1090
 . "$(pwd)/shared.sh"
-#shellcheck disable=SC1090
+# shellcheck disable=SC1090
 . "$(pwd)/env.sh"
 
 if [ ! -f "$(pwd)/app.js" ]; then
@@ -13,7 +13,7 @@ if [ ! -f "$(pwd)/app.js" ]; then
   exit 1
 fi
 
-#shellcheck disable=SC2050
+# shellcheck disable=SC2050
 if [ "\$USER" == "root" ]; then
   echo "Error: Lisk should not be run be as root. Exiting."
   exit 1
@@ -37,7 +37,7 @@ PID_FILE="$PIDS_DIR/$DB_NAME.pid"
 
 SH_LOG_FILE="$LOGS_DIR/lisk.out"
 
-#setup logging
+# Setup logging
 exec > >(tee -ia "$SH_LOG_FILE")
 exec 2>&1
 
@@ -102,7 +102,7 @@ download_blockchain() {
     fi
     echo '√ Downloading '"$DB_SNAPSHOT"' from '"$BLOCKCHAIN_URL"
     curl --progress-bar -o "$DB_SNAPSHOT" "$BLOCKCHAIN_URL/$DB_SNAPSHOT"
-    #Required to clean up ugly curl output in the logs
+    # Required to clean up ugly curl output in the logs
     sed -i -e '/[#]/d' "$SH_LOG_FILE"
     if [ $? != 0 ]; then
       rm -f "$DB_SNAPSHOT"
@@ -435,5 +435,5 @@ case $1 in
   ;;
 esac
 
-#Required to clean up colour characters that don't translate well from Tee
+# Required to clean up colour characters that don't translate well from tee
 sed -i -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g" "$SH_LOG_FILE"
