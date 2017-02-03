@@ -1,14 +1,15 @@
 #!/bin/bash
 
-cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)"
+cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
+# shellcheck disable=SC1090
 . "$(pwd)/../shared.sh"
 
-if [ ! $(uname -s) == "FreeBSD" ]; then
+if [ ! "$(uname -s)" == "FreeBSD" ]; then
   echo "Invalid operating system. Aborting."
   exit 1
 fi
 
-sudo pkg install -y autoconf automake curl gcc git gmake libtool node012 npm012 postgresql95-server postgresql95-contrib python security/ca_root_nss wget unzip
+sudo pkg install -y autoconf automake curl gcc git gmake libtool node012 npm012 postgresql96-server postgresql96-contrib python security/ca_root_nss wget unzip
 
 if [ ! -e "/usr/local/bin/make" ] && [ -e "/usr/bin/make" ]; then
   sudo mv /usr/bin/make /usr/bin/make.moved

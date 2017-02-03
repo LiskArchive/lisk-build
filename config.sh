@@ -1,20 +1,24 @@
 #!/bin/bash
+# shellcheck disable=SC2034
+# Override "unused" variables. This file is used to populate build.sh.
+# shellcheck disable=SC2155
+# Override declare and assign variables seperately. We dont care about return values for path exports.
 
-if [ ! -z $1 ]; then
+if [ ! -z "$1" ]; then
   echo "Overriding architecture with: $1"
   echo "--------------------------------------------------------------------------"
-  ARCH=$1
+  ARCH="$1"
 fi
 
 VERSION="0.5.2"
-OS=`uname`
-[ ! -z "$ARCH" ] || ARCH=`uname -m`
+OS=$(uname)
+[ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
 NOVER_BUILD_NAME="lisk-$OS-$ARCH"
 TARGET=""
 JOBS="2"
 
-LISK_DIR=$VERSION
+LISK_DIR="$VERSION"
 LISK_FILE="$VERSION.tar.gz"
 LISK_NETWORK="main"
 LISK_URL="http://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
@@ -48,13 +52,13 @@ NODE_SODIUM_URL="https://github.com/LiskHQ/node-sodium/archive/master.tar.gz"
 
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
-if [ $(uname -s) == "Darwin" ] || [ $(uname -s) == "FreeBSD" ]; then
+if [ "$(uname -s)" == "Darwin" ] || [ "$(uname -s)" == "FreeBSD" ]; then
   SED_OPTS="-i ''"
 else
   SED_OPTS="-i"
 fi
 
-if [ $(uname -s) == "FreeBSD" ]; then
+if [ "$(uname -s)" == "FreeBSD" ]; then
   MD5_CMD="md5"
 else
   MD5_CMD="md5sum"
