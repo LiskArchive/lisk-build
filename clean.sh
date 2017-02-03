@@ -8,7 +8,7 @@ cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
 . "$(pwd)/config.sh"
 
 # shellcheck disable=SC2034
-# ignoring the failure due to shell indirection
+# Ignoring the failure due to shell indirection
 CMDS=("autoconf" "automake" "make");
 check_cmds CMDS[@]
 

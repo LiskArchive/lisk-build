@@ -8,12 +8,12 @@ cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
 . "$(pwd)/config.sh"
 
 # shellcheck disable=SC2034
-# ignoring the failure due to shell indirection
+# Ignoring the failure due to shell indirection
 CMDS=("autoconf" "gcc" "g++" "make" "node" "npm" "python" "tar" "wget");
 check_cmds CMDS[@]
 
 mkdir -p src
-# exit 2 in case the directory doesnt exist and preventing messes
+# Exit 2 in case the directory doesnt exist and preventing messes
 cd src || exit 2
 
 apply_PATCHES() {
