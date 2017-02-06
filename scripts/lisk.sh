@@ -200,7 +200,7 @@ stop_postgresql() {
         echo "X Postgresql failed to stop."
       fi
       sleep .5
-      STOP_PG=$(STOP_PG+1)
+      STOP_PG=$((STOP_PG+1))
     done
     if pgrep -x "postgres" >> "$SH_LOG_FILE" 2>&1; then
       pkill -x postgres -9 >> "$SH_LOG_FILE" 2>&1;
@@ -255,7 +255,7 @@ stop_lisk() {
         break
       fi
       sleep .5
-      STOP_LISK=$(STOP_LISK+1)
+      STOP_LISK=$((STOP_LISK+1))
     done
   else
     echo "√ Lisk is not running."
