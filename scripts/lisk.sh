@@ -58,14 +58,14 @@ network() {
   else
     NETWORK="local"
   fi
-  echo -e 'Lisk configured for '"$NETWORK"' network\n' &>> "$SH_LOG_FILE"
+  echo -e 'Lisk configured for '"$NETWORK"' network\n' >> "$SH_LOG_FILE" 2>&1
 }
 
 create_user() {
   # shellcheck disable=SC2129
-  dropuser --if-exists "$DB_USER" &>> "$SH_LOG_FILE"
-  createuser --createdb "$DB_USER" &>> "$SH_LOG_FILE"
-  psql -qd postgres -c "ALTER USER $DB_USER WITH PASSWORD '$DB_PASS';" &>> "$SH_LOG_FILE"
+  dropuser --if-exists "$DB_USER" >> "$SH_LOG_FILE" 2>&1
+  createuser --createdb "$DB_USER" >> "$SH_LOG_FILE" 2>&1
+  psql -qd postgres -c "ALTER USER $DB_USER WITH PASSWORD '$DB_PASS';" >> "$SH_LOG_FILE" 2>&1
   if [ $? != 0 ]; then
     echo "X Failed to create Postgresql user."
     exit 1
@@ -76,8 +76,8 @@ create_user() {
 
 create_database() {
   # shellcheck disable=SC2129
-  dropdb --if-exists "$DB_NAME" &>> "$SH_LOG_FILE"
-  createdb "$DB_NAME" &>> "$SH_LOG_FILE"
+  dropdb --if-exists "$DB_NAME" >> "$SH_LOG_FILE" 2>&1
+  createdb "$DB_NAME" >> "$SH_LOG_FILE" 2>&1
   if [ $? != 0 ]; then
     echo "X Failed to create Postgresql database."
     exit 1
@@ -87,7 +87,7 @@ create_database() {
 }
 
 populate_database() {
-  psql -ltAq | grep -q "^$DB_NAME|" &>> "$SH_LOG_FILE"
+  psql -ltAq | grep -q "^$DB_NAME|" >> "$SH_LOG_FILE" 2>&1
   if [ $? == 0 ]; then
     download_blockchain
     restore_blockchain
@@ -118,7 +118,7 @@ download_blockchain() {
 
 restore_blockchain() {
   echo 'Restoring blockchain with '"$DB_SNAPSHOT"
-  gunzip -fcq "$DB_SNAPSHOT" | psql -q -U "$DB_USER" -d "$DB_NAME" &>> "$SH_LOG_FILE"
+  gunzip -fcq "$DB_SNAPSHOT" | psql -q -U "$DB_USER" -d "$DB_NAME" >> "$SH_LOG_FILE" 2>&1
   if [ $? != 0 ]; then
     echo "X Failed to restore blockchain."
     exit 1
@@ -130,7 +130,7 @@ restore_blockchain() {
 autostart_cron() {
   local cmd="crontab"
 
-  command -v "$cmd" &>> /dev/null
+  command -v "$cmd" > /dev/null 2>&1
 
   if [ $? != 0 ]; then
     echo "X Failed to execute crontab."
@@ -145,7 +145,7 @@ autostart_cron() {
 EOF
   )
 
-  printf "%s\n" "$crontab" | $cmd - &>> "$SH_LOG_FILE"
+  printf "%s\n" "$crontab" | $cmd - >> "$SH_LOG_FILE" 2>&1
 
   if [ $? != 0 ]; then
     echo "X Failed to update crontab."
@@ -157,10 +157,10 @@ EOF
 }
 
 coldstart_lisk() {
-  stop_lisk &>> "$SH_LOG_FILE"
-  stop_postgresql &>> "$SH_LOG_FILE"
+  stop_lisk >> "$SH_LOG_FILE" 2>&1
+  stop_postgresql >> "$SH_LOG_FILE" 2>&1
   rm -rf "$DB_DATA"
-  pg_ctl initdb -D "$DB_DATA" &>> "$SH_LOG_FILE"
+  pg_ctl initdb -D "$DB_DATA" >> "$SH_LOG_FILE" 2>&1
   sleep 2
   start_postgresql
   sleep 1
@@ -172,10 +172,10 @@ coldstart_lisk() {
 }
 
 start_postgresql() {
-  if pgrep -x "postgres" &>> /dev/null; then
+  if pgrep -x "postgres" > /dev/null 2>&1; then
     echo "√ Postgresql is running."
   else
-    pg_ctl -D "$DB_DATA" -l "$DB_LOG_FILE" start &>> "$SH_LOG_FILE"
+    pg_ctl -D "$DB_DATA" -l "$DB_LOG_FILE" start >> "$SH_LOG_FILE" 2>&1
     sleep 1
     if [ $? != 0 ]; then
       echo "X Failed to start Postgresql."
@@ -188,11 +188,11 @@ start_postgresql() {
 
 stop_postgresql() {
   STOP_PG=0
-  if ! pgrep -x "postgres" &>> /dev/null; then
+  if ! pgrep -x "postgres" > /dev/null 2>&1; then
     echo "√ Postgresql is not running."
   else
-   while [[ $STOP_PG -lt 5 ]] &>> "$SH_LOG_FILE"; do
-      pg_ctl -D "$DB_DATA" -l "$DB_LOG_FILE" stop &>> "$SH_LOG_FILE"
+   while [[ $STOP_PG -lt 5 ]] >> "$SH_LOG_FILE" 2>&1; do
+      pg_ctl -D "$DB_DATA" -l "$DB_LOG_FILE" stop >> "$SH_LOG_FILE" 2>&1
       if [ $? == 0 ]; then
         echo "√ Postgresql stopped successfully."
         break
@@ -202,8 +202,8 @@ stop_postgresql() {
       sleep .5
       STOP_PG=$(STOP_PG+1)
     done
-    if pgrep -x "postgres" &>> "$SH_LOG_FILE"; then
-      pkill -x postgres -9  &>> "$SH_LOG_FILE";
+    if pgrep -x "postgres" >> "$SH_LOG_FILE" 2>&1; then
+      pkill -x postgres -9 >> "$SH_LOG_FILE" 2>&1;
       echo "√ Postgresql Killed."
     fi
   fi
@@ -211,11 +211,11 @@ stop_postgresql() {
 
 snapshot_lisk() {
   check_pid
-  if  [[ "$STATUS" != 1 ]] &>> "$SH_LOG_FILE"; then
+  if  [[ "$STATUS" != 1 ]] >> "$SH_LOG_FILE" 2>&1; then
     check_status
     exit 1
   else
-    forever start -u lisk -a -l "$LOG_FILE" --pidFile "$PID_FILE" -m 1 app.js -c "$LISK_CONFIG" -s "$SNAPSHOT" &>> "$SH_LOG_FILE"
+    forever start -u lisk -a -l "$LOG_FILE" --pidFile "$PID_FILE" -m 1 app.js -c "$LISK_CONFIG" -s "$SNAPSHOT" >> "$SH_LOG_FILE" 2>&1
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully in snapshot mode."
     else
@@ -226,11 +226,11 @@ snapshot_lisk() {
 
 start_lisk() {
     check_pid
-  if [[ "$STATUS" != 1 ]] &>> /dev/null; then
+  if [[ "$STATUS" != 1 ]] > /dev/null 2>&1; then
     check_status
     exit 1
   else
-    forever start -u lisk -a -l "$LOG_FILE" --pidFile "$PID_FILE" -m 1 app.js -c "$LISK_CONFIG" "$SEED_PEERS" "$SYNC_PEERS" &>> "$SH_LOG_FILE"
+    forever start -u lisk -a -l "$LOG_FILE" --pidFile "$PID_FILE" -m 1 app.js -c "$LISK_CONFIG" "$SEED_PEERS" "$SYNC_PEERS" >> "$SH_LOG_FILE" 2>&1
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully."
       sleep 3
@@ -244,10 +244,10 @@ start_lisk() {
 
 stop_lisk() {
   check_pid
-  if [[ "$STATUS" == 0 ]] &>> /dev/null; then
+  if [[ "$STATUS" == 0 ]] > /dev/null 2>&1; then
     STOP_LISK=0
-    while [[ "$STOP_LISK" -lt 5 ]] &>> "$SH_LOG_FILE"; do
-      forever stop -t "$PID" --killSignal=SIGTERM &>> "$SH_LOG_FILE"
+    while [[ "$STOP_LISK" -lt 5 ]] >> "$SH_LOG_FILE" 2>&1; do
+      forever stop -t "$PID" --killSignal=SIGTERM >> "$SH_LOG_FILE" 2>&1
       if [ $? !=  0 ]; then
         echo "X Failed to stop Lisk."
       else
