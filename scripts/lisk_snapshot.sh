@@ -109,7 +109,7 @@ bash lisk.sh status -c "$SNAPSHOT_CONFIG"
 if [ $? == 1 ]; then
   echo "√ Previous snapshot is not runnning. Proceeding."
 else
-    if [ "$(stat --format=%Y LOG_LOCATION)" -le $(( $(date +%s) - 86400 )) ]; then
+    if [ "$(stat --format=%Y "$LOG_LOCATION")" -le $(( $(date +%s) - 86400 )) ]; then
       echo "Snapshot has run over time limit, terminating and continuing with a new snapshot"
       bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG"
     else
