@@ -280,6 +280,10 @@ start_lisk() { # Parse the various startup flags
       cd "$LISK_INSTALL" || exit 2
       bash lisk.sh rebuild
     fi
+  elif [[ "$FRESH_INSTALL" == true && "$SYNC" == "no" ]]; then
+    echo -e "\nStarting Lisk with official snapshot"
+    cd "$LISK_INSTALL" || exit 2
+    bash lisk.sh rebuild
   else
     if [[ "$SYNC" == "yes" ]]; then
         echo -e "\nStarting Lisk from genesis"
@@ -374,6 +378,7 @@ parse_option() {
 
 case "$1" in
 "install")
+  FRESH_INSTALL='true'
   parse_option "$@"
   prereq_checks
   user_prompts
@@ -384,6 +389,7 @@ case "$1" in
   start_lisk
   ;;
 "upgrade")
+  FRESH_INSTALL='false'
   parse_option "$@"
   user_prompts
   backup_lisk
