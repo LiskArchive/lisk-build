@@ -118,7 +118,7 @@ else
   fi
 fi
 
-mkdir -p "$BACKUP_LOCATION " &> /dev/null
+mkdir -p "$BACKUP_LOCATION" &> /dev/null
 echo -e "\nClearing old snapshots on disk"
 find "$BACKUP_LOCATION" -name "${SOURCE_DB_NAME}*.gz" -mtime +"$DAYS_TO_KEEP" -exec rm {} \;
 
