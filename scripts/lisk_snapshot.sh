@@ -136,13 +136,13 @@ parse_option "$@"
 
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Checking for existing snapshot operation"
 
-if [ ! -f $LOCK_FILE ]; then
+if [ ! -f "$LOCK_FILE" ]; then
   echo "√ Previous snapshot is not runnning. Proceeding."
 else
   if [ "$( stat --format=%Y "$LOG_LOCATION" )" -le $(( $(date +%s) - ( STALL_THRESHOLD_PREVIOUS * 60 ) )) ]; then
     echo "√ Previous snapshot is stalled for $STALL_THRESHOLD_PREVIOUS minutes, terminating and continuing with a new snapshot"
     bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG"
-    rm -f $LOCK_FILE &> /dev/null
+    rm -f "$LOCK_FILE" &> /dev/null
   else
     echo "X Previous snapshot is in progress, aborting."
     exit 1
@@ -150,7 +150,7 @@ else
 fi
 
 mkdir -p "$LOCK_LOCATION" &> /dev/null
-touch $LOCK_FILE &> /dev/null
+touch "$LOCK_FILE" &> /dev/null
 
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Cleaning old snapshot instance, database and logs"
 bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
@@ -179,7 +179,7 @@ until tail -n10 "$LOG_LOCATION" | (grep -q "Snapshot finished"); do
     echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Snapshot process is stalled for $STALL_THRESHOLD_CURRENT minutes, cleaning up and exiting"
     bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
     dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
-    rm -f $LOCK_FILE &> /dev/null
+    rm -f "$LOCK_FILE" &> /dev/null
     exit 1
   fi
   
@@ -213,7 +213,7 @@ fi
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Cleaning up"
 bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
 dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
-rm -f $LOCK_FILE &> /dev/null
+rm -f "$LOCK_FILE" &> /dev/null
 
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Snapshot Complete"
 exit 0
