@@ -111,7 +111,7 @@ usage() {
   echo " -b <backup directory>     -- Backup directory to output into. Default is ./backups"
   echo " -d <days to keep>         -- Days to keep backups. Default is 7"
   echo " -r <round>                -- Round to end the snapshot at. Default is highest"
-  echo " -m <vacuum delay>         -- Delay in minute(s) between each vacuum of mem_round table."
+  echo " -m <vacuum delay>         -- Delay in minute(s) between each vacuum of mem_round table.  Default is 3"
   echo " -g                        -- Make a copy of backup file named blockchain.db.gz"
   echo ''
 }
