@@ -26,8 +26,7 @@ SNAPSHOT_ROUND="highest"
 
 GENERIC_COPY="N"
 
-PGSQL_VACUUM="N"
-PGSQL_VACUUM_DELAY=5
+PGSQL_VACUUM_DELAY=3
 
 STALL_THRESHOLD_PREVIOUS=20
 STALL_THRESHOLD_CURRENT=10
@@ -37,7 +36,7 @@ STALL_THRESHOLD_CURRENT=10
 
 parse_option() {
   OPTIND=1
-  while getopts :t:s:b:d:r:gvm: OPT; do
+  while getopts :t:s:b:d:r:m:g OPT; do
     case "$OPT" in
       t)
         if [ -f "$OPTARG" ]; then
@@ -85,10 +84,6 @@ parse_option() {
           exit 1
         fi ;;
 
-      g) GENERIC_COPY="Y" ;;
-
-      v) PGSQL_VACUUM="Y" ;;
-
       m)
         if [ "$OPTARG" -ge 1 ]; then
           PGSQL_VACUUM_DELAY=$OPTARG
@@ -96,6 +91,8 @@ parse_option() {
           echo "$( date +'%Y-%m-%d %H:%M:%S' ) Invalid number for vacuum delay in minute(s)."
           exit 1
         fi ;;
+
+      g) GENERIC_COPY="Y" ;;
 
       ?) usage; exit 1 ;;
 
@@ -108,15 +105,14 @@ parse_option() {
 }
 
 usage() {
-  echo -e "\nUsage: $0 [-t <snapshot.json>] [-s <config.json>] [-b <backup directory>] [-d <days to keep>] [-r <round>] [-g] [-v] [-m <vacuum delay>]\n"
+  echo -e "\nUsage: $0 [-t <snapshot.json>] [-s <config.json>] [-b <backup directory>] [-d <days to keep>] [-r <round>] [-g] [-m <vacuum delay>]\n"
   echo " -t <snapshot.json>        -- config.json to use for creating the snapshot"
   echo " -s <config.json>          -- config.json used by the target database"
   echo " -b <backup directory>     -- Backup directory to output into. Default is ./backups"
   echo " -d <days to keep>         -- Days to keep backups. Default is 7"
   echo " -r <round>                -- Round to end the snapshot at. Default is highest"
-  echo " -g                        -- Make a copy of backup file named blockchain.db.gz"
-  echo " -v                        -- Use extra pgsql vacuum commands"
   echo " -m <vacuum delay>         -- Delay in minute(s) between each vacuum of mem_round table."
+  echo " -g                        -- Make a copy of backup file named blockchain.db.gz"
   echo ''
 }
 
@@ -145,10 +141,8 @@ mkdir -p "$BACKUP_LOCATION" &> /dev/null
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Deleting snapshots older then $DAYS_TO_KEEP day(s) in $BACKUP_LOCATION"
 find "$BACKUP_LOCATION" -name "${SOURCE_DB_NAME}*.gz" -mtime +"$DAYS_TO_KEEP" -exec rm {} \;
 
-if [ "$PGSQL_VACUUM" == "Y" ] 2> /dev/null; then
-  echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Executing vacuum on database '$SOURCE_DB_NAME' before copy"
-  vacuumdb --analyze --full "$SOURCE_DB_NAME" &> /dev/null
-fi
+echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Executing vacuum on database '$SOURCE_DB_NAME' before copy"
+vacuumdb --analyze --full "$SOURCE_DB_NAME" &> /dev/null
 
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Cleaning old snapshot instance, database and logs"
 bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
@@ -174,14 +168,12 @@ until tail -n10 "$LOG_LOCATION" | (grep -q "Snapshot finished"); do
   fi
   
   MINUTES=$(( MINUTES + 1 ))
-  if [ "$PGSQL_VACUUM" == "Y" ] 2> /dev/null; then
-    if (( MINUTES % PGSQL_VACUUM_DELAY == 0 )) 2> /dev/null; then
-      echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Executing vacuum on table 'mem_round' of database '$TARGET_DB_NAME'"
-      DBSIZE1=$(( $( ./pgsql/bin/psql -d "$TARGET_DB_NAME" -t -c "select pg_database_size('$TARGET_DB_NAME');" | xargs ) / 1024 / 1024 ))
-      vacuumdb --analyze --full --table 'mem_round' "$TARGET_DB_NAME" &> /dev/null
-      DBSIZE2=$(( $( ./pgsql/bin/psql -d "$TARGET_DB_NAME" -t -c "select pg_database_size('$TARGET_DB_NAME');" | xargs ) / 1024 / 1024 ))
-      echo -e "$( date +'%Y-%m-%d %H:%M:%S' ) Vacuum completed, database size: $DBSIZE1 MB => $DBSIZE2 MB"
-    fi
+  if (( MINUTES % PGSQL_VACUUM_DELAY == 0 )) 2> /dev/null; then
+    echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Executing vacuum on table 'mem_round' of database '$TARGET_DB_NAME'"
+    DBSIZE1=$(( $( ./pgsql/bin/psql -d "$TARGET_DB_NAME" -t -c "select pg_database_size('$TARGET_DB_NAME');" | xargs ) / 1024 / 1024 ))
+    vacuumdb --analyze --full --table 'mem_round' "$TARGET_DB_NAME" &> /dev/null
+    DBSIZE2=$(( $( ./pgsql/bin/psql -d "$TARGET_DB_NAME" -t -c "select pg_database_size('$TARGET_DB_NAME');" | xargs ) / 1024 / 1024 ))
+    echo -e "$( date +'%Y-%m-%d %H:%M:%S' ) Vacuum completed, database size: $DBSIZE1 MB => $DBSIZE2 MB"
   fi
 done
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Snapshot verification process completed"
@@ -189,10 +181,8 @@ echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Snapshot verification process complete
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Deleting data on table 'peers' of database '$TARGET_DB_NAME'"
 psql -d "$TARGET_DB_NAME" -c 'delete from peers;' &> /dev/null
 
-if [ "$PGSQL_VACUUM" == "Y" ] 2> /dev/null; then
-  echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Executing vacuum on database '$TARGET_DB_NAME' before dumping"
-  vacuumdb --analyze --full "$TARGET_DB_NAME" &> /dev/null
-fi
+echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Executing vacuum on database '$TARGET_DB_NAME' before dumping"
+vacuumdb --analyze --full "$TARGET_DB_NAME" &> /dev/null
 
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Dumping snapshot database to gzip file"
 HEIGHT="$(psql -d lisk_snapshot -t -c 'select height from blocks order by height desc limit 1;' | xargs)"
