@@ -74,8 +74,8 @@ parse_option() {
           echo "Invalid number for days to keep."
           exit 1
         fi ;;
-		
-      r)
+
+		r)
         if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
           SNAPSHOT_ROUND="$OPTARG"
         elif [ "$OPTARG" == "highest" ]; then
@@ -98,11 +98,11 @@ parse_option() {
         fi ;;
 
       ?) usage; exit 1 ;;
-	  
+
       :) echo "$( date +'%Y-%m-%d %H:%M:%S' ) Missing option argument for -$OPTARG" >&2; exit 1 ;;
 
       *) echo "$( date +'%Y-%m-%d %H:%M:%S' ) Unimplemented option: -$OPTARG" >&2; exit 1 ;;
-	  
+
     esac
   done
 }
@@ -168,20 +168,20 @@ until tail -n10 "$LOG_LOCATION" | (grep -q "Snapshot finished"); do
   
   if [ "$( stat --format=%Y "$LOG_LOCATION" )" -le $(( $(date +%s) - ( STALL_THRESHOLD_CURRENT * 60 ) )) ]; then
     echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Snapshot process is stalled for $STALL_THRESHOLD_CURRENT minutes, cleaning up and exiting"
-	bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
-	dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
+    bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
+    dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
     exit 1
   fi
   
   MINUTES=$(( MINUTES + 1 ))
   if [ "$PGSQL_VACUUM" == "Y" ] 2> /dev/null; then
-	if (( MINUTES % PGSQL_VACUUM_DELAY == 0 )) 2> /dev/null; then
+    if (( MINUTES % PGSQL_VACUUM_DELAY == 0 )) 2> /dev/null; then
       echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Executing vacuum on table 'mem_round' of database '$TARGET_DB_NAME'"
       DBSIZE1=$(( $( ./pgsql/bin/psql -d "$TARGET_DB_NAME" -t -c "select pg_database_size('$TARGET_DB_NAME');" | xargs ) / 1024 / 1024 ))
       vacuumdb --analyze --full --table 'mem_round' "$TARGET_DB_NAME" &> /dev/null
       DBSIZE2=$(( $( ./pgsql/bin/psql -d "$TARGET_DB_NAME" -t -c "select pg_database_size('$TARGET_DB_NAME');" | xargs ) / 1024 / 1024 ))
       echo -e "$( date +'%Y-%m-%d %H:%M:%S' ) Vacuum completed, database size: $DBSIZE1 MB => $DBSIZE2 MB"
-	fi
+    fi
   fi
 done
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Snapshot verification process completed"
