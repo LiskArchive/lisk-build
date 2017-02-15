@@ -1,5 +1,14 @@
 #!/bin/bash
 
+### crontab example(s) ########################################################
+
+# Production
+#*/5 * * * * /usr/bin/bash /opt/lisk/client/lisk_snapshot.sh  -b /opt/lisk/backup -d 2 -g > /dev/null 2>&1
+
+# Debug
+#*/2 * * * * /usr/bin/bash /opt/lisk/client/lisk_snapshot.sh  -b /opt/lisk/backup -g  > /opt/lisk/client/logs/snapshot_cron."`date +\%Y\%m\%d_\%H\%M\%S`".log 2>&1
+
+
 ### Init. Env. ################################################################
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
@@ -28,9 +37,13 @@ GENERIC_COPY="N"
 
 PGSQL_VACUUM_DELAY=3
 
+# Not configurable via parameter(s).
+
 STALL_THRESHOLD_PREVIOUS=20
 STALL_THRESHOLD_CURRENT=10
 
+LOCK_LOCATION="$(pwd)/locks"
+LOCK_FILE="$LOCK_LOCATION/snapshot.lock"
 
 ### Function(s) ###############################################################
 
@@ -123,31 +136,33 @@ parse_option "$@"
 
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Checking for existing snapshot operation"
 
-bash lisk.sh status -c "$SNAPSHOT_CONFIG"
-
-if [ $? == 1 ]; then
+if [ ! -f $LOCK_FILE ]; then
   echo "√ Previous snapshot is not runnning. Proceeding."
 else
   if [ "$( stat --format=%Y "$LOG_LOCATION" )" -le $(( $(date +%s) - ( STALL_THRESHOLD_PREVIOUS * 60 ) )) ]; then
     echo "√ Previous snapshot is stalled for $STALL_THRESHOLD_PREVIOUS minutes, terminating and continuing with a new snapshot"
     bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG"
+    rm -f $LOCK_FILE &> /dev/null
   else
     echo "X Previous snapshot is in progress, aborting."
     exit 1
   fi
 fi
 
-mkdir -p "$BACKUP_LOCATION" &> /dev/null
+mkdir -p "$LOCK_LOCATION" &> /dev/null
+touch $LOCK_FILE &> /dev/null
+
+echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Cleaning old snapshot instance, database and logs"
+bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
+cat /dev/null > "$LOG_LOCATION"
+dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
+
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Deleting snapshots older then $DAYS_TO_KEEP day(s) in $BACKUP_LOCATION"
+mkdir -p "$BACKUP_LOCATION" &> /dev/null
 find "$BACKUP_LOCATION" -name "${SOURCE_DB_NAME}*.gz" -mtime +"$DAYS_TO_KEEP" -exec rm {} \;
 
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Executing vacuum on database '$SOURCE_DB_NAME' before copy"
 vacuumdb --analyze --full "$SOURCE_DB_NAME" &> /dev/null
-
-echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Cleaning old snapshot instance, database and logs"
-bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
-dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
-cat /dev/null > "$LOG_LOCATION"
 
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Copying active database '$SOURCE_DB_NAME' to snapshot database '$TARGET_DB_NAME'"
 createdb "$TARGET_DB_NAME" &> /dev/null
@@ -164,6 +179,7 @@ until tail -n10 "$LOG_LOCATION" | (grep -q "Snapshot finished"); do
     echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Snapshot process is stalled for $STALL_THRESHOLD_CURRENT minutes, cleaning up and exiting"
     bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
     dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
+    rm -f $LOCK_FILE &> /dev/null
     exit 1
   fi
   
@@ -197,6 +213,7 @@ fi
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Cleaning up"
 bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
 dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
+rm -f $LOCK_FILE &> /dev/null
 
 echo -e "\n$( date +'%Y-%m-%d %H:%M:%S' ) Snapshot Complete"
 exit 0
