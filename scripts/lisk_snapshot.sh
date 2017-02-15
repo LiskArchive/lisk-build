@@ -75,7 +75,7 @@ parse_option() {
           exit 1
         fi ;;
 
-		r)
+      r)
         if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
           SNAPSHOT_ROUND="$OPTARG"
         elif [ "$OPTARG" == "highest" ]; then
