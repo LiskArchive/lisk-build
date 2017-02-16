@@ -230,7 +230,7 @@ start_lisk() {
     check_status
     exit 1
   else
-    forever start -u lisk -a -l "$LOG_FILE" --pidFile "$PID_FILE" -m 1 app.js -c "$LISK_CONFIG" "$SEED_PEERS" "$SYNC_PEERS" >> "$SH_LOG_FILE" 2>&1
+    forever start -u lisk -a -l "$LOG_FILE" --pidFile "$PID_FILE" -m 1 app.js -c "$LISK_CONFIG" "$SEED_PEERS" >> "$SH_LOG_FILE" 2>&1
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully."
       sleep 3
@@ -318,7 +318,7 @@ help() {
 
 parse_option() {
   OPTIND=2
-  while getopts ":s:c:f:u:l:x:y:0" OPT; do
+  while getopts ":s:c:f:u:l:x:0" OPT; do
     case "$OPT" in
       s)
         if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
@@ -353,9 +353,6 @@ parse_option() {
 
       x)
         SEED_PEERS="-x $OPTARG"
-      ;;
-      y)
-        SYNC_PEERS="-y $OPTARG"
       ;;
 
       0)
