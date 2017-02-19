@@ -163,7 +163,7 @@ dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
 
 echo -e "\n$(now) Deleting snapshots older then $DAYS_TO_KEEP day(s) in $BACKUP_LOCATION"
 mkdir -p "$BACKUP_LOCATION" &> /dev/null
-find "$BACKUP_LOCATION" -name "${SOURCE_DB_NAME}*.gz" -mtime +"$DAYS_TO_KEEP" -exec rm {} \;
+find "$BACKUP_LOCATION" -name "${SOURCE_DB_NAME}*.gz" -mtime +"$(( DAYS_TO_KEEP - 1 ))" -exec rm {} \;
 
 echo -e "\n$(now) Executing vacuum on database '$SOURCE_DB_NAME' before copy"
 vacuumdb --analyze --full "$SOURCE_DB_NAME" &> /dev/null
