@@ -10,7 +10,7 @@ if [ ! -z "$1" ]; then
   ARCH="$1"
 fi
 
-VERSION="0.5.2"
+VERSION="0.6.0"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
