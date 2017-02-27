@@ -10,7 +10,7 @@ if [ ! -z "$1" ]; then
   ARCH="$1"
 fi
 
-VERSION="0.5.2"
+VERSION="0.6.0"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
@@ -24,15 +24,15 @@ LISK_NETWORK="main"
 LISK_URL="http://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
 
-LISK_NODE_DIR="lisk-node-6.9.4-lisk"
+LISK_NODE_DIR="lisk-node-6.9.5-lisk"
 LISK_NODE_FILE="$LISK_NODE_DIR.tar.gz"
-LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v6.9.4-lisk.tar.gz"
+LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v6.9.5-lisk.tar.gz"
 LISK_NODE_OUT="out/Release/node"
 LISK_NODE_CONFIG=""
 
-NODE_DIR="node-v6.9.4"
+NODE_DIR="node-v6.9.5"
 NODE_FILE="$NODE_DIR.tar.gz"
-NODE_URL="https://nodejs.org/download/release/v6.9.4/$NODE_FILE"
+NODE_URL="https://nodejs.org/download/release/v6.9.5/$NODE_FILE"
 NODE_OUT="compiled"
 NODE_CONFIG=""
 
