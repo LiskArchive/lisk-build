@@ -349,23 +349,31 @@ usage() {
   echo " -d <DIRECTORY> -- install location"
   echo " -r <RELEASE>   -- choose main or test"
   echo " -n             -- install ntp if not installed"
-  echo " -h 	          -- rebuild instead of copying database"
+  echo " -h 	        -- rebuild instead of copying database"
   echo " -u <URL>       -- URL to rebuild from - Requires -h"
-  echo " -0             -- Forces sync from 0"
+  echo " -0 <yes|no>    -- Forces sync from 0"
 }
 
 parse_option() {
   OPTIND=2
-  while getopts :d:r:u:hn0 OPT; do
+  while getopts :d:r:u:hn0: OPT; do
      case "$OPT" in
        d) LISK_LOCATION="$OPTARG" ;;
        r) RELEASE="$OPTARG" ;;
        n) INSTALL_NTP=1 ;;
        h) REBUILD=true ;;
        u) URL="$OPTARG" ;;
-       0) SYNC=yes ;;
+       0) SYNC="$OPTARG" ;;
      esac
    done
+ 
+ if [ "$SYNC" ]; then
+    if [[ "$SYNC" != "no" && "$SYNC" != "yes" ]]; then
+      echo "-0 <yes|no>"
+      usage
+      exit 1
+    fi
+  fi
 
   if [ "$RELEASE" ]; then
     if [[ "$RELEASE" != test && "$RELEASE" != "main" && "$RELEASE" != "dev" ]]; then
