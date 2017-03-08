@@ -40,20 +40,20 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
   cd ../ || exit 2
 fi
 
-//echo "Building libsodium..."
-//echo "--------------------------------------------------------------------------"
-//if [ ! -f "$SODIUM_FILE" ]; then
-//  exec_cmd "wget $SODIUM_URL -O $SODIUM_FILE"
-//fi
-//if [ ! -f "$SODIUM_DIR/$SODIUM_OUT/lib/libsodium.a" ]; then
-//  exec_cmd "rm -rf $SODIUM_DIR"
-//  exec_cmd "tar -zxvf $SODIUM_FILE"
-//  cd "$SODIUM_DIR" || exit 2
-//  exec_cmd "./configure --enable-static --enable-shared --with-pic --prefix=$(pwd)/$SODIUM_OUT $SODIUM_CONFIG"
-//  exec_cmd "make --jobs=$JOBS"
-//  exec_cmd "make install"
-//  cd ../ || exit 2
-//fi
+#echo "Building libsodium..."
+#echo "--------------------------------------------------------------------------"
+#if [ ! -f "$SODIUM_FILE" ]; then
+#  exec_cmd "wget $SODIUM_URL -O $SODIUM_FILE"
+#fi
+#if [ ! -f "$SODIUM_DIR/$SODIUM_OUT/lib/libsodium.a" ]; then
+#  exec_cmd "rm -rf $SODIUM_DIR"
+#  exec_cmd "tar -zxvf $SODIUM_FILE"
+#  cd "$SODIUM_DIR" || exit 2
+#  exec_cmd "./configure --enable-static --enable-shared --with-pic --prefix=$(pwd)/$SODIUM_OUT $SODIUM_CONFIG"
+#  exec_cmd "make --jobs=$JOBS"
+#  exec_cmd "make install"
+#  cd ../ || exit 2
+#fi
 
 echo "Building lisk..."
 echo "--------------------------------------------------------------------------"
@@ -67,26 +67,26 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "cp -vR $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
   exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
 
-//  echo "Preinstalling node-sodium..."
-//  echo "--------------------------------------------------------------------------"
-//  exec_cmd "rm -rf $NODE_SODIUM_DIR"
-//  if [ ! -f "$NODE_SODIUM_FILE" ]; then
-//    exec_cmd "wget $NODE_SODIUM_URL -O $NODE_SODIUM_FILE"
-// fi
-//  exec_cmd "tar -zxvf $NODE_SODIUM_FILE"
-//
-//  exec_cmd "mkdir -p $NODE_SODIUM_DIR/deps/build"
-//  exec_cmd "cp -vR $SODIUM_DIR/$SODIUM_OUT/* $NODE_SODIUM_DIR/deps/build/"
+#  echo "Preinstalling node-sodium..."
+#  echo "--------------------------------------------------------------------------"
+#  exec_cmd "rm -rf $NODE_SODIUM_DIR"
+#  if [ ! -f "$NODE_SODIUM_FILE" ]; then
+#    exec_cmd "wget $NODE_SODIUM_URL -O $NODE_SODIUM_FILE"
+#  fi
+#  exec_cmd "tar -zxvf $NODE_SODIUM_FILE"
 
-//  cd "$NODE_SODIUM_DIR" || exit 2
-//  exec_cmd "npm install --production $LISK_CONFIG"
-//  cd ../ || exit 2
+#  exec_cmd "mkdir -p $NODE_SODIUM_DIR/deps/build"
+#  exec_cmd "cp -vR $SODIUM_DIR/$SODIUM_OUT/* $NODE_SODIUM_DIR/deps/build/"
 
-//  exec_cmd "mkdir -p $BUILD_NAME/node_modules/sodium"
-//  exec_cmd "cp -vR $NODE_SODIUM_DIR/* $BUILD_NAME/node_modules/sodium/"
+#  cd "$NODE_SODIUM_DIR" || exit 2
+#  exec_cmd "npm install --production $LISK_CONFIG"
+#  cd ../ || exit 2
+#
+#  exec_cmd "mkdir -p $BUILD_NAME/node_modules/sodium"
+#  exec_cmd "cp -vR $NODE_SODIUM_DIR/* $BUILD_NAME/node_modules/sodium/"
 
-//  cd "$BUILD_NAME" || exit 2
-//  exec_cmd "sed $SED_OPTS 's/LiskHQ\/node-sodium#07ba174/=1.2.3/' package.json"
+ cd "$BUILD_NAME" || exit 2
+#  exec_cmd "sed $SED_OPTS 's/LiskHQ\/node-sodium#07ba174/=1.2.3/' package.json"
   exec_cmd "npm install --production $LISK_CONFIG"
   chrpath -d "./node_modules/sodium/deps/libsodium/test/default/.libs/*"
   cd ../ || exit 2
