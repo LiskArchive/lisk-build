@@ -88,7 +88,8 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
  cd "$BUILD_NAME" || exit 2
 #  exec_cmd "sed $SED_OPTS 's/LiskHQ\/node-sodium#07ba174/=1.2.3/' package.json"
   exec_cmd "npm install --production $LISK_CONFIG"
-  chrpath -d "./node_modules/sodium/deps/libsodium/test/default/.libs/*"
+  echo "changing rpath"
+  chrpath -d "node_modules/sodium/deps/libsodium/test/default/.libs/*"
   cd ../ || exit 2
 fi
 
