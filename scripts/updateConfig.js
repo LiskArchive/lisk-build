@@ -16,6 +16,7 @@ if (program.old) {
 	delete oldConfig.version;
 	delete oldConfig.minVersion;
 	delete oldConfig.forging.force;
+	delete oldConfig.peers.list;
 
 	if (oldConfig.db.user == null) {
 		delete oldConfig.db.user;
