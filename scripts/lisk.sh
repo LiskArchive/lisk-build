@@ -13,8 +13,7 @@ if [ ! -f "$(pwd)/app.js" ]; then
   exit 1
 fi
 
-# shellcheck disable=SC2050
-if [ "\$USER" == "root" ]; then
+if [ "$USER" == "root" ]; then
   echo "Error: Lisk should not be run be as root. Exiting."
   exit 1
 fi
