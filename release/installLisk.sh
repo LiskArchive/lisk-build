@@ -16,8 +16,7 @@ export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 
 # Verification Checks
-# shellcheck disable=SC2050
-if [ "\$USER" == "root" ]; then
+if [ "$USER" == "root" ]; then
   echo "Error: Lisk should not be installed be as root. Exiting."
   exit 1
 fi
@@ -366,7 +365,7 @@ parse_option() {
        0) SYNC="$OPTARG" ;;
      esac
    done
- 
+
  if [ "$SYNC" ]; then
     if [[ "$SYNC" != "no" && "$SYNC" != "yes" ]]; then
       echo "-0 <yes|no>"
