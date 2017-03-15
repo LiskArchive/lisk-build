@@ -30,6 +30,14 @@ if (program.new) {
 	newConfig = JSON.parse(fs.readFileSync(program.new, 'utf8'));
 	newConfig = extend(true, {}, newConfig, oldConfig);
 
+	// Migrate peers blacklist between <= 0.6.0 and >= 0.7.0
+	if (newConfig.peers && newConfig.peers.access) {
+		if (Array.isArray(newConfig.peers.blackList) && Array.isArray(newConfig.peers.access.blackList)) {
+			newConfig.peers.access.blackList = newConfig.peers.blackList;
+			delete newConfig.peers.blackList;
+		}
+	}
+
 	fs.writeFile(program.new, JSON.stringify(newConfig, null, 4), function (err) {
 		if (err) {
 			throw err;
