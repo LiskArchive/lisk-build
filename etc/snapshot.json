@@ -22,7 +22,9 @@
         ]
     },
     "api": {
+      "enabled": true,
         "access": {
+            "public": false,
             "whiteList": ["127.0.0.1"]
         },
         "options": {
@@ -35,8 +37,11 @@
         }
     },
     "peers": {
+        "enabled": false,
         "list": [],
-        "blackList": [],
+        "access": {
+            "blackList": []
+        },
         "options": {
             "limits": {
                 "max": 0,
@@ -46,9 +51,6 @@
             },
             "timeout": 5000
         }
-    },
-    "syncPeers": {
-        "list": []
     },
     "broadcasts": {
         "broadcastInterval": 5000,
