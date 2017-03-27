@@ -25,6 +25,7 @@ TARGET_DB_NAME="$(grep "database" "$SNAPSHOT_CONFIG" | cut -f 4 -d '"')"
 LOG_LOCATION="$(grep "logFileName" "$SNAPSHOT_CONFIG" | cut -f 4 -d '"')"
 
 LISK_CONFIG="config.json"
+PM2_CONFIG="$(pwd)/etc/pm2-snapshot.json"
 SOURCE_DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
 
 BACKUP_LOCATION="$(pwd)/backups"
@@ -157,7 +158,7 @@ mkdir -p "$LOCK_LOCATION" &> /dev/null
 touch "$LOCK_FILE" &> /dev/null
 
 echo -e "\n$(now) Cleaning old snapshot instance, database and logs"
-bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
+bash lisk.sh stop_node -p "$PM2_CONFIG" -c "$SNAPSHOT_CONFIG" &> /dev/null
 cat /dev/null > "$LOG_LOCATION"
 dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
 
@@ -173,12 +174,12 @@ createdb "$TARGET_DB_NAME" &> /dev/null
 pg_dump "$SOURCE_DB_NAME" | psql "$TARGET_DB_NAME" &> /dev/null
 
 echo -e "\n$(now) Beginning snapshot verification process"
-bash lisk.sh snapshot -s "$SNAPSHOT_ROUND" -c "$SNAPSHOT_CONFIG"
+bash lisk.sh start -s "$SNAPSHOT_ROUND" -c "$SNAPSHOT_CONFIG" -p "$PM2_CONFIG"
 
 MINUTES=0
 until tail -n10 "$LOG_LOCATION" | (grep -q "Snapshot finished"); do
   sleep 60
-  
+
   if [ "$( stat --format=%Y "$LOG_LOCATION" )" -le $(( $(date +%s) - ( STALL_THRESHOLD_CURRENT * 60 ) )) ]; then
     echo -e "\n$(now) Snapshot process is stalled for $STALL_THRESHOLD_CURRENT minutes, cleaning up and exiting"
     bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
@@ -186,7 +187,7 @@ until tail -n10 "$LOG_LOCATION" | (grep -q "Snapshot finished"); do
     rm -f "$LOCK_FILE" &> /dev/null
     exit 1
   fi
-  
+
   MINUTES=$(( MINUTES + 1 ))
   if (( MINUTES % PGSQL_VACUUM_DELAY == 0 )) 2> /dev/null; then
     echo -e "\n$(now) Executing vacuum on table 'mem_round' of database '$TARGET_DB_NAME'"
@@ -215,7 +216,7 @@ if [ "$GENERIC_COPY" == "Y" ] 2> /dev/null; then
 fi
 
 echo -e "\n$(now) Cleaning up"
-bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
+bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" -p "$PM2_CONFIG" &> /dev/null
 dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
 rm -f "$LOCK_FILE" &> /dev/null
 

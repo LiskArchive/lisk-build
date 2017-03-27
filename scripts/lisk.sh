@@ -19,6 +19,7 @@ if [ "$USER" == "root" ]; then
 fi
 
 LISK_CONFIG=config.json
+PM2_CONFIG=pm2-lisk.json
 
 LOGS_DIR="$(pwd)/logs"
 PIDS_DIR="$(pwd)/pids"
@@ -30,9 +31,6 @@ DB_DATA="$(pwd)/pgsql/data"
 DB_LOG_FILE="$LOGS_DIR/pgsql.log"
 DB_SNAPSHOT="blockchain.db.gz"
 DB_DOWNLOAD=Y
-
-LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
-PID_FILE="$PIDS_DIR/$DB_NAME.pid"
 
 SH_LOG_FILE="$LOGS_DIR/lisk.out"
 
@@ -198,7 +196,7 @@ stop_postgresql() {
       else
         echo "X Postgresql failed to stop."
       fi
-      sleep .5
+      sleep 1
       STOP_PG=$((STOP_PG+1))
     done
     if pgrep -x "postgres" >> "$SH_LOG_FILE" 2>&1; then
@@ -208,58 +206,21 @@ stop_postgresql() {
   fi
 }
 
-snapshot_lisk() {
-  check_pid
-  if  [[ "$STATUS" != 1 ]] >> "$SH_LOG_FILE" 2>&1; then
-    check_status
-    exit 1
-  else
-    forever start -u lisk -a -l "$LOG_FILE" --pidFile "$PID_FILE" -m 1 app.js -c "$LISK_CONFIG" -s "$SNAPSHOT" >> "$SH_LOG_FILE" 2>&1
-    if [ $? == 0 ]; then
-      echo "√ Lisk started successfully in snapshot mode."
-    else
-      echo "X Failed to start Lisk."
-    fi
-  fi
-}
-
 start_lisk() {
-    check_pid
-  if [[ "$STATUS" != 1 ]] > /dev/null 2>&1; then
-    check_status
-    exit 1
-  else
-    forever start -u lisk -a -l "$LOG_FILE" --pidFile "$PID_FILE" -m 1 app.js -c "$LISK_CONFIG" "$SEED_PEERS" >> "$SH_LOG_FILE" 2>&1
+    pm2 startOrRestart $PM2_CONFIG -- -c "$LISK_CONFIG" "$SEED_PEERS" "$SNAPSHOT" >> "$SH_LOG_FILE"
     if [ $? == 0 ]; then
       echo "√ Lisk started successfully."
-      sleep 3
-      check_pid
       check_status
     else
       echo "X Failed to start Lisk."
     fi
-  fi
 }
 
 stop_lisk() {
-  check_pid
-  if [[ "$STATUS" == 0 ]] > /dev/null 2>&1; then
-    STOP_LISK=0
-    while [[ "$STOP_LISK" -lt 5 ]] >> "$SH_LOG_FILE" 2>&1; do
-      forever stop -t "$PID" --killSignal=SIGTERM >> "$SH_LOG_FILE" 2>&1
-      if [ $? !=  0 ]; then
-        echo "X Failed to stop Lisk."
-      else
-        echo "√ Lisk stopped successfully."
-        break
-      fi
-      sleep .5
-      STOP_LISK=$((STOP_LISK+1))
-    done
-  else
-    echo "√ Lisk is not running."
-  fi
+    pm2 stop $PM2_CONFIG >> "$SH_LOG_FILE"
+    echo "√ Lisk stopped successfully."
 }
+
 
 rebuild_lisk() {
   create_database
@@ -268,32 +229,17 @@ rebuild_lisk() {
 }
 
 check_status() {
-  if [ -f "$PID_FILE" ] && [ ! -z "$PID" ]; then
-    echo '√ Lisk is running as PID: '"$PID"
+  PM2_APP="$(grep "name" $PM2_CONFIG | cut -d'"' -f4)"
+  pm2 describe $PM2_APP
+
+  if [ "$?" -eq 0  ]; then
     blockheight
     return 0
-  else
-    echo "X Lisk is not running."
-    exit 1
-  fi
-}
-
-check_pid() {
-  if [ -f "$PID_FILE" ]; then
-  read -r PID < "$PID_FILE" 2>&1 > /dev/null
-  fi
-  if [ ! -z "$PID" ]; then
-    ps -p "$PID" > /dev/null 2>&1
-    STATUS=$?
-  else
-    STATUS=1
   fi
 }
 
 tail_logs() {
-  if [ -f "$LOG_FILE" ]; then
-    tail -f "$LOG_FILE"
-  fi
+pm2 logs
 }
 
 help() {
@@ -308,7 +254,6 @@ help() {
   echo -e "start_db                              Starts the PostgreSQL database"
   echo -e "stop_db                               Stops the PostgreSQL database"
   echo -e "coldstart                             Creates the PostgreSQL database and configures config.json for Lisk"
-  echo -e "snapshot -s #                         Starts Lisk in snapshot mode"
   echo -e "logs                                  Displays and tails logs for Lisk"
   echo -e "status                                Displays the status of the PID associated with Lisk"
   echo -e "help                                  Displays this message"
@@ -317,13 +262,13 @@ help() {
 
 parse_option() {
   OPTIND=2
-  while getopts ":s:c:f:u:l:x:0" OPT; do
+  while getopts ":s:c:p:f:u:l:x:0" OPT; do
     case "$OPT" in
       s)
         if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
-          SNAPSHOT="$OPTARG"
+          SNAPSHOT="-s $OPTARG"
         elif [ "$OPTARG" == "highest" ]; then
-          SNAPSHOT="$OPTARG"
+          SNAPSHOT="-s $OPTARG"
         else
           echo "Snapshot flag must be a greater than 0 or set to highest"
           exit 1
@@ -333,10 +278,17 @@ parse_option() {
         if [ -f "$OPTARG" ]; then
           LISK_CONFIG="$OPTARG"
           DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
-          LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
           PID_FILE="$PIDS_DIR/$DB_NAME.pid"
         else
           echo "Config.json not found. Please verify the file exists and try again."
+          exit 1
+        fi ;;
+
+      p)
+        if [ -f "$OPTARG" ]; then
+          PM2_CONFIG="$OPTARG"
+        else
+          echo "PM2-config.json not found. Please verify the file exists and try again."
           exit 1
         fi ;;
 
@@ -373,12 +325,6 @@ case $1 in
 "coldstart")
   coldstart_lisk
   ;;
-"snapshot")
-  stop_lisk
-  start_postgresql
-  sleep 2
-  snapshot_lisk
-  ;;
 "start_node")
   start_lisk
   ;;
@@ -395,8 +341,6 @@ case $1 in
   stop_postgresql
   ;;
 "reload")
-  stop_lisk
-  sleep 2
   start_lisk
   ;;
 "rebuild")
@@ -414,7 +358,6 @@ case $1 in
   stop_postgresql
   ;;
 "status")
-  check_pid
   check_status
   ;;
 "logs")
@@ -426,7 +369,7 @@ case $1 in
 *)
   echo "Error: Unrecognized command."
   echo ""
-  echo "Available commands are: start stop start_node stop_node start_db stop_db reload rebuild coldstart snapshot logs status help"
+  echo "Available commands are: start stop start_node stop_node start_db stop_db reload rebuild coldstart logs status help"
   help
   ;;
 esac
