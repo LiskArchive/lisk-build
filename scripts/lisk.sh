@@ -18,15 +18,14 @@ if [ "$USER" == "root" ]; then
   exit 1
 fi
 
-LISK_CONFIG=config.json
-PM2_CONFIG=pm2-lisk.json
+LISK_CONFIG="config.json"
+PM2_CONFIG="pm2-lisk.json"
 PM2_APP="$(grep "name" $PM2_CONFIG | cut -d'"' -f4)" >> /dev/null
 
 LOGS_DIR="$(pwd)/logs"
-PIDS_DIR="$(pwd)/pids"
 
 DB_NAME="$(grep "database" $LISK_CONFIG | cut -f 4 -d '"')"
-DB_USER=$USER
+DB_USER="$USER"
 DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
 DB_LOG_FILE="$LOGS_DIR/pgsql.log"
@@ -235,9 +234,9 @@ rebuild_lisk() {
 }
 
 check_status() {
-  PM2_PID="$(pm2 describe $PM2_APP | grep "pid path" | cut -d' ' -f14)" >> "$SH_LOG_FILE" 2>&1> /dev/null
+  PM2_PID="$(pm2 describe "$PM2_APP" | grep "pid path" | cut -d' ' -f14)" >> "$SH_LOG_FILE" 2>&1> /dev/null
 
-  pm2 describe $PM2_APP >> "$SH_LOG_FILE"
+  pm2 describe "$PM2_APP" >> "$SH_LOG_FILE"
 
   check_pid
   if [ "$STATUS" -eq 0  ]; then
@@ -290,7 +289,7 @@ parse_option() {
       p)
         if [ -f "$OPTARG" ]; then
           PM2_CONFIG="$OPTARG"
-          PM2_APP="$(grep "name" $PM2_CONFIG | cut -d'"' -f4)"
+          PM2_APP="$(grep "name" "$PM2_CONFIG" | cut -d'"' -f4)"
         else
           echo "PM2-config.json not found. Please verify the file exists and try again."
           exit 1
