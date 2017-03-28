@@ -20,11 +20,11 @@ fi
 
 LISK_CONFIG="config.json"
 PM2_CONFIG="$(pwd)/etc/pm2-lisk.json"
-PM2_APP="$(grep "name" $PM2_CONFIG | cut -d'"' -f4)" >> /dev/null
+PM2_APP="$(grep "name" "$PM2_CONFIG" | cut -d'"' -f4)" >> /dev/null
 
 LOGS_DIR="$(pwd)/logs"
 
-DB_NAME="$(grep "database" $LISK_CONFIG | cut -f 4 -d '"')"
+DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
 DB_USER="$USER"
 DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
@@ -207,7 +207,7 @@ stop_postgresql() {
 }
 
 start_lisk() {
-  pm2 start $PM2_CONFIG  >> "$SH_LOG_FILE"
+  pm2 start "$PM2_CONFIG"  >> "$SH_LOG_FILE"
   if [ $? == 0 ]; then
     echo "√ Lisk started successfully."
     check_status
