@@ -48,7 +48,7 @@ LOCK_FILE="$LOCK_LOCATION/snapshot.lock"
 
 parse_option() {
   OPTIND=1
-  while getopts :t:s:b:d:r:m:g OPT; do
+  while getopts :t:s:b:d:m:g OPT; do
     case "$OPT" in
       t)
         if [ -f "$OPTARG" ]; then
