@@ -104,9 +104,9 @@ exec_cmd "cp -vR $NODE_DIR/$NODE_OUT/* $BUILD_NAME/"
 exec_cmd "sed $SED_OPTS \"s%$(head -1 "$NPM_CLI")%#\!.\/bin\/node%g\" $NPM_CLI"
 
 cd "$BUILD_NAME" || exit 2
-exec_cmd "npm install forever"
-exec_cmd "rm -f bin/forever"
-exec_cmd "ln -s ../node_modules/forever/bin/forever bin/forever"
+# shellcheck disable=SC1090
+. "$(pwd)/env.sh"
+exec_cmd "npm install -g pm2"
 cd ../ || exit 2
 
 echo "Stamping build..."

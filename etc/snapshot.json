@@ -5,7 +5,7 @@
     "minVersion": "9.9.9",
     "fileLogLevel": "info",
     "logFileName": "logs/lisk_snapshot.log",
-    "consoleLogLevel": "log",
+    "consoleLogLevel": "info",
     "trustProxy": false,
     "topAccounts": false,
     "db": {
