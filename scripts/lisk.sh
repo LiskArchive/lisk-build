@@ -19,7 +19,7 @@ if [ "$USER" == "root" ]; then
 fi
 
 LISK_CONFIG="config.json"
-PM2_CONFIG="pm2-lisk.json"
+PM2_CONFIG="$(pwd)/etc/pm2-lisk.json"
 PM2_APP="$(grep "name" $PM2_CONFIG | cut -d'"' -f4)" >> /dev/null
 
 LOGS_DIR="$(pwd)/logs"
