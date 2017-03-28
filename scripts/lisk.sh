@@ -261,7 +261,7 @@ check_pid() {
 }
 
 tail_logs() {
-  pm2 logs $PM2_APP
+  pm2 logs "$PM2_APP"
 }
 
 help() {
