@@ -76,7 +76,7 @@ parse_option() {
         if [ -d "$OPTARG" ]; then
           BACKUP_LOCATION="$OPTARG"
         else
-          echo "$(now) Backup Location invalid. Please verify the folder exists and try again."
+          echo "$(now) Backup location invalid. Please verify the folder exists and try again."
           exit 1
         fi ;;
 
@@ -85,16 +85,6 @@ parse_option() {
           DAYS_TO_KEEP="$OPTARG"
         else
           echo "Invalid number for days to keep."
-          exit 1
-        fi ;;
-
-      r)
-        if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
-          SNAPSHOT_ROUND="$OPTARG"
-        elif [ "$OPTARG" == "highest" ]; then
-          SNAPSHOT_ROUND="$OPTARG"
-        else
-          echo "$(now) Snapshot flag must be a greater than 0 or set to highest"
           exit 1
         fi ;;
 
@@ -124,7 +114,6 @@ usage() {
   echo " -s <config.json>          -- config.json used by the target database"
   echo " -b <backup directory>     -- Backup directory to output into. Default is ./backups"
   echo " -d <days to keep>         -- Days to keep backups. Default is 7"
-  echo " -r <round>                -- Round to end the snapshot at. Default is highest"
   echo " -m <vacuum delay>         -- Delay in minute(s) between each vacuum of mem_round table.  Default is 3"
   echo " -g                        -- Make a copy of backup file named blockchain.db.gz"
   echo ''
@@ -174,7 +163,7 @@ createdb "$TARGET_DB_NAME" &> /dev/null
 pg_dump "$SOURCE_DB_NAME" | psql "$TARGET_DB_NAME" &> /dev/null
 
 echo -e "\n$(now) Beginning snapshot verification process"
-bash lisk.sh start -s "$SNAPSHOT_ROUND" -c "$SNAPSHOT_CONFIG" -p "$PM2_CONFIG"
+bash lisk.sh start -p "$PM2_CONFIG"
 
 MINUTES=0
 until tail -n10 "$LOG_LOCATION" | (grep -q "Snapshot finished"); do
@@ -182,7 +171,7 @@ until tail -n10 "$LOG_LOCATION" | (grep -q "Snapshot finished"); do
 
   if [ "$( stat --format=%Y "$LOG_LOCATION" )" -le $(( $(date +%s) - ( STALL_THRESHOLD_CURRENT * 60 ) )) ]; then
     echo -e "\n$(now) Snapshot process is stalled for $STALL_THRESHOLD_CURRENT minutes, cleaning up and exiting"
-    bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" &> /dev/null
+    bash lisk.sh stop_node -p "$PM2_CONFIG" &> /dev/null
     dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
     rm -f "$LOCK_FILE" &> /dev/null
     exit 1
@@ -216,7 +205,7 @@ if [ "$GENERIC_COPY" == "Y" ] 2> /dev/null; then
 fi
 
 echo -e "\n$(now) Cleaning up"
-bash lisk.sh stop_node -c "$SNAPSHOT_CONFIG" -p "$PM2_CONFIG" &> /dev/null
+bash lisk.sh stop_node -p "$PM2_CONFIG" &> /dev/null
 dropdb --if-exists "$TARGET_DB_NAME" &> /dev/null
 rm -f "$LOCK_FILE" &> /dev/null
 

@@ -1,16 +1,18 @@
 {
         "apps": [{
                 "name": "lisk.snapshot",
-                "max_memory_restart": "1024M",
+                "max_memory_restart": "2048M",
+                "autorestart": false,
                 "log_date_format": "YYYY-MM-DD HH:mm:ss SSS",
                 "script": "app.js",
-                "out_file": "/dev/null",
-                "error_file": "./logs/lisk.app.err",
-                "watch": true,
-                "ignore_watch": ["node_modules", ".git", "logs", "pgsql","pids"],
+                "out_file": "./logs/lisk.snapshot.log",
+                "error_file": "./logs/lisk.snapshot.err",
+                "watch": false,
+                "ignore_watch": ["node_modules", ".git", "logs", "pgsql", "pids", "public"],
                 "cwd": ".",
                 "pid_file": "./pids/lisk.snapshot.pid",
                 "kill_timeout" : 10000,
-                "node_args": "--max_old_space_size=1024"
+                "node_args": "--max_old_space_size=2048",
+                "args": "-c etc/snapshot.json -s highest"
         }]
 }

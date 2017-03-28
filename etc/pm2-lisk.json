@@ -4,13 +4,14 @@
                 "max_memory_restart": "1024M",
                 "log_date_format": "YYYY-MM-DD HH:mm:ss SSS",
                 "script": "app.js",
-                "out_file": "/dev/null",
+                "out_file": "./logs/lisk.app.log",
                 "error_file": "./logs/lisk.app.err",
                 "watch": true,
-                "ignore_watch": ["node_modules", ".git", "logs", "pgsql","pids"],
+                "ignore_watch": ["node_modules", ".git", "logs", "pgsql", "pids"],
                 "cwd": ".",
                 "pid_file": "./pids/lisk.app.pid",
                 "kill_timeout" : 10000,
-                "node_args": "--max_old_space_size=1024"
+                "node_args": "--max_old_space_size=1024",
+                "args": "-c config.json"
         }]
 }

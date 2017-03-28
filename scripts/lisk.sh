@@ -20,6 +20,7 @@ fi
 
 LISK_CONFIG=config.json
 PM2_CONFIG=pm2-lisk.json
+PM2_APP="$(grep "name" $PM2_CONFIG | cut -d'"' -f4)" >> /dev/null
 
 LOGS_DIR="$(pwd)/logs"
 PIDS_DIR="$(pwd)/pids"
@@ -207,20 +208,25 @@ stop_postgresql() {
 }
 
 start_lisk() {
-    pm2 startOrRestart $PM2_CONFIG -- -c "$LISK_CONFIG" "$SEED_PEERS" "$SNAPSHOT" >> "$SH_LOG_FILE"
-    if [ $? == 0 ]; then
-      echo "√ Lisk started successfully."
-      check_status
-    else
-      echo "X Failed to start Lisk."
-    fi
+  pm2 start $PM2_CONFIG  >> "$SH_LOG_FILE"
+  if [ $? == 0 ]; then
+    echo "√ Lisk started successfully."
+    check_status
+  else
+    echo "X Failed to start Lisk."
+  fi
 }
 
 stop_lisk() {
-    pm2 stop $PM2_CONFIG >> "$SH_LOG_FILE"
-    echo "√ Lisk stopped successfully."
+  pm2 delete "$PM2_CONFIG" >> "$SH_LOG_FILE"
+  echo "√ Lisk stopped successfully."
 }
 
+reload_lisk() {
+  echo "Stopping Lisk to reload PM2 config"
+  pm2 delete "$PM2_CONFIG" >> "$SH_LOG_FILE"
+  start_lisk
+}
 
 rebuild_lisk() {
   create_database
@@ -229,22 +235,39 @@ rebuild_lisk() {
 }
 
 check_status() {
-  PM2_APP="$(grep "name" $PM2_CONFIG | cut -d'"' -f4)"
-  pm2 describe $PM2_APP
+  PM2_PID="$(pm2 describe $PM2_APP | grep "pid path" | cut -d' ' -f14)" >> "$SH_LOG_FILE" 2>&1> /dev/null
 
-  if [ "$?" -eq 0  ]; then
+  pm2 describe $PM2_APP >> "$SH_LOG_FILE"
+
+  check_pid
+  if [ "$STATUS" -eq 0  ]; then
+    echo "√ Lisk is running as PID: $PID"
     blockheight
-    return 0
+  else
+    echo "X Lisk is not running"
+    exit 1
+  fi
+}
+
+check_pid() {
+  if [ -f "$PM2_PID" ]; then
+  read -r PID < "$PM2_PID" 2>&1 > /dev/null
+  fi
+  if [ ! -z "$PID" ]; then
+    ps -p "$PID" > /dev/null 2>&1
+    STATUS=$?
+  else
+    STATUS=1
   fi
 }
 
 tail_logs() {
-pm2 logs
+  pm2 logs $PM2_APP
 }
 
 help() {
   echo -e "\nCommand Options for Lisk.sh"
-  echo -e "\nAll options may be passed [-c <config.json>]"
+  echo -e "\nAll options may be passed [-p <PM2-config.json>]"
   echo -e "\nstart_node                            Starts a Nodejs process for Lisk"
   echo -e "start                                 Starts the Nodejs process and PostgreSQL Database for Lisk"
   echo -e "stop_node                             Stops a Nodejs process for Lisk"
@@ -262,31 +285,12 @@ help() {
 
 parse_option() {
   OPTIND=2
-  while getopts ":s:c:p:f:u:l:x:0" OPT; do
+  while getopts ":p:f:u:l:0" OPT; do
     case "$OPT" in
-      s)
-        if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
-          SNAPSHOT="-s $OPTARG"
-        elif [ "$OPTARG" == "highest" ]; then
-          SNAPSHOT="-s $OPTARG"
-        else
-          echo "Snapshot flag must be a greater than 0 or set to highest"
-          exit 1
-        fi ;;
-
-      c)
-        if [ -f "$OPTARG" ]; then
-          LISK_CONFIG="$OPTARG"
-          DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
-          PID_FILE="$PIDS_DIR/$DB_NAME.pid"
-        else
-          echo "Config.json not found. Please verify the file exists and try again."
-          exit 1
-        fi ;;
-
       p)
         if [ -f "$OPTARG" ]; then
           PM2_CONFIG="$OPTARG"
+          PM2_APP="$(grep "name" $PM2_CONFIG | cut -d'"' -f4)"
         else
           echo "PM2-config.json not found. Please verify the file exists and try again."
           exit 1
@@ -301,10 +305,6 @@ parse_option() {
         if [ -f "$OPTARG" ]; then
           DB_DOWNLOAD=N
         fi ;;
-
-      x)
-        SEED_PEERS="-x $OPTARG"
-      ;;
 
       0)
         DB_SNAPSHOT="$(pwd)/etc/blockchain.db.gz"
@@ -341,7 +341,7 @@ case $1 in
   stop_postgresql
   ;;
 "reload")
-  start_lisk
+  reload_lisk
   ;;
 "rebuild")
   stop_lisk
