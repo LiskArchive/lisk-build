@@ -18,9 +18,9 @@ if [ "$USER" == "root" ]; then
   exit 1
 fi
 
-LISK_CONFIG="config.json"
 PM2_CONFIG="$(pwd)/etc/pm2-lisk.json"
 PM2_APP="$(grep "name" "$PM2_CONFIG" | cut -d'"' -f4)" >> /dev/null
+LISK_CONFIG="$(grep "config" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
 
 LOGS_DIR="$(pwd)/logs"
 
@@ -210,6 +210,7 @@ start_lisk() {
   pm2 start "$PM2_CONFIG"  >> "$SH_LOG_FILE"
   if [ $? == 0 ]; then
     echo "√ Lisk started successfully."
+    sleep 3
     check_status
   else
     echo "X Failed to start Lisk."
@@ -290,6 +291,7 @@ parse_option() {
         if [ -f "$OPTARG" ]; then
           PM2_CONFIG="$OPTARG"
           PM2_APP="$(grep "name" "$PM2_CONFIG" | cut -d'"' -f4)"
+          LISK_CONFIG="$(grep "config" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
         else
           echo "PM2-config.json not found. Please verify the file exists and try again."
           exit 1
