@@ -235,6 +235,11 @@ rebuild_lisk() {
   restore_blockchain
 }
 
+pm2_cleanup() {
+  pm2 delete all
+  pm2 kill
+}
+
 check_status() {
   PM2_PID="$(pm2 describe "$PM2_APP" | grep "pid path" | cut -d' ' -f14)" >> "$SH_LOG_FILE" 2>&1> /dev/null
 
@@ -358,6 +363,9 @@ case $1 in
   ;;
 "stop_db")
   stop_postgresql
+  ;;
+"cleanup")
+  pm2_cleanup
   ;;
 "status")
   check_status
