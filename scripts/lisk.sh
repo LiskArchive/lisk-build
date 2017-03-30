@@ -3,10 +3,6 @@
 # shellcheck disable=SC2129
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
-# shellcheck disable=SC1090
-. "$(pwd)/shared.sh"
-# shellcheck disable=SC1090
-. "$(pwd)/env.sh"
 
 if [ ! -f "$(pwd)/app.js" ]; then
   echo "Error: Lisk installation was not found. Exiting."
@@ -17,6 +13,11 @@ if [ "$USER" == "root" ]; then
   echo "Error: Lisk should not be run be as root. Exiting."
   exit 1
 fi
+
+# shellcheck disable=SC1090
+. "$(pwd)/shared.sh"
+# shellcheck disable=SC1090
+. "$(pwd)/env.sh"
 
 PM2_CONFIG="$(pwd)/etc/pm2-lisk.json"
 PM2_APP="$(grep "name" "$PM2_CONFIG" | cut -d'"' -f4)" >> /dev/null
