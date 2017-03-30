@@ -5,6 +5,7 @@ A binary package building tool for [Lisk](https://lisk.io/). Allows automated co
 Please read [Installing Lisk (from Binaries)](https://github.com/LiskHQ/lisk-docs/blob/master/BinaryInstall.md) if you are merely looking to install Lisk onto an already supported operating system / architecture.
 
 [![Build Status](https://travis-ci.org/LiskHQ/lisk-build.svg?branch=development)](https://travis-ci.org/LiskHQ/lisk-build)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0) 
 
 ## Platforms
 
@@ -204,15 +205,25 @@ To build a package, perform the following on an x86 machine, that has a Debian/U
 
 ## Authors
 
-- Isabella Dell <isabella@lisk.io>
-- Oliver Beddows <oliver@lisk.io>
+- Isabella Dell <isabella@lightcurve.io>
+- Oliver Beddows <oliver@lightcurve.io>
 
 ## License
 
-The MIT License (MIT)
+Copyright © 2016-2017 Lisk Foundation
 
-Copyright (c) 2016-2017 Lisk  
-Copyright (c) 2015 Crypti
+This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+You should have received a copy of the [GNU General Public License](https://github.com/LiskHQ/lisk-build/tree/master/LICENSE) along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+***
+
+This program also incorporates work previously released with lisk-build `0.7.0` (and earlier) versions under the [MIT License](https://opensource.org/licenses/MIT). To comply with the requirements of that license, the following permission notice, applicable to those parts of the code only, is included below:
+
+Copyright © 2016-2017 Lisk Foundation  
+Copyright © 2015 Crypti
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
