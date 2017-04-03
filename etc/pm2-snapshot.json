@@ -9,7 +9,6 @@
                 "log_date_format": "YYYY-MM-DD HH:mm:ss SSS",
                 "autorestart": false,
                 "watch": false,
-                "ignore_watch": ["node_modules", ".git", "logs", "pgsql", "pids", "public"],
                 "kill_timeout" : 10000,
                 "max_memory_restart": "2048M",
                 "node_args": "--max_old_space_size=2048",
