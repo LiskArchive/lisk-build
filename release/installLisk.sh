@@ -45,7 +45,7 @@ prereq_checks() {
     echo -e "curl is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
     echo -e "\ncurl is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-      echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+      echo -e "\nPlease follow the Prerequisites at: https://github.com/LiskHQ/lisk-wiki/wiki/Binary-Install#1-prepare-your-system"
     exit 2
   fi
 
@@ -53,7 +53,7 @@ prereq_checks() {
     echo -e "Tar is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
     echo -e "\ntar is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-      echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+      echo -e "\nPlease follow the Prerequisites at: https://github.com/LiskHQ/lisk-wiki/wiki/Binary-Install#1-prepare-your-system"
     exit 2
   fi
 
@@ -61,7 +61,7 @@ prereq_checks() {
     echo -e "Wget is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
     echo -e "\nWget is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-    echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+    echo -e "\nPlease follow the Prerequisites at: https://github.com/LiskHQ/lisk-wiki/wiki/Binary-Install#1-prepare-your-system"
     exit 2
   fi
 
@@ -74,7 +74,7 @@ prereq_checks() {
       echo -e "Sudo authenticated.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
     else
       echo -e "Unable to authenticate Sudo.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-      echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+      echo -e "\nPlease follow the Prerequisites at: https://github.com/LiskHQ/lisk-wiki/wiki/Binary-Install#1-prepare-your-system"
       exit 2
     fi
   fi
