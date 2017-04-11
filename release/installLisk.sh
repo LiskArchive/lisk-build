@@ -1,4 +1,21 @@
 #!/bin/bash
+#
+# LiskHQ/lisk-build
+# Copyright (C) 2017 Lisk Foundation
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+######################################################################
 
 # Variable Declaration
 UNAME=$(uname)-$(uname -m)
@@ -28,7 +45,7 @@ prereq_checks() {
     echo -e "curl is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
     echo -e "\ncurl is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-      echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+      echo -e "\nPlease follow the Prerequisites at: https://github.com/LiskHQ/lisk-wiki/wiki/Binary-Install#1-prepare-your-system"
     exit 2
   fi
 
@@ -36,7 +53,7 @@ prereq_checks() {
     echo -e "Tar is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
     echo -e "\ntar is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-      echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+      echo -e "\nPlease follow the Prerequisites at: https://github.com/LiskHQ/lisk-wiki/wiki/Binary-Install#1-prepare-your-system"
     exit 2
   fi
 
@@ -44,7 +61,7 @@ prereq_checks() {
     echo -e "Wget is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
     echo -e "\nWget is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-    echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+    echo -e "\nPlease follow the Prerequisites at: https://github.com/LiskHQ/lisk-wiki/wiki/Binary-Install#1-prepare-your-system"
     exit 2
   fi
 
@@ -57,7 +74,7 @@ prereq_checks() {
       echo -e "Sudo authenticated.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
     else
       echo -e "Unable to authenticate Sudo.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-      echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+      echo -e "\nPlease follow the Prerequisites at: https://github.com/LiskHQ/lisk-wiki/wiki/Binary-Install#1-prepare-your-system"
       exit 2
     fi
   fi
