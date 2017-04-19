@@ -172,29 +172,6 @@ ntp_checks() {
     elif [[ -f "/proc/user_beancounters" ]]; then
       echo "_ Running OpenVZ VM, NTP and Chrony are not required"
     fi
-  elif [[ "$(uname)" == "FreeBSD" ]]; then
-    if sudo pgrep -x "ntpd" > /dev/null; then
-      echo "√ NTP is running"
-    else
-      echo "X NTP is not running"
-      [ "$INSTALL_NTP" ] || read -r -n 1 -p "Would like to install NTP? (y/n): " REPLY
-      if [[ "$INSTALL_NTP" || "$REPLY" =~ ^[Yy]$ ]]; then
-        echo -e "\nInstalling NTP, please provide sudo password.\n"
-        sudo pkg install ntp
-        sudo sh -c "echo 'ntpd_enable=\"YES\"' >> /etc/rc.conf"
-        sudo ntpdate -u pool.ntp.org
-        sudo service ntpd start
-        if pgrep -x "ntpd" > /dev/null; then
-          echo "v NTP is running"
-        else
-          echo -e "\nLisk requires NTP running on FreeBSD based systems. Please check /etc/ntp.conf and correct any issues."
-          exit 0
-        fi
-      else
-        echo -e "\nLisk requires NTP FreeBSD based systems, exiting."
-        exit 0
-      fi
-    fi # End FreeBSD Checks
   elif [[ "$(uname)" == "Darwin" ]]; then
     if pgrep -x "ntpd" > /dev/null; then
       echo "√ NTP is running"
@@ -224,8 +201,6 @@ install_lisk() {
 
   if [[ "$(uname)" == "Linux" ]]; then
     md5=$(md5sum "$LISK_VERSION" | awk '{print $1}')
-  elif [[ "$(uname)" == "FreeBSD" ]]; then
-    md5=$(md5 "$LISK_VERSION" | awk '{print $1}')
   elif [[ "$(uname)" == "Darwin" ]]; then
     md5=$(md5 "$LISK_VERSION" | awk '{print $4}')
   fi
