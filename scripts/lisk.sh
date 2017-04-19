@@ -43,7 +43,7 @@ exec 2>&1
 ################################################################################
 
 blockheight() {
-  DB_HEIGHT="$(psql -d "$DB_NAME" -t -p $DB_PORT -c 'select height from blocks order by height desc limit 1;')"
+  DB_HEIGHT="$(psql -d "$DB_NAME" -t -p "$DB_PORT" -c 'select height from blocks order by height desc limit 1;')"
   HEIGHT="${DB_HEIGHT:- Unavailable}"
   echo -e "Current Block Height:" "$HEIGHT"
 }
