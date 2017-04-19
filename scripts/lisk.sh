@@ -26,6 +26,7 @@ LISK_CONFIG="$(grep "config" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> 
 LOGS_DIR="$(pwd)/logs"
 
 DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
+DB_PORT="$(grep "port" config.json -m2 | tail -n1 |cut -f 1 -d ',' | cut -f 2 -d ':')"
 DB_USER="$USER"
 DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
@@ -42,7 +43,7 @@ exec 2>&1
 ################################################################################
 
 blockheight() {
-  DB_HEIGHT="$(psql -d "$DB_NAME" -t -c 'select height from blocks order by height desc limit 1;')"
+  DB_HEIGHT="$(psql -d "$DB_NAME" -t -p $DB_PORT -c 'select height from blocks order by height desc limit 1;')"
   HEIGHT="${DB_HEIGHT:- Unavailable}"
   echo -e "Current Block Height:" "$HEIGHT"
 }
