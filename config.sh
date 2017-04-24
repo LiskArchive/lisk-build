@@ -52,18 +52,6 @@ NODE_SODIUM_URL="https://github.com/LiskHQ/node-sodium/archive/master.tar.gz"
 
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
-if [ "$(uname -s)" == "Darwin" ] || [ "$(uname -s)" == "FreeBSD" ]; then
-  SED_OPTS="-i ''"
-else
-  SED_OPTS="-i"
-fi
-
-if [ "$(uname -s)" == "FreeBSD" ]; then
-  MD5_CMD="md5"
-else
-  MD5_CMD="md5sum"
-fi
-
 if [ "$ARCH" == "armv6l" ]; then
   export TARGET="arm-linux-gnueabihf"
   export PATH="$PATH:$(pwd)/toolchains/rpi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin"
