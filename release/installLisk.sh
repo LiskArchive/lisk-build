@@ -247,6 +247,9 @@ backup_lisk() {
   cd "$LISK_INSTALL" || exit 2
   bash lisk.sh stop
 
+  echo -e "\nCleaning up PM2"
+  bash lisk.sh cleanup
+
   echo -e "\nBacking up existing Lisk Folder"
 
   LISK_BACKUP="$LISK_LOCATION"'/backup/lisk-'"$RELEASE"
