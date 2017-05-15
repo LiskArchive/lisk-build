@@ -172,29 +172,6 @@ ntp_checks() {
     elif [[ -f "/proc/user_beancounters" ]]; then
       echo "_ Running OpenVZ VM, NTP and Chrony are not required"
     fi
-  elif [[ "$(uname)" == "FreeBSD" ]]; then
-    if sudo pgrep -x "ntpd" > /dev/null; then
-      echo "√ NTP is running"
-    else
-      echo "X NTP is not running"
-      [ "$INSTALL_NTP" ] || read -r -n 1 -p "Would like to install NTP? (y/n): " REPLY
-      if [[ "$INSTALL_NTP" || "$REPLY" =~ ^[Yy]$ ]]; then
-        echo -e "\nInstalling NTP, please provide sudo password.\n"
-        sudo pkg install ntp
-        sudo sh -c "echo 'ntpd_enable=\"YES\"' >> /etc/rc.conf"
-        sudo ntpdate -u pool.ntp.org
-        sudo service ntpd start
-        if pgrep -x "ntpd" > /dev/null; then
-          echo "v NTP is running"
-        else
-          echo -e "\nLisk requires NTP running on FreeBSD based systems. Please check /etc/ntp.conf and correct any issues."
-          exit 0
-        fi
-      else
-        echo -e "\nLisk requires NTP FreeBSD based systems, exiting."
-        exit 0
-      fi
-    fi # End FreeBSD Checks
   elif [[ "$(uname)" == "Darwin" ]]; then
     if pgrep -x "ntpd" > /dev/null; then
       echo "√ NTP is running"
@@ -220,23 +197,23 @@ install_lisk() {
 
   curl --progress-bar -o "$LISK_VERSION" "https://downloads.lisk.io/lisk/$RELEASE/$LISK_VERSION"
 
-  curl -s "https://downloads.lisk.io/lisk/$RELEASE/$LISK_VERSION.md5" -o "$LISK_VERSION".md5
+  curl -s "https://downloads.lisk.io/lisk/$RELEASE/$LISK_VERSION.SHA256" -o "$LISK_VERSION".SHA256
 
   if [[ "$(uname)" == "Linux" ]]; then
-    md5=$(md5sum "$LISK_VERSION" | awk '{print $1}')
+    SHA256=$(SHA256sum "$LISK_VERSION" | awk '{print $1}')
   elif [[ "$(uname)" == "FreeBSD" ]]; then
-    md5=$(md5 "$LISK_VERSION" | awk '{print $1}')
+    SHA256=$(SHA256 "$LISK_VERSION" | awk '{print $1}')
   elif [[ "$(uname)" == "Darwin" ]]; then
-    md5=$(md5 "$LISK_VERSION" | awk '{print $4}')
+    SHA256=$(SHA256 "$LISK_VERSION" | awk '{print $4}')
   fi
 
-  md5_compare=$(grep "$LISK_VERSION" "$LISK_VERSION".md5 | awk '{print $1}')
+  SHA256_compare=$(grep "$LISK_VERSION" "$LISK_VERSION".SHA256 | awk '{print $1}')
 
-  if [[ "$md5" == "$md5_compare" ]]; then
+  if [[ "$SHA256" == "$SHA256_compare" ]]; then
     echo -e "\nChecksum Passed!"
   else
     echo -e "\nChecksum Failed, aborting installation"
-    rm -f "$LISK_VERSION" "$LISK_VERSION".md5
+    rm -f "$LISK_VERSION" "$LISK_VERSION".SHA256
     exit 0
   fi
 
@@ -247,7 +224,7 @@ install_lisk() {
   mv "$LISK_LOCATION/$LISK_DIR" "$LISK_INSTALL"
 
   echo -e "\nCleaning up downloaded files"
-  rm -f "$LISK_VERSION" "$LISK_VERSION".md5
+  rm -f "$LISK_VERSION" "$LISK_VERSION".SHA256
 }
 
 configure_lisk() {
