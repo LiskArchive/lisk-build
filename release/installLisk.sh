@@ -197,21 +197,23 @@ install_lisk() {
 
   curl --progress-bar -o "$LISK_VERSION" "https://downloads.lisk.io/lisk/$RELEASE/$LISK_VERSION"
 
-  curl -s "https://downloads.lisk.io/lisk/$RELEASE/$LISK_VERSION.md5" -o "$LISK_VERSION".md5
+  curl -s "https://downloads.lisk.io/lisk/$RELEASE/$LISK_VERSION.SHA256" -o "$LISK_VERSION".SHA256
 
   if [[ "$(uname)" == "Linux" ]]; then
-    md5=$(md5sum "$LISK_VERSION" | awk '{print $1}')
+    SHA256=$(SHA256sum "$LISK_VERSION" | awk '{print $1}')
+  elif [[ "$(uname)" == "FreeBSD" ]]; then
+    SHA256=$(SHA256 "$LISK_VERSION" | awk '{print $1}')
   elif [[ "$(uname)" == "Darwin" ]]; then
-    md5=$(md5 "$LISK_VERSION" | awk '{print $4}')
+    SHA256=$(SHA256 "$LISK_VERSION" | awk '{print $4}')
   fi
 
-  md5_compare=$(grep "$LISK_VERSION" "$LISK_VERSION".md5 | awk '{print $1}')
+  SHA256_compare=$(grep "$LISK_VERSION" "$LISK_VERSION".SHA256 | awk '{print $1}')
 
-  if [[ "$md5" == "$md5_compare" ]]; then
+  if [[ "$SHA256" == "$SHA256_compare" ]]; then
     echo -e "\nChecksum Passed!"
   else
     echo -e "\nChecksum Failed, aborting installation"
-    rm -f "$LISK_VERSION" "$LISK_VERSION".md5
+    rm -f "$LISK_VERSION" "$LISK_VERSION".SHA256
     exit 0
   fi
 
@@ -222,7 +224,7 @@ install_lisk() {
   mv "$LISK_LOCATION/$LISK_DIR" "$LISK_INSTALL"
 
   echo -e "\nCleaning up downloaded files"
-  rm -f "$LISK_VERSION" "$LISK_VERSION".md5
+  rm -f "$LISK_VERSION" "$LISK_VERSION".SHA256
 }
 
 configure_lisk() {

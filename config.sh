@@ -10,7 +10,7 @@ if [ ! -z "$1" ]; then
   ARCH="$1"
 fi
 
-VERSION="0.7.0"
+VERSION="0.8.0"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
@@ -52,39 +52,16 @@ NODE_SODIUM_URL="https://github.com/LiskHQ/node-sodium/archive/master.tar.gz"
 
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
-if [ "$ARCH" == "armv6l" ]; then
-  export TARGET="arm-linux-gnueabihf"
-  export PATH="$PATH:$(pwd)/toolchains/rpi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin"
-  export CCFLAGS="-marm -march=armv6 -mfpu=vfp -mfloat-abi=hard"
-  export CXXFLAGS="${CCFLAGS}"
-
-  export GYPFLAGS="-Darmeabi=hard -Dv8_use_arm_eabi_hardfloat=true -Dv8_can_use_vfp3_instructions=false -Dv8_can_use_vfp2_instructions=true -Darm7=0 -Darm_vfp=vfp"
-  export VFP3="off"
-  export VFP2="on"
-
-  LISK_CONFIG="--target_arch=arm"
-  LISK_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
-  NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --with-arm-float-abi=hard"
-  POSTGRESQL_CONFIG="--host=arm-linux --without-readline --without-zlib --disable-spinlocks"
-  SODIUM_CONFIG="--host=arm-linux"
+if [ "$(uname -s)" == "Darwin" ] || [ "$(uname -s)" == "FreeBSD" ]; then
+  SED_OPTS="-i ''"
+else
+  SED_OPTS="-i"
 fi
 
-if [ "$ARCH" == "armv7l" ]; then
-  export TARGET="arm-linux-gnueabihf"
-  export PATH="$(pwd)/toolchains/rpi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin:$PATH"
-  export CCFLAGS="-marm -march=armv7-a -mfpu=vfp -mfloat-abi=hard"
-  export CXXFLAGS="${CCFLAGS}"
-
-  export OPENSSL_armcap=7
-  export GYPFLAGS="-Darmeabi=hard -Dv8_use_arm_eabi_hardfloat=true -Dv8_can_use_vfp3_instructions=true -Dv8_can_use_vfp2_instructions=true -Darm7=1"
-  export VFP3="on"
-  export VFP2="on"
-
-  LISK_CONFIG="--target_arch=arm"
-  LISK_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
-  NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --with-arm-float-abi=hard"
-  POSTGRESQL_CONFIG="--host=arm-linux --without-readline --without-zlib --disable-spinlocks"
-  SODIUM_CONFIG="--host=arm-linux"
+if [ "$(uname -s)" == "Darwin" ]; then
+  MD5_CMD="shasum -a 256"
+else
+  MD5_CMD="sha256sum"
 fi
 
 if [ "$TARGET" != "" ]; then
