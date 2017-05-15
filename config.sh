@@ -10,7 +10,7 @@ if [ ! -z "$1" ]; then
   ARCH="$1"
 fi
 
-VERSION="0.8.0"
+VERSION="BUILD_VERSION"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
@@ -20,7 +20,7 @@ JOBS="2"
 
 LISK_DIR="$VERSION"
 LISK_FILE="$VERSION.tar.gz"
-LISK_NETWORK="main"
+LISK_NETWORK="BUILD_NETWORK"
 LISK_URL="http://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
 
