@@ -10,7 +10,7 @@ if [ ! -z "$1" ]; then
   ARCH="$1"
 fi
 
-VERSION="0.7.0"
+VERSION="0.8.0"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
@@ -58,10 +58,10 @@ else
   SED_OPTS="-i"
 fi
 
-if [ "$(uname -s)" == "FreeBSD" ]; then
-  MD5_CMD="md5"
+if [ "$(uname -s)" == "Darwin" ]; then
+  MD5_CMD="shasum -a 256"
 else
-  MD5_CMD="md5sum"
+  MD5_CMD="sha256sum"
 fi
 
 if [ "$ARCH" == "armv6l" ]; then
