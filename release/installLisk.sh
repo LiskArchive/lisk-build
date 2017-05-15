@@ -200,16 +200,12 @@ install_lisk() {
   curl -s "https://downloads.lisk.io/lisk/$RELEASE/$LISK_VERSION.SHA256" -o "$LISK_VERSION".SHA256
 
   if [[ "$(uname)" == "Linux" ]]; then
-    SHA256=$(SHA256sum "$LISK_VERSION" | awk '{print $1}')
-  elif [[ "$(uname)" == "FreeBSD" ]]; then
-    SHA256=$(SHA256 "$LISK_VERSION" | awk '{print $1}')
+    SHA256=$(sha256sum -c "$LISK_VERSION" | awk '{print $2}')
   elif [[ "$(uname)" == "Darwin" ]]; then
-    SHA256=$(SHA256 "$LISK_VERSION" | awk '{print $4}')
+    SHA256=$(shasum -c "$LISK_VERSION" | awk '{print $2}')
   fi
 
-  SHA256_compare=$(grep "$LISK_VERSION" "$LISK_VERSION".SHA256 | awk '{print $1}')
-
-  if [[ "$SHA256" == "$SHA256_compare" ]]; then
+  if [[ "$SHA256" == "OK" ]]; then
     echo -e "\nChecksum Passed!"
   else
     echo -e "\nChecksum Failed, aborting installation"
@@ -304,11 +300,11 @@ upgrade_lisk() {
     # shellcheck disable=SC1090
     . "$LISK_INSTALL"/env.sh
     # shellcheck disable=SC2129
-    pg_ctl initdb -D "$LISK_NEW_PG"/data &>> $LOG_FILE
+    pg_ctl initdb -D "$LISK_NEW_PG"/data &> $LOG_FILE
     # shellcheck disable=SC2129
-    "$LISK_NEW_PG"/bin/pg_upgrade -b "$LISK_OLD_PG"/bin -B "$LISK_NEW_PG"/bin -d "$LISK_OLD_PG"/data -D "$LISK_NEW_PG"/data &>> $LOG_FILE
-    bash "$LISK_INSTALL"/lisk.sh start_db &>> $LOG_FILE
-    bash "$LISK_INSTALL"/analyze_new_cluster.sh &>> $LOG_FILE
+    "$LISK_NEW_PG"/bin/pg_upgrade -b "$LISK_OLD_PG"/bin -B "$LISK_NEW_PG"/bin -d "$LISK_OLD_PG"/data -D "$LISK_NEW_PG"/data &> $LOG_FILE
+    bash "$LISK_INSTALL"/lisk.sh start_db &> $LOG_FILE
+    bash "$LISK_INSTALL"/analyze_new_cluster.sh &> $LOG_FILE
     rm -f "$LISK_INSTALL"/*cluster*
   else
     cp -rf "$LISK_OLD_PG"/data/* "$LISK_NEW_PG"/data/
