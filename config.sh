@@ -24,9 +24,9 @@ LISK_NETWORK="BUILD_NETWORK"
 LISK_URL="https://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
 
-LISK_NODE_DIR="lisk-node-6.10.1-lisk"
+LISK_NODE_DIR="lisk-node-6.10.3-lisk"
 LISK_NODE_FILE="$LISK_NODE_DIR.tar.gz"
-LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v6.10.1-lisk.tar.gz"
+LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v6.10.3-lisk.tar.gz"
 LISK_NODE_OUT="out/Release/node"
 LISK_NODE_CONFIG=""
 
