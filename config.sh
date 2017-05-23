@@ -10,7 +10,7 @@ if [ ! -z "$1" ]; then
   ARCH="$1"
 fi
 
-VERSION="BUILD_VERSION"
+VERSION="0.8.2a"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
@@ -20,7 +20,7 @@ JOBS="2"
 
 LISK_DIR="$VERSION"
 LISK_FILE="$VERSION.tar.gz"
-LISK_NETWORK="BUILD_NETWORK"
+LISK_NETWORK="test"
 LISK_URL="http://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
 
@@ -65,9 +65,9 @@ else
 fi
 
 if [ "$(uname -s)" == "Darwin" ]; then
-  MD5_CMD="shasum -a 256"
+  SHA_CMD="shasum -a 256"
 else
-  MD5_CMD="sha256sum"
+  SHA_CMD="sha256sum"
 fi
 
 if [ "$(uname -m)" == "i686" ]; then

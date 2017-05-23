@@ -63,7 +63,9 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "tar -xvf $VERSION.tar.gz"
   exec_cmd "cp -Rf $VERSION $BUILD_NAME"
   exec_cmd "cp -vR $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
-  exec_cmd "cp -vf $REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT $BUILD_NAME/bin"
+  exec_cmd "mkdir $BUILD_NAME/bin"
+  exec_cmd "mkdir $BUILD_NAME/redis"
+  exec_cmd "cp -vf $REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT $BUILD_NAME/bin/$REDIS_SERVER_OUT"
   exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
 
   cd "$BUILD_NAME" || exit 2
@@ -113,7 +115,6 @@ if [ ! -f "$NODE_DIR/$NODE_OUT/bin/node" ] || [ ! -f "$NODE_DIR/$NODE_OUT/bin/np
   exec_cmd "make install"
   cd ../ || exit 2
 fi
-exec_cmd "mkdir -p $BUILD_NAME/bin"
 exec_cmd "cp -vR $NODE_DIR/$NODE_OUT/* $BUILD_NAME/"
 exec_cmd "sed $SED_OPTS \"s%$(head -1 "$NPM_CLI")%#\!.\/bin\/node%g\" $NPM_CLI"
 
