@@ -10,7 +10,7 @@ if [ ! -z "$1" ]; then
   ARCH="$1"
 fi
 
-VERSION="0.8.2a"
+VERSION="BUILD_VERSION"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
@@ -20,7 +20,7 @@ JOBS="2"
 
 LISK_DIR="$VERSION"
 LISK_FILE="$VERSION.tar.gz"
-LISK_NETWORK="test"
+LISK_NETWORK="BUILD_NETWORK"
 LISK_URL="http://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
 
@@ -54,6 +54,7 @@ REDIS_SERVER_DIR="redis-3.2.9"
 REDIS_SERVER_FILE="$REDIS_SERVER_DIR.tar.gz"
 REDIS_SERVER_URL="http://download.redis.io/releases/$REDIS_SERVER_FILE"
 REDIS_SERVER_OUT="redis-server"
+REDIS_SERVER_CLI="redis-cli"
 REDIS_SERVER_CONFIG=""
 
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
