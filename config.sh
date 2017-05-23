@@ -50,6 +50,12 @@ NODE_SODIUM_DIR="node-sodium-master"
 NODE_SODIUM_FILE="$NODE_SODIUM_DIR.tar.gz"
 NODE_SODIUM_URL="https://github.com/LiskHQ/node-sodium/archive/master.tar.gz"
 
+REDIS_SERVER_DIR="redis-3.2.9"
+REDIS_SERVER_FILE="$REDIS_SERVER_DIR.tar.gz"
+REDIS_SERVER_URL="http://download.redis.io/releases/$REDIS_SERVER_FILE"
+REDIS_SERVER_OUT="redis-server"
+REDIS_SERVER_CONFIG=""
+
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
 if [ "$(uname -s)" == "Darwin" ] || [ "$(uname -s)" == "FreeBSD" ]; then
@@ -62,6 +68,10 @@ if [ "$(uname -s)" == "Darwin" ]; then
   MD5_CMD="shasum -a 256"
 else
   MD5_CMD="sha256sum"
+fi
+
+if [ "$(uname -m)" == "i686" ]; then
+  REDIS_SERVER_CONFIG="32bit"
 fi
 
 if [ "$TARGET" != "" ]; then

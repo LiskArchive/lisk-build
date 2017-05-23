@@ -34,9 +34,22 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
   exec_cmd "rm -rf $POSTGRESQL_DIR"
   exec_cmd "tar -zxvf $POSTGRESQL_FILE"
   cd "$POSTGRESQL_DIR" || exit 2
-  exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT $POSTGRESQL_CONFIG"
+  exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT"
   exec_cmd "make --jobs=$JOBS"
   exec_cmd "make install"
+  cd ../ || exit 2
+fi
+
+echo "Building Redis-Server"
+echo "--------------------------------------------------------------------------"
+if [ ! -f "$REDIS_SERVER_FILE" ]; then
+  exec_cmd "wget $REDIS_SERVER_URL -O $REDIS_SERVER_FILE"
+fi
+if [ ! -f "$REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT" ]; then
+  exec_cmd "rm -rf $REDIS_SERVER_DIR"
+  exec_cmd "tar -zxvf $REDIS_SERVER_FILE"
+  cd "$REDIS_SERVER_DIR" || exit 2
+  exec_cmd "make --jobs=$JOBS $REDIS_SERVER_CONFIG"
   cd ../ || exit 2
 fi
 
@@ -50,6 +63,7 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "tar -xvf $VERSION.tar.gz"
   exec_cmd "cp -Rf $VERSION $BUILD_NAME"
   exec_cmd "cp -vR $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
+  exec_cmd "cp -vf $REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT $BUILD_NAME/bin"
   exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
 
   cd "$BUILD_NAME" || exit 2
