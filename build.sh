@@ -82,7 +82,14 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "mkdir $BUILD_NAME/redis"
   exec_cmd "cp -vf $REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT $BUILD_NAME/bin/$REDIS_SERVER_OUT"
   exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
-  exec_cmd "cp -vF $LIBREADLINE_DIR/shlib/*.so.7.0 $BUILD_NAME/lib"
+
+  # Bundle libreadline6 and create symbolic links
+  exec_cmd "cp -vf $LIBREADLINE_DIR/shlib/lib*.so.* $BUILD_NAME/lib"
+  exec_cmd "cp -vf $LIBREADLINE_DIR/lib*.a $BUILD_NAME/lib"
+  exec_cmd "ln -s $BUILD_NAME/lib/$LIBREADLINE_OUT $BUILD_NAME/lib/libreadline.so.6"
+  exec_cmd "ln -s $BUILD_NAME/lib/libreadline.so.6 $BUILD_NAME/lib/libreadline.so"
+  exec_cmd "ln -s $BUILD_NAME/lib/$LIBREADLINE_HISTORY $BUILD_NAME/lib/libhistory.so.6"
+  exec_cmd "ln -s $BUILD_NAME/lib/libhistory.so.6 $BUILD_NAME/lib/libhistory.so"
 
   cd "$BUILD_NAME" || exit 2
   exec_cmd "npm install --production $LISK_CONFIG"
