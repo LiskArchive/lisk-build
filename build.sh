@@ -25,6 +25,21 @@ apply_PATCHES() {
 
 ################################################################################
 
+echo "Building libreadline7"
+echo "--------------------------------------------------------------------------"
+if [ ! -f "$LIBREADLINE_FILE" ]; then
+  exec_cmd "wget $LIBREADLINE_URL -O $LIBREADLINE_FILE"
+fi
+if [ ! -f "$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" ]; then
+  exec_cmd "rm -rf $LIBREADLINE_DIR"
+  exec_cmd "tar -zxvf $LIBREADLINE_FILE"
+  cd "$LIBREADLINE_DIR" || exit 2
+  exec_cmd "./configure"
+  exec_cmd "make --jobs=$JOBS SHLIB_LIBS=-lcurses"
+  exec_cmd "sudo make install"
+  cd ../ || exit 2
+fi
+
 echo "Building postgresql..."
 echo "--------------------------------------------------------------------------"
 if [ ! -f "$POSTGRESQL_FILE" ]; then
@@ -34,7 +49,7 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
   exec_cmd "rm -rf $POSTGRESQL_DIR"
   exec_cmd "tar -zxvf $POSTGRESQL_FILE"
   cd "$POSTGRESQL_DIR" || exit 2
-  exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT"
+  exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libs=/usr/local/lib --with-includes=/usr/local/include"
   exec_cmd "make --jobs=$JOBS"
   exec_cmd "make install"
   cd ../ || exit 2
@@ -50,20 +65,6 @@ if [ ! -f "$REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT" ]; then
   exec_cmd "tar -zxvf $REDIS_SERVER_FILE"
   cd "$REDIS_SERVER_DIR" || exit 2
   exec_cmd "make --jobs=$JOBS $REDIS_SERVER_CONFIG"
-  cd ../ || exit 2
-fi
-
-echo "Building libreadline7"
-echo "--------------------------------------------------------------------------"
-if [ ! -f "$LIBREADLINE_FILE" ]; then
-  exec_cmd "wget $LIBREADLINE_URL -O $LIBREADLINE_FILE"
-fi
-if [ ! -f "$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" ]; then
-  exec_cmd "rm -rf $LIBREADLINE_DIR"
-  exec_cmd "tar -zxvf $LIBREADLINE_FILE"
-  cd "$LIBREADLINE_DIR" || exit 2
-  exec_cmd "./configure"
-  exec_cmd "make --jobs=$JOBS"
   cd ../ || exit 2
 fi
 
@@ -86,11 +87,12 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
   # Bundle libreadline6 and create symbolic links
   exec_cmd "cp -vf $LIBREADLINE_DIR/shlib/lib*.so.* $BUILD_NAME/lib"
   exec_cmd "cp -vf $LIBREADLINE_DIR/lib*.a $BUILD_NAME/lib"
-  exec_cmd "cd $BUILD_NAME/lib"
-  exec_cmd "ln -s $LIBREADLINE_OUT libreadline.so.6"
-  exec_cmd "ln -s libreadline.so.6 libreadline.so"
-  exec_cmd "ln -s $LIBREADLINE_HISTORY libhistory.so.6"
-  exec_cmd "ln -s libhistory.so.6 libhistory.so"
+  cd "$(pwd)/$BUILD_NAME/lib"
+  exec_cmd "ln -s $LIBREADLINE_OUT libreadline.so.7"
+  exec_cmd "ln -s libreadline.so.7 libreadline.so"
+  exec_cmd "ln -s $LIBREADLINE_HISTORY libhistory.so.7"
+  exec_cmd "ln -s libhistory.so.7 libhistory.so"
+  cd ../../
 
   cd "$BUILD_NAME" || exit 2
   exec_cmd "npm install --production $LISK_CONFIG"
