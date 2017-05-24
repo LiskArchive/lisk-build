@@ -86,10 +86,11 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
   # Bundle libreadline6 and create symbolic links
   exec_cmd "cp -vf $LIBREADLINE_DIR/shlib/lib*.so.* $BUILD_NAME/lib"
   exec_cmd "cp -vf $LIBREADLINE_DIR/lib*.a $BUILD_NAME/lib"
-  exec_cmd "ln -s $BUILD_NAME/lib/$LIBREADLINE_OUT $BUILD_NAME/lib/libreadline.so.6"
-  exec_cmd "ln -s $BUILD_NAME/lib/libreadline.so.6 $BUILD_NAME/lib/libreadline.so"
-  exec_cmd "ln -s $BUILD_NAME/lib/$LIBREADLINE_HISTORY $BUILD_NAME/lib/libhistory.so.6"
-  exec_cmd "ln -s $BUILD_NAME/lib/libhistory.so.6 $BUILD_NAME/lib/libhistory.so"
+  exec_cmd "cd $BUILD_NAME/lib"
+  exec_cmd "ln -s $LIBREADLINE_OUT libreadline.so.6"
+  exec_cmd "ln -s libreadline.so.6 libreadline.so"
+  exec_cmd "ln -s $LIBREADLINE_HISTORY libhistory.so.6"
+  exec_cmd "ln -s libhistory.so.6 libhistory.so"
 
   cd "$BUILD_NAME" || exit 2
   exec_cmd "npm install --production $LISK_CONFIG"

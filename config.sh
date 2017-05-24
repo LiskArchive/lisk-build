@@ -57,11 +57,11 @@ REDIS_SERVER_OUT="redis-server"
 REDIS_SERVER_CLI="redis-cli"
 REDIS_SERVER_CONFIG=""
 
-LIBREADLINE_DIR="readline-master"
+LIBREADLINE_DIR="readline-6.3"
 LIBREADLINE_FILE="$LIBREADLINE_DIR.tar.gz"
 LIBREADLINE_URL="http://git.savannah.gnu.org/cgit/readline.git/snapshot/$LIBREADLINE_FILE"
-LIBREADLINE_OUT="libreadline.so.7.0"
-LIBREADLINE_HISTORY="libhistory.so.7.0"
+LIBREADLINE_OUT="libreadline.so.6.3"
+LIBREADLINE_HISTORY="libhistory.so.6.3"
 
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
