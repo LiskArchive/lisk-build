@@ -10,7 +10,7 @@ if [ ! -z "$1" ]; then
   ARCH="$1"
 fi
 
-VERSION="BUILD_VERSION"
+VERSION="0.8.2a"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
@@ -20,7 +20,7 @@ JOBS="2"
 
 LISK_DIR="$VERSION"
 LISK_FILE="$VERSION.tar.gz"
-LISK_NETWORK="BUILD_NETWORK"
+LISK_NETWORK="test"
 LISK_URL="http://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
 
@@ -56,6 +56,12 @@ REDIS_SERVER_URL="http://download.redis.io/releases/$REDIS_SERVER_FILE"
 REDIS_SERVER_OUT="redis-server"
 REDIS_SERVER_CLI="redis-cli"
 REDIS_SERVER_CONFIG=""
+
+LIBREADLINE_DIR="readline-master"
+LIBREADLINE_FILE="$LIBREADLINE_DIR.tar.gz"
+LIBREADLINE_URL="http://git.savannah.gnu.org/cgit/readline.git/snapshot/$LIBREADLINE_FILE"
+LIBREADLINE_OUT="libreadline.so.7.0"
+LIBREADLINE_HISTORY="libhistory.so.7.0"
 
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 

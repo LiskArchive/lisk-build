@@ -53,6 +53,20 @@ if [ ! -f "$REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT" ]; then
   cd ../ || exit 2
 fi
 
+echo "Building libreadline7"
+echo "--------------------------------------------------------------------------"
+if [ ! -f "$LIBREADLINE_FILE" ]; then
+  exec_cmd "wget $LIBREADLINE_URL -O $LIBREADLINE_FILE"
+fi
+if [ ! -f "$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" ]; then
+  exec_cmd "rm -rf $LIBREADLINE_DIR"
+  exec_cmd "tar -zxvf $LIBREADLINE_FILE"
+  cd "$LIBREADLINE_DIR" || exit 2
+  exec_cmd "./configure"
+  exec_cmd "make --jobs=$JOBS"
+  cd ../ || exit 2
+fi
+
 echo "Building lisk..."
 echo "--------------------------------------------------------------------------"
 if [ ! -f "$LISK_FILE" ]; then
@@ -64,9 +78,11 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "cp -Rf $VERSION $BUILD_NAME"
   exec_cmd "cp -vR $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
   exec_cmd "mkdir $BUILD_NAME/bin"
+  exec_cmd "mkdir $BUILD_NAME/lib"
   exec_cmd "mkdir $BUILD_NAME/redis"
   exec_cmd "cp -vf $REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT $BUILD_NAME/bin/$REDIS_SERVER_OUT"
   exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
+  exec_cmd "cp -vF $LIBREADLINE_DIR/shlib/*.so.7.0 $BUILD_NAME/lib"
 
   cd "$BUILD_NAME" || exit 2
   exec_cmd "npm install --production $LISK_CONFIG"
