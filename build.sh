@@ -27,10 +27,10 @@ apply_PATCHES() {
 
 echo "Building libreadline7"
 echo "--------------------------------------------------------------------------"
-if [ ! -f "$LIBREADLINE_FILE" && ! "$(uname -s)" == "Darwin" ]; then
+if [ ! -f "$LIBREADLINE_FILE" ] && [ ! "$(uname -s)" == "Darwin" ]; then
   exec_cmd "wget $LIBREADLINE_URL -O $LIBREADLINE_FILE"
 fi
-if [ ! -f "$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" && ! "$(uname -s)" == "Darwin" ]; then
+if [ ! -f "$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" ] && [ ! "$(uname -s)" == "Darwin" ]; then
   exec_cmd "rm -rf $LIBREADLINE_DIR"
   exec_cmd "tar -zxf $LIBREADLINE_FILE"
   cd "$LIBREADLINE_DIR" || exit 2
@@ -100,12 +100,12 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
   if [ ! "$(uname -s)" == "Darwin" ]; then
     exec_cmd "cp -vf $LIBREADLINE_DIR/shlib/lib*.so.* $BUILD_NAME/lib"
     exec_cmd "cp -vf $LIBREADLINE_DIR/lib*.a $BUILD_NAME/lib"
-    cd "$(pwd)/$BUILD_NAME/lib"
+    cd "$(pwd)/$BUILD_NAME/lib" || exit 2
     exec_cmd "ln -s $LIBREADLINE_OUT libreadline.so.7"
     exec_cmd "ln -s libreadline.so.7 libreadline.so"
     exec_cmd "ln -s $LIBREADLINE_HISTORY libhistory.so.7"
     exec_cmd "ln -s libhistory.so.7 libhistory.so"
-    cd ../../
+    cd ../../ || exit 2
   fi
 
   cd "$BUILD_NAME" || exit 2
