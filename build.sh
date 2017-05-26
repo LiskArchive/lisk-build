@@ -27,12 +27,12 @@ apply_PATCHES() {
 
 echo "Building libreadline7"
 echo "--------------------------------------------------------------------------"
-if [ ! -f "$LIBREADLINE_FILE" ]; then
+if [ ! -f "$LIBREADLINE_FILE" && ! "$(uname -s)" == "Darwin"  ]; then
   exec_cmd "wget $LIBREADLINE_URL -O $LIBREADLINE_FILE"
 fi
-if [ ! -f "$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" ]; then
+if [ ! -f "$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" && ! "$(uname -s)" == "Darwin" ]; then
   exec_cmd "rm -rf $LIBREADLINE_DIR"
-  exec_cmd "tar -zxvf $LIBREADLINE_FILE"
+  exec_cmd "tar -zxf $LIBREADLINE_FILE"
   cd "$LIBREADLINE_DIR" || exit 2
   exec_cmd "./configure"
   exec_cmd "make --jobs=$JOBS SHLIB_LIBS=-lcurses"
@@ -47,7 +47,7 @@ if [ ! -f "$POSTGRESQL_FILE" ]; then
 fi
 if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
   exec_cmd "rm -rf $POSTGRESQL_DIR"
-  exec_cmd "tar -zxvf $POSTGRESQL_FILE"
+  exec_cmd "tar -zxf $POSTGRESQL_FILE"
   cd "$POSTGRESQL_DIR" || exit 2
   exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libs=/usr/local/lib --with-includes=/usr/local/include"
   exec_cmd "make --jobs=$JOBS"
@@ -62,7 +62,7 @@ if [ ! -f "$REDIS_SERVER_FILE" ]; then
 fi
 if [ ! -f "$REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT" ]; then
   exec_cmd "rm -rf $REDIS_SERVER_DIR"
-  exec_cmd "tar -zxvf $REDIS_SERVER_FILE"
+  exec_cmd "tar -zxf $REDIS_SERVER_FILE"
   cd "$REDIS_SERVER_DIR" || exit 2
   exec_cmd "make --jobs=$JOBS $REDIS_SERVER_CONFIG"
   cd ../ || exit 2
@@ -75,24 +75,31 @@ if [ ! -f "$LISK_FILE" ]; then
 fi
 if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "rm -rf $BUILD_NAME"
-  exec_cmd "tar -xvf $VERSION.tar.gz"
+  exec_cmd "tar -xf $VERSION.tar.gz"
   exec_cmd "cp -Rf $VERSION $BUILD_NAME"
   exec_cmd "cp -vR $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
   exec_cmd "mkdir $BUILD_NAME/bin"
   exec_cmd "mkdir $BUILD_NAME/lib"
+
+  # Create redis specific dirs and copy binaries
   exec_cmd "mkdir $BUILD_NAME/redis"
   exec_cmd "cp -vf $REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT $BUILD_NAME/bin/$REDIS_SERVER_OUT"
+  exec_cmd "cp -vf $REDIS_SERVER_DIR/src/$REDIS_SERVER_CLI $BUILD_NAME/bin/$REDIS_SERVER_CLI"
+
+  # Copy Libpq for use
   exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
 
   # Bundle libreadline6 and create symbolic links
-  exec_cmd "cp -vf $LIBREADLINE_DIR/shlib/lib*.so.* $BUILD_NAME/lib"
-  exec_cmd "cp -vf $LIBREADLINE_DIR/lib*.a $BUILD_NAME/lib"
-  cd "$(pwd)/$BUILD_NAME/lib"
-  exec_cmd "ln -s $LIBREADLINE_OUT libreadline.so.7"
-  exec_cmd "ln -s libreadline.so.7 libreadline.so"
-  exec_cmd "ln -s $LIBREADLINE_HISTORY libhistory.so.7"
-  exec_cmd "ln -s libhistory.so.7 libhistory.so"
-  cd ../../
+  if [ ! "$(uname -s)" == "Darwin" ]; then
+    exec_cmd "cp -vf $LIBREADLINE_DIR/shlib/lib*.so.* $BUILD_NAME/lib"
+    exec_cmd "cp -vf $LIBREADLINE_DIR/lib*.a $BUILD_NAME/lib"
+    cd "$(pwd)/$BUILD_NAME/lib"
+    exec_cmd "ln -s $LIBREADLINE_OUT libreadline.so.7"
+    exec_cmd "ln -s libreadline.so.7 libreadline.so"
+    exec_cmd "ln -s $LIBREADLINE_HISTORY libhistory.so.7"
+    exec_cmd "ln -s libhistory.so.7 libhistory.so"
+    cd ../../
+  fi
 
   cd "$BUILD_NAME" || exit 2
   exec_cmd "npm install --production $LISK_CONFIG"
@@ -157,20 +164,20 @@ exec_cmd "echo v$(date '+%H:%M:%S %d/%m/%Y') > $BUILD_NAME/package.build";
 echo "Creating archives..."
 echo "--------------------------------------------------------------------------"
 # Create $BUILD_NAME.tar.gz
-exec_cmd "GZIP=-6 tar -czvf ../release/$BUILD_NAME.tar.gz $BUILD_NAME"
+exec_cmd "GZIP=-6 tar -czf ../release/$BUILD_NAME.tar.gz $BUILD_NAME"
 
 # Create $NOVER_BUILD_NAME.tar.gz
 exec_cmd "mv -f $BUILD_NAME $NOVER_BUILD_NAME"
-exec_cmd "GZIP=-6 tar -czvf ../release/$NOVER_BUILD_NAME.tar.gz $NOVER_BUILD_NAME"
+exec_cmd "GZIP=-6 tar -czf ../release/$NOVER_BUILD_NAME.tar.gz $NOVER_BUILD_NAME"
 
 # Create lisk-node-$OS-$ARCH.tar.gz
 cd "$NOVER_BUILD_NAME" || exit 2
-exec_cmd "GZIP=-6 tar -czvf ../../release/lisk-node-$OS-$ARCH.tar.gz nodejs"
+exec_cmd "GZIP=-6 tar -czf ../../release/lisk-node-$OS-$ARCH.tar.gz nodejs"
 cd ../ || exit 2
 
 # Create lisk-source.tar.gz
 exec_cmd "mv -f $VERSION lisk-source"
-exec_cmd "GZIP=-6 tar -czvf ../release/lisk-source.tar.gz lisk-source"
+exec_cmd "GZIP=-6 tar -czf ../release/lisk-source.tar.gz lisk-source"
 
 echo "Checksumming archives..."
 echo "--------------------------------------------------------------------------"

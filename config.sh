@@ -61,11 +61,11 @@ LIBREADLINE_DIR="readline-master"
 LIBREADLINE_FILE="$LIBREADLINE_DIR.tar.gz"
 LIBREADLINE_URL="http://git.savannah.gnu.org/cgit/readline.git/snapshot/$LIBREADLINE_FILE"
 LIBREADLINE_OUT="libreadline.so.7.0"
-LIBREADLINE_HISTORY="libhistory.so.7.0"
+LIBREADLINE_HISTORY="libhistory.so.7.3"
 
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
-if [ "$(uname -s)" == "Darwin" ] || [ "$(uname -s)" == "FreeBSD" ]; then
+if [ "$(uname -s)" == "Darwin" ]; then
   SED_OPTS="-i ''"
 else
   SED_OPTS="-i"
