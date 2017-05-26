@@ -27,7 +27,7 @@ apply_PATCHES() {
 
 echo "Building libreadline7"
 echo "--------------------------------------------------------------------------"
-if [ ! -f "$LIBREADLINE_FILE" && ! "$(uname -s)" == "Darwin"  ]; then
+if [ ! -f "$LIBREADLINE_FILE" && ! "$(uname -s)" == "Darwin" ]; then
   exec_cmd "wget $LIBREADLINE_URL -O $LIBREADLINE_FILE"
 fi
 if [ ! -f "$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" && ! "$(uname -s)" == "Darwin" ]; then
@@ -49,7 +49,14 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
   exec_cmd "rm -rf $POSTGRESQL_DIR"
   exec_cmd "tar -zxf $POSTGRESQL_FILE"
   cd "$POSTGRESQL_DIR" || exit 2
-  exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libs=/usr/local/lib --with-includes=/usr/local/include"
+
+  # Configures make for libreadline7 on linux, without for Darwin
+  if [ ! "$(uname -s)" == "Darwin" ]; then
+    exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libs=/usr/local/lib --with-includes=/usr/local/include"
+  else
+    exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT"
+  fi
+
   exec_cmd "make --jobs=$JOBS"
   exec_cmd "make install"
   cd ../ || exit 2

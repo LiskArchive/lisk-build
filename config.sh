@@ -77,6 +77,7 @@ else
   SHA_CMD="sha256sum"
 fi
 
+# Needed to build Redis as 32bit
 if [ "$(uname -m)" == "i686" ]; then
   REDIS_SERVER_CONFIG="32bit"
 fi
