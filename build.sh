@@ -84,7 +84,7 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
   exec_cmd "rm -rf $BUILD_NAME"
   exec_cmd "tar -xf $VERSION.tar.gz"
   exec_cmd "cp -Rf $VERSION $BUILD_NAME"
-  exec_cmd "cp -vR $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
+  exec_cmd "cp -R $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
   exec_cmd "mkdir $BUILD_NAME/bin"
   exec_cmd "mkdir $BUILD_NAME/lib"
 
