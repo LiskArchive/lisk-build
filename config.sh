@@ -50,9 +50,22 @@ NODE_SODIUM_DIR="node-sodium-master"
 NODE_SODIUM_FILE="$NODE_SODIUM_DIR.tar.gz"
 NODE_SODIUM_URL="https://github.com/LiskHQ/node-sodium/archive/master.tar.gz"
 
+REDIS_SERVER_DIR="redis-3.2.9"
+REDIS_SERVER_FILE="$REDIS_SERVER_DIR.tar.gz"
+REDIS_SERVER_URL="http://download.redis.io/releases/$REDIS_SERVER_FILE"
+REDIS_SERVER_OUT="redis-server"
+REDIS_SERVER_CLI="redis-cli"
+REDIS_SERVER_CONFIG=""
+
+LIBREADLINE_DIR="readline-master"
+LIBREADLINE_FILE="$LIBREADLINE_DIR.tar.gz"
+LIBREADLINE_URL="http://git.savannah.gnu.org/cgit/readline.git/snapshot/$LIBREADLINE_FILE"
+LIBREADLINE_OUT="libreadline.so.7.0"
+LIBREADLINE_HISTORY="libhistory.so.7.3"
+
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
-if [ "$(uname -s)" == "Darwin" ] || [ "$(uname -s)" == "FreeBSD" ]; then
+if [ "$(uname -s)" == "Darwin" ]; then
   SED_OPTS="-i ''"
 else
   SED_OPTS="-i"
@@ -62,6 +75,11 @@ if [ "$(uname -s)" == "Darwin" ]; then
   SHA_CMD="shasum -a 256"
 else
   SHA_CMD="sha256sum"
+fi
+
+# Needed to build Redis as 32bit
+if [ "$(uname -m)" == "i686" ]; then
+  REDIS_SERVER_CONFIG="32bit"
 fi
 
 if [ "$TARGET" != "" ]; then

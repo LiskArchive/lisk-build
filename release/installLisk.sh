@@ -229,6 +229,11 @@ configure_lisk() {
   echo -e "\nColdstarting Lisk for the first time"
   bash lisk.sh coldstart -f "$LISK_INSTALL"/etc/blockchain.db.gz
 
+  if [ ! $? == 0 ]; then
+    echo "Installation failed. Cleaning up..."
+    cleanup_installation
+  fi
+
   sleep 5 # Allow the DApp password to generate and write back to the config.json
 
   echo -e "\nStopping Lisk to perform database tuning"
@@ -236,6 +241,25 @@ configure_lisk() {
 
   echo -e "\nExecuting database tuning operation"
   bash tune.sh
+}
+
+cleanup_installation() {
+  echo -e "\nStopping Lisk components before cleanup"
+  bash lisk.sh stop
+
+  cd ../ || exit 2
+
+  echo -e "\nRemoving Lisk directory and installation files"
+  rm -rf "$LISK_INSTALL"
+  rm -f "$LISK_VERSION" "$LISK_VERSION".SHA256
+
+  if [[ "$FRESH_INSTALL" == false ]]; then
+    echo -e "\Restoring old Lisk installation"
+    cp "$LISK_BACKUP" "$LISK_INSTALL"
+    bash "$LISK_INSTALL/lisk.sh" start
+  fi
+
+  exit 1
 }
 
 backup_lisk() {
