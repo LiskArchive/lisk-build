@@ -10,7 +10,7 @@ if [ ! -z "$1" ]; then
   ARCH="$1"
 fi
 
-VERSION="0.8.2a"
+VERSION="BUILD_VERSION"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
@@ -20,25 +20,25 @@ JOBS="2"
 
 LISK_DIR="$VERSION"
 LISK_FILE="$VERSION.tar.gz"
-LISK_NETWORK="test"
-LISK_URL="http://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
+LISK_NETWORK="BUILD_NETWORK"
+LISK_URL="https://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
 
-LISK_NODE_DIR="lisk-node-6.10.1-lisk"
+LISK_NODE_DIR="lisk-node-6.10.3-lisk"
 LISK_NODE_FILE="$LISK_NODE_DIR.tar.gz"
-LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v6.10.1-lisk.tar.gz"
+LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v6.10.3-lisk.tar.gz"
 LISK_NODE_OUT="out/Release/node"
 LISK_NODE_CONFIG=""
 
-NODE_DIR="node-v6.10.1"
+NODE_DIR="node-v6.10.3"
 NODE_FILE="$NODE_DIR.tar.gz"
-NODE_URL="https://nodejs.org/download/release/v6.10.1/$NODE_FILE"
+NODE_URL="https://nodejs.org/download/release/v6.10.3/$NODE_FILE"
 NODE_OUT="compiled"
 NODE_CONFIG=""
 
-POSTGRESQL_DIR="postgresql-9.6.2"
+POSTGRESQL_DIR="postgresql-9.6.3"
 POSTGRESQL_FILE="$POSTGRESQL_DIR.tar.gz"
-POSTGRESQL_URL="https://ftp.postgresql.org/pub/source/v9.6.2/$POSTGRESQL_FILE"
+POSTGRESQL_URL="https://ftp.postgresql.org/pub/source/v9.6.3/$POSTGRESQL_FILE"
 POSTGRESQL_OUT="pgsql"
 
 SODIUM_DIR="libsodium-1.0.11"
