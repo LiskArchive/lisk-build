@@ -37,7 +37,8 @@ DB_DOWNLOAD=Y
 REDIS_CONFIG="$(pwd)/etc/redis.conf"
 REDIS_BIN="$(pwd)/bin/redis-server"
 REDIS_CLI="$(pwd)/bin/redis-cli"
-REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 4 -d '"')"
+REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 2 -d ':' | cut -f 1 -d ',' |  sed 's: ::g')"
+REDIS_PORT="$(grep "port" "$REDIS_CONFIG" -m1| cut -f 2 -d ' ')"
 
 SH_LOG_FILE="$LOGS_DIR/lisk.out"
 
@@ -215,7 +216,7 @@ stop_postgresql() {
 
 start_redis() {
   if [[ "$REDIS_ENABLED" == 'true' ]]; then
-    "$REDIS_BIN" -c "$REDIS_CONFIG"
+    "$REDIS_BIN" "$REDIS_CONFIG"
     if [ $? == 0 ]; then
       echo "√ Redis-Server started successfully."
     else
@@ -227,7 +228,7 @@ start_redis() {
 
 stop_redis() {
   if [[ "$REDIS_ENABLED" == 'true' ]]; then
-    "$REDIS_CLI" -c "$REDIS_CONFIG "shutdown
+    "$REDIS_CLI" -p "$REDIS_PORT" shutdown
     if [ $? == 0 ]; then
       echo "√ Redis-Server stopped successfully."
     else
