@@ -37,7 +37,7 @@ DB_DOWNLOAD=Y
 REDIS_CONFIG="$(pwd)/etc/redis.conf"
 REDIS_BIN="$(pwd)/bin/redis-server"
 REDIS_CLI="$(pwd)/bin/redis-cli"
-REDIS_ENABLED="$(grep "cacheEnabled" $LISK_CONFIG | cut -f 4 -d '"')"
+REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 4 -d '"')"
 
 SH_LOG_FILE="$LOGS_DIR/lisk.out"
 
