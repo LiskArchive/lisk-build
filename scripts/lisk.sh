@@ -214,8 +214,8 @@ stop_postgresql() {
 }
 
 start_redis() {
-  if [[ $REDIS_ENABLED == 'true' ]]; then
-    $REDIS_BIN -c $REDIS_CONFIG
+  if [[ "$REDIS_ENABLED" == 'true' ]]; then
+    "$REDIS_BIN" -c "$REDIS_CONFIG"
     if [ $? == 0 ]; then
       echo "√ Redis-Server started successfully."
     else
@@ -226,8 +226,8 @@ start_redis() {
 }
 
 stop_redis() {
-  if [[ $REDIS_ENABLED == 'true' ]]; then
-    $REDIS_CLI -c $REDIS_CONFIG shutdown
+  if [[ "$REDIS_ENABLED" == 'true' ]]; then
+    "$REDIS_CLI" -c "$REDIS_CONFIG "shutdown
     if [ $? == 0 ]; then
       echo "√ Redis-Server stopped successfully."
     else
