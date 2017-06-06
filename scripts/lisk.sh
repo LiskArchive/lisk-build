@@ -39,6 +39,7 @@ REDIS_BIN="$(pwd)/bin/redis-server"
 REDIS_CLI="$(pwd)/bin/redis-cli"
 REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 2 -d ':' | cut -f 1 -d ',' |  sed 's: ::g')"
 REDIS_PORT="$(grep "port" "$REDIS_CONFIG" -m1| cut -f 2 -d ' ')"
+REDIS_PID="$(pwd)/redis/redis_6380.pid"
 
 SH_LOG_FILE="$LOGS_DIR/lisk.out"
 
@@ -216,23 +217,31 @@ stop_postgresql() {
 
 start_redis() {
   if [[ "$REDIS_ENABLED" == 'true' ]]; then
-    "$REDIS_BIN" "$REDIS_CONFIG"
-    if [ $? == 0 ]; then
-      echo "√ Redis-Server started successfully."
+    if [[ ! -f "$REDIS_PID" ]]; then
+      "$REDIS_BIN" "$REDIS_CONFIG"
+      if [ $? == 0 ]; then
+        echo "√ Redis-Server started successfully."
+      else
+        echo "X Failed to start Redis-Server."
+        exit 1
+      fi
     else
-      echo "X Failed to start Redis-Server."
-      exit 1
+      echo "√ Redis-Server is already running"
     fi
   fi
 }
 
 stop_redis() {
   if [[ "$REDIS_ENABLED" == 'true' ]]; then
-    "$REDIS_CLI" -p "$REDIS_PORT" shutdown
-    if [ $? == 0 ]; then
-      echo "√ Redis-Server stopped successfully."
+    if [[ -f "$REDIS_PID" ]]; then
+      "$REDIS_CLI" -p "$REDIS_PORT" shutdown
+      if [ $? == 0 ]; then
+        echo "√ Redis-Server stopped successfully."
+      else
+        echo "X Failed to stop Redis-Server."
+      fi
     else
-      echo "X Failed to stop Redis-Server."
+      echo "√ Redis-Server already stopped"
     fi
   fi
 }
