@@ -21,24 +21,24 @@ JOBS="2"
 LISK_DIR="$VERSION"
 LISK_FILE="$VERSION.tar.gz"
 LISK_NETWORK="BUILD_NETWORK"
-LISK_URL="http://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
+LISK_URL="https://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
 
-LISK_NODE_DIR="lisk-node-6.10.1-lisk"
+LISK_NODE_DIR="lisk-node-6.10.3-lisk"
 LISK_NODE_FILE="$LISK_NODE_DIR.tar.gz"
-LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v6.10.1-lisk.tar.gz"
+LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v6.10.3-lisk.tar.gz"
 LISK_NODE_OUT="out/Release/node"
 LISK_NODE_CONFIG=""
 
-NODE_DIR="node-v6.10.1"
+NODE_DIR="node-v6.10.3"
 NODE_FILE="$NODE_DIR.tar.gz"
-NODE_URL="https://nodejs.org/download/release/v6.10.1/$NODE_FILE"
+NODE_URL="https://nodejs.org/download/release/v6.10.3/$NODE_FILE"
 NODE_OUT="compiled"
 NODE_CONFIG=""
 
-POSTGRESQL_DIR="postgresql-9.6.2"
+POSTGRESQL_DIR="postgresql-9.6.3"
 POSTGRESQL_FILE="$POSTGRESQL_DIR.tar.gz"
-POSTGRESQL_URL="https://ftp.postgresql.org/pub/source/v9.6.2/$POSTGRESQL_FILE"
+POSTGRESQL_URL="https://ftp.postgresql.org/pub/source/v9.6.3/$POSTGRESQL_FILE"
 POSTGRESQL_OUT="pgsql"
 
 SODIUM_DIR="libsodium-1.0.11"
@@ -50,18 +50,36 @@ NODE_SODIUM_DIR="node-sodium-master"
 NODE_SODIUM_FILE="$NODE_SODIUM_DIR.tar.gz"
 NODE_SODIUM_URL="https://github.com/LiskHQ/node-sodium/archive/master.tar.gz"
 
+REDIS_SERVER_DIR="redis-3.2.9"
+REDIS_SERVER_FILE="$REDIS_SERVER_DIR.tar.gz"
+REDIS_SERVER_URL="http://download.redis.io/releases/$REDIS_SERVER_FILE"
+REDIS_SERVER_OUT="redis-server"
+REDIS_SERVER_CLI="redis-cli"
+REDIS_SERVER_CONFIG=""
+
+LIBREADLINE_DIR="readline-master"
+LIBREADLINE_FILE="$LIBREADLINE_DIR.tar.gz"
+LIBREADLINE_URL="http://git.savannah.gnu.org/cgit/readline.git/snapshot/$LIBREADLINE_FILE"
+LIBREADLINE_OUT="libreadline.so.7.0"
+LIBREADLINE_HISTORY="libhistory.so.7.3"
+
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
-if [ "$(uname -s)" == "Darwin" ] || [ "$(uname -s)" == "FreeBSD" ]; then
+if [ "$(uname -s)" == "Darwin" ]; then
   SED_OPTS="-i ''"
 else
   SED_OPTS="-i"
 fi
 
 if [ "$(uname -s)" == "Darwin" ]; then
-  MD5_CMD="shasum -a 256"
+  SHA_CMD="shasum -a 256"
 else
-  MD5_CMD="sha256sum"
+  SHA_CMD="sha256sum"
+fi
+
+# Needed to build Redis as 32bit
+if [ "$(uname -m)" == "i686" ]; then
+  REDIS_SERVER_CONFIG="32bit"
 fi
 
 if [ "$TARGET" != "" ]; then

@@ -34,6 +34,13 @@ DB_LOG_FILE="$LOGS_DIR/pgsql.log"
 DB_SNAPSHOT="blockchain.db.gz"
 DB_DOWNLOAD=Y
 
+REDIS_CONFIG="$(pwd)/etc/redis.conf"
+REDIS_BIN="$(pwd)/bin/redis-server"
+REDIS_CLI="$(pwd)/bin/redis-cli"
+REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 2 -d ':' | cut -f 1 -d ',' |  sed 's: ::g')"
+REDIS_PORT="$(grep "port" "$REDIS_CONFIG" -m1| cut -f 2 -d ' ')"
+REDIS_PID="$(pwd)/redis/redis_6380.pid"
+
 SH_LOG_FILE="$LOGS_DIR/lisk.out"
 
 # Setup logging
@@ -208,7 +215,39 @@ stop_postgresql() {
   fi
 }
 
+start_redis() {
+  if [[ "$REDIS_ENABLED" == 'true' ]]; then
+    if [[ ! -f "$REDIS_PID" ]]; then
+      "$REDIS_BIN" "$REDIS_CONFIG"
+      if [ $? == 0 ]; then
+        echo "√ Redis-Server started successfully."
+      else
+        echo "X Failed to start Redis-Server."
+        exit 1
+      fi
+    else
+      echo "√ Redis-Server is already running"
+    fi
+  fi
+}
+
+stop_redis() {
+  if [[ "$REDIS_ENABLED" == 'true' ]]; then
+    if [[ -f "$REDIS_PID" ]]; then
+      "$REDIS_CLI" -p "$REDIS_PORT" shutdown
+      if [ $? == 0 ]; then
+        echo "√ Redis-Server stopped successfully."
+      else
+        echo "X Failed to stop Redis-Server."
+      fi
+    else
+      echo "√ Redis-Server already stopped"
+    fi
+  fi
+}
+
 start_lisk() {
+  start_redis
   pm2 start "$PM2_CONFIG"  >> "$SH_LOG_FILE"
   if [ $? == 0 ]; then
     echo "√ Lisk started successfully."
@@ -222,11 +261,12 @@ start_lisk() {
 stop_lisk() {
   pm2 delete "$PM2_CONFIG" >> "$SH_LOG_FILE"
   echo "√ Lisk stopped successfully."
+  stop_redis
 }
 
 reload_lisk() {
   echo "Stopping Lisk to reload PM2 config"
-  pm2 delete "$PM2_CONFIG" >> "$SH_LOG_FILE"
+  stop_lisk
   start_lisk
 }
 

@@ -45,7 +45,7 @@ prereq_checks() {
     echo -e "curl is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
     echo -e "\ncurl is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-      echo -e "\nPlease follow the Prerequisites at: https://github.com/LiskHQ/lisk-wiki/wiki/Binary-Install#1-prepare-your-system"
+      echo -e "\nPlease follow the Prerequisites at: https://docs.lisk.io/docs/core-pre-installation-binary"
     exit 2
   fi
 
@@ -53,7 +53,7 @@ prereq_checks() {
     echo -e "Tar is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
     echo -e "\ntar is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-      echo -e "\nPlease follow the Prerequisites at: https://github.com/LiskHQ/lisk-wiki/wiki/Binary-Install#1-prepare-your-system"
+      echo -e "\nPlease follow the Prerequisites at: https://docs.lisk.io/docs/core-pre-installation-binary"
     exit 2
   fi
 
@@ -61,7 +61,7 @@ prereq_checks() {
     echo -e "Wget is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
     echo -e "\nWget is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-    echo -e "\nPlease follow the Prerequisites at: https://github.com/LiskHQ/lisk-wiki/wiki/Binary-Install#1-prepare-your-system"
+    echo -e "\nPlease follow the Prerequisites at: https://docs.lisk.io/docs/core-pre-installation-binary"
     exit 2
   fi
 
@@ -74,7 +74,7 @@ prereq_checks() {
       echo -e "Sudo authenticated.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
     else
       echo -e "Unable to authenticate Sudo.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-      echo -e "\nPlease follow the Prerequisites at: https://github.com/LiskHQ/lisk-wiki/wiki/Binary-Install#1-prepare-your-system"
+      echo -e "\nPlease follow the Prerequisites at: https://docs.lisk.io/docs/core-pre-installation-binary"
       exit 2
     fi
   fi
@@ -200,16 +200,12 @@ install_lisk() {
   curl -s "https://downloads.lisk.io/lisk/$RELEASE/$LISK_VERSION.SHA256" -o "$LISK_VERSION".SHA256
 
   if [[ "$(uname)" == "Linux" ]]; then
-    SHA256=$(SHA256sum "$LISK_VERSION" | awk '{print $1}')
-  elif [[ "$(uname)" == "FreeBSD" ]]; then
-    SHA256=$(SHA256 "$LISK_VERSION" | awk '{print $1}')
+    SHA256=$(sha256sum -c "$LISK_VERSION" | awk '{print $2}')
   elif [[ "$(uname)" == "Darwin" ]]; then
-    SHA256=$(SHA256 "$LISK_VERSION" | awk '{print $4}')
+    SHA256=$(shasum -c "$LISK_VERSION" | awk '{print $2}')
   fi
 
-  SHA256_compare=$(grep "$LISK_VERSION" "$LISK_VERSION".SHA256 | awk '{print $1}')
-
-  if [[ "$SHA256" == "$SHA256_compare" ]]; then
+  if [[ "$SHA256" == "OK" ]]; then
     echo -e "\nChecksum Passed!"
   else
     echo -e "\nChecksum Failed, aborting installation"
@@ -233,6 +229,11 @@ configure_lisk() {
   echo -e "\nColdstarting Lisk for the first time"
   bash lisk.sh coldstart -f "$LISK_INSTALL"/etc/blockchain.db.gz
 
+  if [ ! $? == 0 ]; then
+    echo "Installation failed. Cleaning up..."
+    cleanup_installation
+  fi
+
   sleep 5 # Allow the DApp password to generate and write back to the config.json
 
   echo -e "\nStopping Lisk to perform database tuning"
@@ -240,6 +241,27 @@ configure_lisk() {
 
   echo -e "\nExecuting database tuning operation"
   bash tune.sh
+}
+
+cleanup_installation() {
+  echo -e "\nStopping Lisk components before cleanup"
+  bash lisk.sh stop
+
+  cd ../ || exit 2
+
+  echo -e "\nRemoving Lisk directory and installation files"
+  rm -rf "$LISK_INSTALL"
+  rm -f "$LISK_VERSION" "$LISK_VERSION".SHA256
+
+  if [[ "$FRESH_INSTALL" == false ]]; then
+    echo -e "\Restoring old Lisk installation"
+    cp "$LISK_BACKUP" "$LISK_INSTALL"
+    bash "$LISK_INSTALL/lisk.sh" start
+  fi
+
+  echo -e "\nPlease check installLisk.out for more details on the failure. See here for troubleshooting steps: https://docs.lisk.io/docs/core-troubleshooting"
+  echo -e "\nIf no steps resolve your issue, please log an issue at: https://github.com/LiskHQ/lisk-build/issues"
+  exit 1
 }
 
 backup_lisk() {
@@ -304,11 +326,11 @@ upgrade_lisk() {
     # shellcheck disable=SC1090
     . "$LISK_INSTALL"/env.sh
     # shellcheck disable=SC2129
-    pg_ctl initdb -D "$LISK_NEW_PG"/data &>> $LOG_FILE
+    pg_ctl initdb -D "$LISK_NEW_PG"/data &> $LOG_FILE
     # shellcheck disable=SC2129
-    "$LISK_NEW_PG"/bin/pg_upgrade -b "$LISK_OLD_PG"/bin -B "$LISK_NEW_PG"/bin -d "$LISK_OLD_PG"/data -D "$LISK_NEW_PG"/data &>> $LOG_FILE
-    bash "$LISK_INSTALL"/lisk.sh start_db &>> $LOG_FILE
-    bash "$LISK_INSTALL"/analyze_new_cluster.sh &>> $LOG_FILE
+    "$LISK_NEW_PG"/bin/pg_upgrade -b "$LISK_OLD_PG"/bin -B "$LISK_NEW_PG"/bin -d "$LISK_OLD_PG"/data -D "$LISK_NEW_PG"/data &> $LOG_FILE
+    bash "$LISK_INSTALL"/lisk.sh start_db &> $LOG_FILE
+    bash "$LISK_INSTALL"/analyze_new_cluster.sh &> $LOG_FILE
     rm -f "$LISK_INSTALL"/*cluster*
   else
     cp -rf "$LISK_OLD_PG"/data/* "$LISK_NEW_PG"/data/
