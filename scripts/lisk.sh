@@ -235,7 +235,7 @@ start_redis() {
 stop_redis() {
   if [[ "$REDIS_ENABLED" == 'true' ]]; then
     if [[ -f "$REDIS_PID" ]]; then
-      "$REDIS_CLI" -p "$REDIS_PORT" -a $REDIS_PASSWORD shutdown
+      "$REDIS_CLI" -p "$REDIS_PORT" -a "$REDIS_PASSWORD" shutdown
       if [ $? == 0 ]; then
         echo "√ Redis-Server stopped successfully."
       else
