@@ -200,9 +200,9 @@ install_lisk() {
   curl -s "https://downloads.lisk.io/lisk/$RELEASE/$LISK_VERSION.SHA256" -o "$LISK_VERSION".SHA256
 
   if [[ "$(uname)" == "Linux" ]]; then
-    SHA256=$(sha256sum -c "$LISK_VERSION" | awk '{print $2}')
+    SHA256=$(sha256sum -c "$LISK_VERSION".SHA256 | awk '{print $2}')
   elif [[ "$(uname)" == "Darwin" ]]; then
-    SHA256=$(shasum -c "$LISK_VERSION" | awk '{print $2}')
+    SHA256=$(shasum -c "$LISK_VERSION".SHA256 | awk '{print $2}')
   fi
 
   if [[ "$SHA256" == "OK" ]]; then
