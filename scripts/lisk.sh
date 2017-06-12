@@ -251,7 +251,7 @@ stop_redis() {
         echo "√ Redis-Server stopped successfully."
       else
         echo "X Failed to stop Redis-Server."
-        REDIS_PID="$(tail -n1 $REDIS_PID)"
+        REDIS_PID="$(tail -n1 "$REDIS_PID")"
         pkill -9 "$REDIS_PID"
         echo "√ Redis-Server killed"
       fi
