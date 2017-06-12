@@ -39,7 +39,6 @@ REDIS_BIN="$(pwd)/bin/redis-server"
 REDIS_CLI="$(pwd)/bin/redis-cli"
 REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 2 -d ':' |  sed 's: ::g' | cut -f 1 -d ',')"
 REDIS_PORT="$(grep "port" "$LISK_CONFIG" -m3 | sed -n 3p | cut -f 2 -d':' | sed 's: ::g' | cut -f 1 -d ',')"
-REDIS_USER="$(grep "user" "$LISK_CONFIG" -m2 | sed -n 2p | cut -f 2 -d ":" | cut -f 2 -d '"')"
 REDIS_PASSWORD="$(grep "password" "$LISK_CONFIG" -m2 | sed -n 2p | cut -f 2 -d ":" | cut -f 2 -d '"')"
 REDIS_PID="$(pwd)/redis/redis_6380.pid"
 
