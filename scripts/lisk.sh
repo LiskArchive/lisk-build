@@ -219,7 +219,7 @@ stop_postgresql() {
 
 start_redis() {
   if [[ "$REDIS_ENABLED" == 'true' ]]; then
-    if [[ "$REDIS_PORT" == '6379']]; then
+    if [[ "$REDIS_PORT" == '6379' ]]; then
       echo "√ Using OS Redis-Server, skipping startup"
     elif [[ ! -f "$REDIS_PID" ]]; then
       "$REDIS_BIN" "$REDIS_CONFIG"
