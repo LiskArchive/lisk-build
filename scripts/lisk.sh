@@ -37,8 +37,9 @@ DB_DOWNLOAD=Y
 REDIS_CONFIG="$(pwd)/etc/redis.conf"
 REDIS_BIN="$(pwd)/bin/redis-server"
 REDIS_CLI="$(pwd)/bin/redis-cli"
-REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 2 -d ':' | cut -f 1 -d ',' |  sed 's: ::g')"
-REDIS_PORT="$(grep "port" "$REDIS_CONFIG" -m1| cut -f 2 -d ' ')"
+REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 2 -d ':' |  sed 's: ::g' | cut -f 1 -d ',')"
+REDIS_PORT="$(grep "port" "$LISK_CONFIG" -m3 | sed -n 3p | cut -f 2 -d':' | sed 's: ::g' | cut -f 1 -d ',')"
+REDIS_PASSWORD="$(grep "password" "$LISK_CONFIG" -m2 | sed -n 2p | cut -f 2 -d ":" | cut -f 2 -d '"')"
 REDIS_PID="$(pwd)/redis/redis_6380.pid"
 
 SH_LOG_FILE="$LOGS_DIR/lisk.out"
@@ -217,7 +218,9 @@ stop_postgresql() {
 
 start_redis() {
   if [[ "$REDIS_ENABLED" == 'true' ]]; then
-    if [[ ! -f "$REDIS_PID" ]]; then
+    if [[ "$REDIS_PORT" == '6379' ]]; then
+      echo "√ Using OS Redis-Server, skipping startup"
+    elif [[ ! -f "$REDIS_PID" ]]; then
       "$REDIS_BIN" "$REDIS_CONFIG"
       if [ $? == 0 ]; then
         echo "√ Redis-Server started successfully."
@@ -233,12 +236,23 @@ start_redis() {
 
 stop_redis() {
   if [[ "$REDIS_ENABLED" == 'true' ]]; then
-    if [[ -f "$REDIS_PID" ]]; then
-      "$REDIS_CLI" -p "$REDIS_PORT" shutdown
+    if [[ "$REDIS_PORT" == '6379' ]]; then
+      echo "√ OS Redis-Server detected, skipping shutdown"
+    elif [[ -f "$REDIS_PID" ]]; then
+
+      # Necessary to pass the right password string to redis
+      if [[ "$REDIS_PASSWORD" ]]; then
+        REDIS_PASSWORD="-a $REDIS_PASSWORD"
+      fi
+
+      "$REDIS_CLI" -p "$REDIS_PORT" "$REDIS_PASSWORD" shutdown
       if [ $? == 0 ]; then
         echo "√ Redis-Server stopped successfully."
       else
         echo "X Failed to stop Redis-Server."
+        REDIS_PID="$(tail -n1 "$REDIS_PID")"
+        pkill -9 "$REDIS_PID"
+        echo "√ Redis-Server killed"
       fi
     else
       echo "√ Redis-Server already stopped"
