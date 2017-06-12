@@ -242,7 +242,7 @@ stop_redis() {
     elif [[ -f "$REDIS_PID" ]]; then
 
       # Necessary to pass the right password string to redis
-      if [[ $REDIS_PASSWORD ]]; then
+      if [[ "$REDIS_PASSWORD" ]]; then
         REDIS_PASSWORD="-a $REDIS_PASSWORD"
       fi
 
@@ -252,7 +252,7 @@ stop_redis() {
       else
         echo "X Failed to stop Redis-Server."
         REDIS_PID="$(tail -n1 $REDIS_PID)"
-        pkill -9 $REDIS_PID
+        pkill -9 "$REDIS_PID"
         echo "√ Redis-Server killed"
       fi
     else
