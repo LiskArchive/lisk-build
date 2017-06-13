@@ -242,10 +242,10 @@ stop_redis() {
 
       # Necessary to pass the right password string to redis
       if [[ "$REDIS_PASSWORD" ]]; then
-        REDIS_PASSWORD="-a $REDIS_PASSWORD"
+        REDIS_FLAG="-a"
       fi
 
-      "$REDIS_CLI" -p "$REDIS_PORT" "$REDIS_PASSWORD" shutdown
+      "$REDIS_CLI" -p "$REDIS_PORT" "$REDIS_FLAG" "$REDIS_PASSWORD" shutdown
       if [ $? == 0 ]; then
         echo "√ Redis-Server stopped successfully."
       else
