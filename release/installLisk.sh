@@ -369,7 +369,7 @@ usage() {
   echo " -d <DIRECTORY> -- install location"
   echo " -r <RELEASE>   -- choose main or test"
   echo " -n             -- install ntp if not installed"
-  echo " -h 	          -- rebuild instead of copying database"
+  echo " -h             -- rebuild instead of copying database"
   echo " -u <URL>       -- URL to rebuild from - Requires -h"
   echo " -0 <yes|no>    -- Forces sync from 0"
 }
