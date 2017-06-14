@@ -19,14 +19,17 @@ fi
 # shellcheck disable=SC1090
 . "$(pwd)/env.sh"
 
+
 PM2_CONFIG="$(pwd)/etc/pm2-lisk.json"
 PM2_APP="$(grep "name" "$PM2_CONFIG" | cut -d'"' -f4)" >> /dev/null
 LISK_CONFIG="$(grep "config" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
 
 LOGS_DIR="$(pwd)/logs"
 
+# Allocates variables for use later, reusable for changing pm2 config.
+config() {
 DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
-DB_PORT="$(grep "port" config.json -m2 | tail -n1 |cut -f 1 -d ',' | cut -f 2 -d ':')"
+DB_PORT="$(grep "port" "$LISK_CONFIG" -m2 | tail -n1 |cut -f 1 -d ',' | cut -f 2 -d ':')"
 DB_USER="$USER"
 DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
@@ -41,8 +44,13 @@ REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 2 -d ':' |  sed 's:
 REDIS_PORT="$(grep "port" "$LISK_CONFIG" -m3 | sed -n 3p | cut -f 2 -d':' | sed 's: ::g' | cut -f 1 -d ',')"
 REDIS_PASSWORD="$(grep "password" "$LISK_CONFIG" -m2 | sed -n 2p | cut -f 2 -d ":" | cut -f 2 -d '"')"
 REDIS_PID="$(pwd)/redis/redis_6380.pid"
+}
+
+#sets all of the variables
+config
 
 SH_LOG_FILE="$LOGS_DIR/lisk.out"
+
 
 # Setup logging
 exec > >(tee -ia "$SH_LOG_FILE")
@@ -242,10 +250,10 @@ stop_redis() {
 
       # Necessary to pass the right password string to redis
       if [[ "$REDIS_PASSWORD" ]]; then
-        REDIS_FLAG="-a"
+        REDIS_PASSWORD="-a $REDIS_PASSWORD"
       fi
 
-      "$REDIS_CLI" -p "$REDIS_PORT" "$REDIS_FLAG" "$REDIS_PASSWORD" shutdown
+      "$REDIS_CLI" -p "$REDIS_PORT" "$REDIS_PASSWORD" shutdown
       if [ $? == 0 ]; then
         echo "√ Redis-Server stopped successfully."
       else
@@ -352,7 +360,9 @@ parse_option() {
         if [ -f "$OPTARG" ]; then
           PM2_CONFIG="$OPTARG"
           PM2_APP="$(grep "name" "$PM2_CONFIG" | cut -d'"' -f4)"
-          LISK_CONFIG="$(grep "config" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
+          LISK_CONFIG="$(grep ".json" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
+          # Resets all of the variables
+          config
         else
           echo "PM2-config.json not found. Please verify the file exists and try again."
           exit 1
