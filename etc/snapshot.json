@@ -67,6 +67,9 @@
         "releaseLimit": 5,
         "relayLimit": 5
     },
+    "transactions": {
+        "maxTxsPerQueue": 1000
+    },
     "forging": {
         "force": false,
         "secret": [],
