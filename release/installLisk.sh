@@ -188,7 +188,7 @@ ntp_checks() {
   fi # End NTP Checks
 }
 
-install_lisk() {
+download_lisk() {
   LISK_VERSION=lisk-$UNAME.tar.gz
 
   LISK_DIR=$(echo "$LISK_VERSION" | cut -d'.' -f1)
@@ -212,7 +212,9 @@ install_lisk() {
     rm -f "$LISK_VERSION" "$LISK_VERSION".SHA256
     exit 0
   fi
+}
 
+install_lisk() {
   echo -e '\nExtracting Lisk binaries to '"$LISK_INSTALL"
 
   tar -xzf "$LISK_VERSION" -C "$LISK_LOCATION"
@@ -367,7 +369,7 @@ usage() {
   echo " -d <DIRECTORY> -- install location"
   echo " -r <RELEASE>   -- choose main or test"
   echo " -n             -- install ntp if not installed"
-  echo " -h 	        -- rebuild instead of copying database"
+  echo " -h             -- rebuild instead of copying database"
   echo " -u <URL>       -- URL to rebuild from - Requires -h"
   echo " -0 <yes|no>    -- Forces sync from 0"
 }
@@ -409,6 +411,7 @@ case "$1" in
   prereq_checks
   user_prompts
   ntp_checks
+  download_lisk
   install_lisk
   configure_lisk
   log_rotate
@@ -418,6 +421,7 @@ case "$1" in
   FRESH_INSTALL='false'
   parse_option "$@"
   user_prompts
+  download_lisk
   backup_lisk
   install_lisk
   upgrade_lisk
