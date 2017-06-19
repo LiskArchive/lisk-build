@@ -42,7 +42,7 @@ REDIS_BIN="$(pwd)/bin/redis-server"
 REDIS_CLI="$(pwd)/bin/redis-cli"
 REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 2 -d ':' |  sed 's: ::g' | cut -f 1 -d ',')"
 REDIS_PORT="$(grep "port" "$LISK_CONFIG" -m3 | sed -n 3p | cut -f 2 -d':' | sed 's: ::g' | cut -f 1 -d ',')"
-REDIS_PASSWORD="$(grep "password" "$LISK_CONFIG" -m2 | sed -n 2p | cut -f 2 -d ":" | cut -f 2 -d '"')"
+REDIS_PASSWORD="$(grep "password" "$LISK_CONFIG" -m2 | sed -n 2p | cut -f 2 -d ":" | cut -f 1 -d ',' | sed 's: ::g')"
 REDIS_PID="$(pwd)/redis/redis_6380.pid"
 }
 
@@ -249,11 +249,12 @@ stop_redis() {
     elif [[ -f "$REDIS_PID" ]]; then
 
       # Necessary to pass the right password string to redis
-      if [[ "$REDIS_PASSWORD" ]]; then
-        REDIS_PASSWORD="-a $REDIS_PASSWORD"
+      if [[ "$REDIS_PASSWORD" != null ]]; then
+        "$REDIS_CLI" -p "$REDIS_PORT" "-a $REDIS_PASSWORD" shutdown
+      else
+        "$REDIS_CLI" -p "$REDIS_PORT" shutdown
       fi
 
-      "$REDIS_CLI" -p "$REDIS_PORT" "$REDIS_PASSWORD" shutdown
       if [ $? == 0 ]; then
         echo "√ Redis-Server stopped successfully."
       else
