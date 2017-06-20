@@ -193,6 +193,8 @@ download_lisk() {
 
   LISK_DIR=$(echo "$LISK_VERSION" | cut -d'.' -f1)
 
+  rm -f "$LISK_VERSION" "$LISK_VERSION".SHA256 &> /dev/null
+
   echo -e "\nDownloading current Lisk binaries: ""$LISK_VERSION"
 
   curl --progress-bar -o "$LISK_VERSION" "https://downloads.lisk.io/lisk/$RELEASE/$LISK_VERSION"
@@ -287,6 +289,7 @@ backup_lisk() {
 
   mkdir -p "$LISK_LOCATION"/backup/ &> /dev/null
   mv -f "$LISK_INSTALL" "$LISK_LOCATION"/backup/ &> /dev/null
+  cd "$LISK_LOCATION" || exit 2
 }
 
 start_lisk() { # Parse the various startup flags
