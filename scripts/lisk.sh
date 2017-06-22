@@ -23,6 +23,7 @@ fi
 PM2_CONFIG="$(pwd)/etc/pm2-lisk.json"
 PM2_APP="$(grep "name" "$PM2_CONFIG" | cut -d'"' -f4)" >> /dev/null
 LISK_CONFIG="$(grep "config" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
+LISK_LOGS="$(grep "logFileName" "$LISK_CONFIG" | cut -f 4 -d'"')"
 
 LOGS_DIR="$(pwd)/logs"
 
@@ -332,7 +333,7 @@ check_pid() {
 }
 
 tail_logs() {
-  pm2 logs "$PM2_APP"
+  tail -f "$LISK_LOGS"
 }
 
 help() {
