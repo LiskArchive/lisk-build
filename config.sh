@@ -10,7 +10,7 @@ if [ ! -z "$1" ]; then
   ARCH="$1"
 fi
 
-VERSION="0.7.0"
+VERSION="BUILD_VERSION"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
@@ -20,25 +20,25 @@ JOBS="2"
 
 LISK_DIR="$VERSION"
 LISK_FILE="$VERSION.tar.gz"
-LISK_NETWORK="main"
-LISK_URL="http://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
+LISK_NETWORK="BUILD_NETWORK"
+LISK_URL="https://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
 
-LISK_NODE_DIR="lisk-node-6.9.5-lisk"
+LISK_NODE_DIR="lisk-node-6.10.3-lisk"
 LISK_NODE_FILE="$LISK_NODE_DIR.tar.gz"
-LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v6.9.5-lisk.tar.gz"
+LISK_NODE_URL="https://github.com/LiskHQ/lisk-node/archive/v6.10.3-lisk.tar.gz"
 LISK_NODE_OUT="out/Release/node"
 LISK_NODE_CONFIG=""
 
-NODE_DIR="node-v6.9.5"
+NODE_DIR="node-v6.10.3"
 NODE_FILE="$NODE_DIR.tar.gz"
-NODE_URL="https://nodejs.org/download/release/v6.9.5/$NODE_FILE"
+NODE_URL="https://nodejs.org/download/release/v6.10.3/$NODE_FILE"
 NODE_OUT="compiled"
 NODE_CONFIG=""
 
-POSTGRESQL_DIR="postgresql-9.6.2"
+POSTGRESQL_DIR="postgresql-9.6.3"
 POSTGRESQL_FILE="$POSTGRESQL_DIR.tar.gz"
-POSTGRESQL_URL="https://ftp.postgresql.org/pub/source/v9.6.2/$POSTGRESQL_FILE"
+POSTGRESQL_URL="https://ftp.postgresql.org/pub/source/v9.6.3/$POSTGRESQL_FILE"
 POSTGRESQL_OUT="pgsql"
 
 SODIUM_DIR="libsodium-1.0.11"
@@ -50,53 +50,36 @@ NODE_SODIUM_DIR="node-sodium-master"
 NODE_SODIUM_FILE="$NODE_SODIUM_DIR.tar.gz"
 NODE_SODIUM_URL="https://github.com/LiskHQ/node-sodium/archive/master.tar.gz"
 
+REDIS_SERVER_DIR="redis-3.2.9"
+REDIS_SERVER_FILE="$REDIS_SERVER_DIR.tar.gz"
+REDIS_SERVER_URL="http://download.redis.io/releases/$REDIS_SERVER_FILE"
+REDIS_SERVER_OUT="redis-server"
+REDIS_SERVER_CLI="redis-cli"
+REDIS_SERVER_CONFIG=""
+
+LIBREADLINE_DIR="readline-master"
+LIBREADLINE_FILE="$LIBREADLINE_DIR.tar.gz"
+LIBREADLINE_URL="http://git.savannah.gnu.org/cgit/readline.git/snapshot/$LIBREADLINE_FILE"
+LIBREADLINE_OUT="libreadline.so.7.0"
+LIBREADLINE_HISTORY="libhistory.so.7.3"
+
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
-if [ "$(uname -s)" == "Darwin" ] || [ "$(uname -s)" == "FreeBSD" ]; then
+if [ "$(uname -s)" == "Darwin" ]; then
   SED_OPTS="-i ''"
 else
   SED_OPTS="-i"
 fi
 
-if [ "$(uname -s)" == "FreeBSD" ]; then
-  MD5_CMD="md5"
+if [ "$(uname -s)" == "Darwin" ]; then
+  SHA_CMD="shasum -a 256"
 else
-  MD5_CMD="md5sum"
+  SHA_CMD="sha256sum"
 fi
 
-if [ "$ARCH" == "armv6l" ]; then
-  export TARGET="arm-linux-gnueabihf"
-  export PATH="$PATH:$(pwd)/toolchains/rpi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin"
-  export CCFLAGS="-marm -march=armv6 -mfpu=vfp -mfloat-abi=hard"
-  export CXXFLAGS="${CCFLAGS}"
-
-  export GYPFLAGS="-Darmeabi=hard -Dv8_use_arm_eabi_hardfloat=true -Dv8_can_use_vfp3_instructions=false -Dv8_can_use_vfp2_instructions=true -Darm7=0 -Darm_vfp=vfp"
-  export VFP3="off"
-  export VFP2="on"
-
-  LISK_CONFIG="--target_arch=arm"
-  LISK_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
-  NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --with-arm-float-abi=hard"
-  POSTGRESQL_CONFIG="--host=arm-linux --without-readline --without-zlib --disable-spinlocks"
-  SODIUM_CONFIG="--host=arm-linux"
-fi
-
-if [ "$ARCH" == "armv7l" ]; then
-  export TARGET="arm-linux-gnueabihf"
-  export PATH="$(pwd)/toolchains/rpi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian/bin:$PATH"
-  export CCFLAGS="-marm -march=armv7-a -mfpu=vfp -mfloat-abi=hard"
-  export CXXFLAGS="${CCFLAGS}"
-
-  export OPENSSL_armcap=7
-  export GYPFLAGS="-Darmeabi=hard -Dv8_use_arm_eabi_hardfloat=true -Dv8_can_use_vfp3_instructions=true -Dv8_can_use_vfp2_instructions=true -Darm7=1"
-  export VFP3="on"
-  export VFP2="on"
-
-  LISK_CONFIG="--target_arch=arm"
-  LISK_NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --without-npm --with-arm-float-abi=hard"
-  NODE_CONFIG="--without-snapshot --dest-cpu=arm --dest-os=linux --with-arm-float-abi=hard"
-  POSTGRESQL_CONFIG="--host=arm-linux --without-readline --without-zlib --disable-spinlocks"
-  SODIUM_CONFIG="--host=arm-linux"
+# Needed to build Redis as 32bit
+if [ "$(uname -m)" == "i686" ]; then
+  REDIS_SERVER_CONFIG="32bit"
 fi
 
 if [ "$TARGET" != "" ]; then

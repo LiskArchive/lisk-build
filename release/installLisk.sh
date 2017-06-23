@@ -1,4 +1,21 @@
 #!/bin/bash
+#
+# LiskHQ/lisk-build
+# Copyright (C) 2017 Lisk Foundation
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+######################################################################
 
 # Variable Declaration
 UNAME=$(uname)-$(uname -m)
@@ -28,7 +45,7 @@ prereq_checks() {
     echo -e "curl is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
     echo -e "\ncurl is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-      echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+      echo -e "\nPlease follow the Prerequisites at: https://docs.lisk.io/docs/core-pre-installation-binary"
     exit 2
   fi
 
@@ -36,7 +53,7 @@ prereq_checks() {
     echo -e "Tar is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
     echo -e "\ntar is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-      echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+      echo -e "\nPlease follow the Prerequisites at: https://docs.lisk.io/docs/core-pre-installation-binary"
     exit 2
   fi
 
@@ -44,7 +61,7 @@ prereq_checks() {
     echo -e "Wget is installed.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
   else
     echo -e "\nWget is not installed.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-    echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+    echo -e "\nPlease follow the Prerequisites at: https://docs.lisk.io/docs/core-pre-installation-binary"
     exit 2
   fi
 
@@ -57,7 +74,7 @@ prereq_checks() {
       echo -e "Sudo authenticated.\t\t\t\t\t$(tput setaf 2)Passed$(tput sgr0)"
     else
       echo -e "Unable to authenticate Sudo.\t\t\t\t\t$(tput setaf 1)Failed$(tput sgr0)"
-      echo -e "\nPlease follow the Prerequisites at: https://lisk.io/documentation?i=lisk-docs/PrereqSetup"
+      echo -e "\nPlease follow the Prerequisites at: https://docs.lisk.io/docs/core-pre-installation-binary"
       exit 2
     fi
   fi
@@ -155,29 +172,6 @@ ntp_checks() {
     elif [[ -f "/proc/user_beancounters" ]]; then
       echo "_ Running OpenVZ VM, NTP and Chrony are not required"
     fi
-  elif [[ "$(uname)" == "FreeBSD" ]]; then
-    if sudo pgrep -x "ntpd" > /dev/null; then
-      echo "√ NTP is running"
-    else
-      echo "X NTP is not running"
-      [ "$INSTALL_NTP" ] || read -r -n 1 -p "Would like to install NTP? (y/n): " REPLY
-      if [[ "$INSTALL_NTP" || "$REPLY" =~ ^[Yy]$ ]]; then
-        echo -e "\nInstalling NTP, please provide sudo password.\n"
-        sudo pkg install ntp
-        sudo sh -c "echo 'ntpd_enable=\"YES\"' >> /etc/rc.conf"
-        sudo ntpdate -u pool.ntp.org
-        sudo service ntpd start
-        if pgrep -x "ntpd" > /dev/null; then
-          echo "v NTP is running"
-        else
-          echo -e "\nLisk requires NTP running on FreeBSD based systems. Please check /etc/ntp.conf and correct any issues."
-          exit 0
-        fi
-      else
-        echo -e "\nLisk requires NTP FreeBSD based systems, exiting."
-        exit 0
-      fi
-    fi # End FreeBSD Checks
   elif [[ "$(uname)" == "Darwin" ]]; then
     if pgrep -x "ntpd" > /dev/null; then
       echo "√ NTP is running"
@@ -194,35 +188,35 @@ ntp_checks() {
   fi # End NTP Checks
 }
 
-install_lisk() {
+download_lisk() {
   LISK_VERSION=lisk-$UNAME.tar.gz
 
   LISK_DIR=$(echo "$LISK_VERSION" | cut -d'.' -f1)
+
+  rm -f "$LISK_VERSION" "$LISK_VERSION".SHA256 &> /dev/null
 
   echo -e "\nDownloading current Lisk binaries: ""$LISK_VERSION"
 
   curl --progress-bar -o "$LISK_VERSION" "https://downloads.lisk.io/lisk/$RELEASE/$LISK_VERSION"
 
-  curl -s "https://downloads.lisk.io/lisk/$RELEASE/$LISK_VERSION.md5" -o "$LISK_VERSION".md5
+  curl -s "https://downloads.lisk.io/lisk/$RELEASE/$LISK_VERSION.SHA256" -o "$LISK_VERSION".SHA256
 
   if [[ "$(uname)" == "Linux" ]]; then
-    md5=$(md5sum "$LISK_VERSION" | awk '{print $1}')
-  elif [[ "$(uname)" == "FreeBSD" ]]; then
-    md5=$(md5 "$LISK_VERSION" | awk '{print $1}')
+    SHA256=$(sha256sum -c "$LISK_VERSION".SHA256 | awk '{print $2}')
   elif [[ "$(uname)" == "Darwin" ]]; then
-    md5=$(md5 "$LISK_VERSION" | awk '{print $4}')
+    SHA256=$(shasum -c "$LISK_VERSION".SHA256 | awk '{print $2}')
   fi
 
-  md5_compare=$(grep "$LISK_VERSION" "$LISK_VERSION".md5 | awk '{print $1}')
-
-  if [[ "$md5" == "$md5_compare" ]]; then
+  if [[ "$SHA256" == "OK" ]]; then
     echo -e "\nChecksum Passed!"
   else
     echo -e "\nChecksum Failed, aborting installation"
-    rm -f "$LISK_VERSION" "$LISK_VERSION".md5
+    rm -f "$LISK_VERSION" "$LISK_VERSION".SHA256
     exit 0
   fi
+}
 
+install_lisk() {
   echo -e '\nExtracting Lisk binaries to '"$LISK_INSTALL"
 
   tar -xzf "$LISK_VERSION" -C "$LISK_LOCATION"
@@ -230,7 +224,7 @@ install_lisk() {
   mv "$LISK_LOCATION/$LISK_DIR" "$LISK_INSTALL"
 
   echo -e "\nCleaning up downloaded files"
-  rm -f "$LISK_VERSION" "$LISK_VERSION".md5
+  rm -f "$LISK_VERSION" "$LISK_VERSION".SHA256
 }
 
 configure_lisk() {
@@ -238,6 +232,11 @@ configure_lisk() {
 
   echo -e "\nColdstarting Lisk for the first time"
   bash lisk.sh coldstart -f "$LISK_INSTALL"/etc/blockchain.db.gz
+
+  if [ ! $? == 0 ]; then
+    echo "Installation failed. Cleaning up..."
+    cleanup_installation
+  fi
 
   sleep 5 # Allow the DApp password to generate and write back to the config.json
 
@@ -248,10 +247,34 @@ configure_lisk() {
   bash tune.sh
 }
 
+cleanup_installation() {
+  echo -e "\nStopping Lisk components before cleanup"
+  bash lisk.sh stop
+
+  cd ../ || exit 2
+
+  echo -e "\nRemoving Lisk directory and installation files"
+  rm -rf "$LISK_INSTALL"
+  rm -f "$LISK_VERSION" "$LISK_VERSION".SHA256
+
+  if [[ "$FRESH_INSTALL" == false ]]; then
+    echo -e "\Restoring old Lisk installation"
+    cp "$LISK_BACKUP" "$LISK_INSTALL"
+    bash "$LISK_INSTALL/lisk.sh" start
+  fi
+
+  echo -e "\nPlease check installLisk.out for more details on the failure. See here for troubleshooting steps: https://docs.lisk.io/docs/core-troubleshooting"
+  echo -e "\nIf no steps resolve your issue, please log an issue at: https://github.com/LiskHQ/lisk-build/issues"
+  exit 1
+}
+
 backup_lisk() {
   echo -e "\nStopping Lisk to perform a backup"
   cd "$LISK_INSTALL" || exit 2
   bash lisk.sh stop
+
+  echo -e "\nCleaning up PM2"
+  bash lisk.sh cleanup
 
   echo -e "\nBacking up existing Lisk Folder"
 
@@ -266,6 +289,7 @@ backup_lisk() {
 
   mkdir -p "$LISK_LOCATION"/backup/ &> /dev/null
   mv -f "$LISK_INSTALL" "$LISK_LOCATION"/backup/ &> /dev/null
+  cd "$LISK_LOCATION" || exit 2
 }
 
 start_lisk() { # Parse the various startup flags
@@ -307,11 +331,11 @@ upgrade_lisk() {
     # shellcheck disable=SC1090
     . "$LISK_INSTALL"/env.sh
     # shellcheck disable=SC2129
-    pg_ctl initdb -D "$LISK_NEW_PG"/data &>> $LOG_FILE
+    pg_ctl initdb -D "$LISK_NEW_PG"/data &> $LOG_FILE
     # shellcheck disable=SC2129
-    "$LISK_NEW_PG"/bin/pg_upgrade -b "$LISK_OLD_PG"/bin -B "$LISK_NEW_PG"/bin -d "$LISK_OLD_PG"/data -D "$LISK_NEW_PG"/data &>> $LOG_FILE
-    bash "$LISK_INSTALL"/lisk.sh start_db &>> $LOG_FILE
-    bash "$LISK_INSTALL"/analyze_new_cluster.sh &>> $LOG_FILE
+    "$LISK_NEW_PG"/bin/pg_upgrade -b "$LISK_OLD_PG"/bin -B "$LISK_NEW_PG"/bin -d "$LISK_OLD_PG"/data -D "$LISK_NEW_PG"/data &> $LOG_FILE
+    bash "$LISK_INSTALL"/lisk.sh start_db &> $LOG_FILE
+    bash "$LISK_INSTALL"/analyze_new_cluster.sh &> $LOG_FILE
     rm -f "$LISK_INSTALL"/*cluster*
   else
     cp -rf "$LISK_OLD_PG"/data/* "$LISK_NEW_PG"/data/
@@ -348,7 +372,7 @@ usage() {
   echo " -d <DIRECTORY> -- install location"
   echo " -r <RELEASE>   -- choose main or test"
   echo " -n             -- install ntp if not installed"
-  echo " -h 	        -- rebuild instead of copying database"
+  echo " -h             -- rebuild instead of copying database"
   echo " -u <URL>       -- URL to rebuild from - Requires -h"
   echo " -0 <yes|no>    -- Forces sync from 0"
 }
@@ -390,6 +414,7 @@ case "$1" in
   prereq_checks
   user_prompts
   ntp_checks
+  download_lisk
   install_lisk
   configure_lisk
   log_rotate
@@ -399,6 +424,7 @@ case "$1" in
   FRESH_INSTALL='false'
   parse_option "$@"
   user_prompts
+  download_lisk
   backup_lisk
   install_lisk
   upgrade_lisk

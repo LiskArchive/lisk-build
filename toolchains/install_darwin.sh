@@ -16,4 +16,4 @@ check_cmds CMDS[@]
 
 ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 exec_cmd "brew install autoconf automake git libtool md5sha1sum n postgresql wget"
-exec_cmd "sudo n v6.9.5"
+exec_cmd "sudo n v6.10.1"

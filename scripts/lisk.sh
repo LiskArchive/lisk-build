@@ -3,10 +3,6 @@
 # shellcheck disable=SC2129
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
-# shellcheck disable=SC1090
-. "$(pwd)/shared.sh"
-# shellcheck disable=SC1090
-. "$(pwd)/env.sh"
 
 if [ ! -f "$(pwd)/app.js" ]; then
   echo "Error: Lisk installation was not found. Exiting."
@@ -18,23 +14,43 @@ if [ "$USER" == "root" ]; then
   exit 1
 fi
 
-LISK_CONFIG=config.json
+# shellcheck disable=SC1090
+. "$(pwd)/shared.sh"
+# shellcheck disable=SC1090
+. "$(pwd)/env.sh"
+
+
+PM2_CONFIG="$(pwd)/etc/pm2-lisk.json"
+PM2_APP="$(grep "name" "$PM2_CONFIG" | cut -d'"' -f4)" >> /dev/null
+LISK_CONFIG="$(grep "config" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
 
 LOGS_DIR="$(pwd)/logs"
-PIDS_DIR="$(pwd)/pids"
 
-DB_NAME="$(grep "database" $LISK_CONFIG | cut -f 4 -d '"')"
-DB_USER=$USER
+# Allocates variables for use later, reusable for changing pm2 config.
+config() {
+DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
+DB_PORT="$(grep "port" "$LISK_CONFIG" -m2 | tail -n1 |cut -f 1 -d ',' | cut -f 2 -d ':')"
+DB_USER="$USER"
 DB_PASS="password"
 DB_DATA="$(pwd)/pgsql/data"
 DB_LOG_FILE="$LOGS_DIR/pgsql.log"
 DB_SNAPSHOT="blockchain.db.gz"
 DB_DOWNLOAD=Y
 
-LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
-PID_FILE="$PIDS_DIR/$DB_NAME.pid"
+REDIS_CONFIG="$(pwd)/etc/redis.conf"
+REDIS_BIN="$(pwd)/bin/redis-server"
+REDIS_CLI="$(pwd)/bin/redis-cli"
+REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 2 -d ':' |  sed 's: ::g' | cut -f 1 -d ',')"
+REDIS_PORT="$(grep "port" "$LISK_CONFIG" -m3 | sed -n 3p | cut -f 2 -d':' | sed 's: ::g' | cut -f 1 -d ',')"
+REDIS_PASSWORD="$(grep "password" "$LISK_CONFIG" -m2 | sed -n 2p | cut -f 2 -d ":" | cut -f 1 -d ',' | sed 's: ::g')"
+REDIS_PID="$(pwd)/redis/redis_6380.pid"
+}
+
+#sets all of the variables
+config
 
 SH_LOG_FILE="$LOGS_DIR/lisk.out"
+
 
 # Setup logging
 exec > >(tee -ia "$SH_LOG_FILE")
@@ -43,7 +59,7 @@ exec 2>&1
 ################################################################################
 
 blockheight() {
-  DB_HEIGHT="$(psql -d "$DB_NAME" -t -c 'select height from blocks order by height desc limit 1;')"
+  DB_HEIGHT="$(psql -d "$DB_NAME" -t -p "$DB_PORT" -c 'select height from blocks order by height desc limit 1;')"
   HEIGHT="${DB_HEIGHT:- Unavailable}"
   echo -e "Current Block Height:" "$HEIGHT"
 }
@@ -198,7 +214,7 @@ stop_postgresql() {
       else
         echo "X Postgresql failed to stop."
       fi
-      sleep .5
+      sleep 1
       STOP_PG=$((STOP_PG+1))
     done
     if pgrep -x "postgres" >> "$SH_LOG_FILE" 2>&1; then
@@ -208,57 +224,73 @@ stop_postgresql() {
   fi
 }
 
-snapshot_lisk() {
-  check_pid
-  if  [[ "$STATUS" != 1 ]] >> "$SH_LOG_FILE" 2>&1; then
-    check_status
-    exit 1
-  else
-    forever start -u lisk -a -l "$LOG_FILE" --pidFile "$PID_FILE" -m 1 app.js -c "$LISK_CONFIG" -s "$SNAPSHOT" >> "$SH_LOG_FILE" 2>&1
-    if [ $? == 0 ]; then
-      echo "√ Lisk started successfully in snapshot mode."
+start_redis() {
+  if [[ "$REDIS_ENABLED" == 'true' ]]; then
+    if [[ "$REDIS_PORT" == '6379' ]]; then
+      echo "√ Using OS Redis-Server, skipping startup"
+    elif [[ ! -f "$REDIS_PID" ]]; then
+      "$REDIS_BIN" "$REDIS_CONFIG"
+      if [ $? == 0 ]; then
+        echo "√ Redis-Server started successfully."
+      else
+        echo "X Failed to start Redis-Server."
+        exit 1
+      fi
     else
-      echo "X Failed to start Lisk."
+      echo "√ Redis-Server is already running"
+    fi
+  fi
+}
+
+stop_redis() {
+  if [[ "$REDIS_ENABLED" == 'true' ]]; then
+    if [[ "$REDIS_PORT" == '6379' ]]; then
+      echo "√ OS Redis-Server detected, skipping shutdown"
+    elif [[ -f "$REDIS_PID" ]]; then
+
+      # Necessary to pass the right password string to redis
+      if [[ "$REDIS_PASSWORD" != null ]]; then
+        "$REDIS_CLI" -p "$REDIS_PORT" "-a $REDIS_PASSWORD" shutdown
+      else
+        "$REDIS_CLI" -p "$REDIS_PORT" shutdown
+      fi
+
+      if [ $? == 0 ]; then
+        echo "√ Redis-Server stopped successfully."
+      else
+        echo "X Failed to stop Redis-Server."
+        REDIS_PID="$(tail -n1 "$REDIS_PID")"
+        pkill -9 "$REDIS_PID"
+        echo "√ Redis-Server killed"
+      fi
+    else
+      echo "√ Redis-Server already stopped"
     fi
   fi
 }
 
 start_lisk() {
-    check_pid
-  if [[ "$STATUS" != 1 ]] > /dev/null 2>&1; then
+  start_redis
+  pm2 start "$PM2_CONFIG"  >> "$SH_LOG_FILE"
+  if [ $? == 0 ]; then
+    echo "√ Lisk started successfully."
+    sleep 3
     check_status
-    exit 1
   else
-    forever start -u lisk -a -l "$LOG_FILE" --pidFile "$PID_FILE" -m 1 app.js -c "$LISK_CONFIG" "$SEED_PEERS" >> "$SH_LOG_FILE" 2>&1
-    if [ $? == 0 ]; then
-      echo "√ Lisk started successfully."
-      sleep 3
-      check_pid
-      check_status
-    else
-      echo "X Failed to start Lisk."
-    fi
+    echo "X Failed to start Lisk."
   fi
 }
 
 stop_lisk() {
-  check_pid
-  if [[ "$STATUS" == 0 ]] > /dev/null 2>&1; then
-    STOP_LISK=0
-    while [[ "$STOP_LISK" -lt 5 ]] >> "$SH_LOG_FILE" 2>&1; do
-      forever stop -t "$PID" --killSignal=SIGTERM >> "$SH_LOG_FILE" 2>&1
-      if [ $? !=  0 ]; then
-        echo "X Failed to stop Lisk."
-      else
-        echo "√ Lisk stopped successfully."
-        break
-      fi
-      sleep .5
-      STOP_LISK=$((STOP_LISK+1))
-    done
-  else
-    echo "√ Lisk is not running."
-  fi
+  pm2 delete "$PM2_CONFIG" >> "$SH_LOG_FILE"
+  echo "√ Lisk stopped successfully."
+  stop_redis
+}
+
+reload_lisk() {
+  echo "Stopping Lisk to reload PM2 config"
+  stop_lisk
+  start_lisk
 }
 
 rebuild_lisk() {
@@ -267,20 +299,29 @@ rebuild_lisk() {
   restore_blockchain
 }
 
+pm2_cleanup() {
+  pm2 delete all
+  pm2 kill
+}
+
 check_status() {
-  if [ -f "$PID_FILE" ] && [ ! -z "$PID" ]; then
-    echo '√ Lisk is running as PID: '"$PID"
+  PM2_PID="$(pm2 describe "$PM2_APP" | grep "pid path" | cut -d' ' -f14)" >> "$SH_LOG_FILE" 2>&1> /dev/null
+
+  pm2 describe "$PM2_APP" >> "$SH_LOG_FILE"
+
+  check_pid
+  if [ "$STATUS" -eq 0  ]; then
+    echo "√ Lisk is running as PID: $PID"
     blockheight
-    return 0
   else
-    echo "X Lisk is not running."
+    echo "X Lisk is not running"
     exit 1
   fi
 }
 
 check_pid() {
-  if [ -f "$PID_FILE" ]; then
-  read -r PID < "$PID_FILE" 2>&1 > /dev/null
+  if [ -f "$PM2_PID" ]; then
+  read -r PID < "$PM2_PID" 2>&1 > /dev/null
   fi
   if [ ! -z "$PID" ]; then
     ps -p "$PID" > /dev/null 2>&1
@@ -291,14 +332,12 @@ check_pid() {
 }
 
 tail_logs() {
-  if [ -f "$LOG_FILE" ]; then
-    tail -f "$LOG_FILE"
-  fi
+  pm2 logs "$PM2_APP"
 }
 
 help() {
   echo -e "\nCommand Options for Lisk.sh"
-  echo -e "\nAll options may be passed [-c <config.json>]"
+  echo -e "\nAll options may be passed [-p <PM2-config.json>]"
   echo -e "\nstart_node                            Starts a Nodejs process for Lisk"
   echo -e "start                                 Starts the Nodejs process and PostgreSQL Database for Lisk"
   echo -e "stop_node                             Stops a Nodejs process for Lisk"
@@ -308,7 +347,6 @@ help() {
   echo -e "start_db                              Starts the PostgreSQL database"
   echo -e "stop_db                               Stops the PostgreSQL database"
   echo -e "coldstart                             Creates the PostgreSQL database and configures config.json for Lisk"
-  echo -e "snapshot -s #                         Starts Lisk in snapshot mode"
   echo -e "logs                                  Displays and tails logs for Lisk"
   echo -e "status                                Displays the status of the PID associated with Lisk"
   echo -e "help                                  Displays this message"
@@ -317,26 +355,17 @@ help() {
 
 parse_option() {
   OPTIND=2
-  while getopts ":s:c:f:u:l:x:0" OPT; do
+  while getopts ":p:f:u:l:0" OPT; do
     case "$OPT" in
-      s)
-        if [ "$OPTARG" -gt "0" ] 2> /dev/null; then
-          SNAPSHOT="$OPTARG"
-        elif [ "$OPTARG" == "highest" ]; then
-          SNAPSHOT="$OPTARG"
-        else
-          echo "Snapshot flag must be a greater than 0 or set to highest"
-          exit 1
-        fi ;;
-
-      c)
+      p)
         if [ -f "$OPTARG" ]; then
-          LISK_CONFIG="$OPTARG"
-          DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
-          LOG_FILE="$LOGS_DIR/$DB_NAME.app.log"
-          PID_FILE="$PIDS_DIR/$DB_NAME.pid"
+          PM2_CONFIG="$OPTARG"
+          PM2_APP="$(grep "name" "$PM2_CONFIG" | cut -d'"' -f4)"
+          LISK_CONFIG="$(grep ".json" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
+          # Resets all of the variables
+          config
         else
-          echo "Config.json not found. Please verify the file exists and try again."
+          echo "PM2-config.json not found. Please verify the file exists and try again."
           exit 1
         fi ;;
 
@@ -349,10 +378,6 @@ parse_option() {
         if [ -f "$OPTARG" ]; then
           DB_DOWNLOAD=N
         fi ;;
-
-      x)
-        SEED_PEERS="-x $OPTARG"
-      ;;
 
       0)
         DB_SNAPSHOT="$(pwd)/etc/blockchain.db.gz"
@@ -373,12 +398,6 @@ case $1 in
 "coldstart")
   coldstart_lisk
   ;;
-"snapshot")
-  stop_lisk
-  start_postgresql
-  sleep 2
-  snapshot_lisk
-  ;;
 "start_node")
   start_lisk
   ;;
@@ -395,9 +414,7 @@ case $1 in
   stop_postgresql
   ;;
 "reload")
-  stop_lisk
-  sleep 2
-  start_lisk
+  reload_lisk
   ;;
 "rebuild")
   stop_lisk
@@ -413,8 +430,10 @@ case $1 in
 "stop_db")
   stop_postgresql
   ;;
+"cleanup")
+  pm2_cleanup
+  ;;
 "status")
-  check_pid
   check_status
   ;;
 "logs")
@@ -426,7 +445,7 @@ case $1 in
 *)
   echo "Error: Unrecognized command."
   echo ""
-  echo "Available commands are: start stop start_node stop_node start_db stop_db reload rebuild coldstart snapshot logs status help"
+  echo "Available commands are: start stop start_node stop_node start_db stop_db reload rebuild coldstart logs status help"
   help
   ;;
 esac
