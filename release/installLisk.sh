@@ -204,7 +204,7 @@ download_lisk() {
   if [[ "$(uname)" == "Linux" ]]; then
     SHA256=$(sha256sum -c "$LISK_VERSION".SHA256 | awk '{print $2}')
   elif [[ "$(uname)" == "Darwin" ]]; then
-    SHA256=$(shasum -c "$LISK_VERSION".SHA256 | awk '{print $2}')
+    SHA256=$(shasum -a 256 -c "$LISK_VERSION".SHA256 | awk '{print $2}')
   fi
 
   if [[ "$SHA256" == "OK" ]]; then
