@@ -113,6 +113,7 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
 
   if [[ "$(uname)" == "Linux" ]]; then
     chrpath -d "$(pwd)/node_modules/sodium/deps/libsodium/test/default/.libs/"*
+    chrpath -d "$(pwd)/lib/"*
   fi # Change rpaths on linux
 
   cd ../ || exit 2
