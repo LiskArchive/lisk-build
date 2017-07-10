@@ -231,7 +231,6 @@ configure_lisk() {
   cd "$LISK_INSTALL" || exit 2
 
   echo -e "\nColdstarting Lisk for the first time"
-  bash lisk.sh coldstart -f "$LISK_INSTALL"/etc/blockchain.db.gz
   if ! bash lisk.sh coldstart -f "$LISK_INSTALL"/etc/blockchain.db.gz; then
     echo "Installation failed. Cleaning up..."
     cleanup_installation
