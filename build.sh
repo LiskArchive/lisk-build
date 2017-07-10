@@ -125,23 +125,6 @@ echo "--------------------------------------------------------------------------
 exec_cmd "cp -f ../shared.sh ../scripts/* $BUILD_NAME/"
 exec_cmd "cp -fR ../etc $BUILD_NAME/"
 
-echo "Building lisk-node..."
-echo "--------------------------------------------------------------------------"
-if [ ! -f "$LISK_NODE_FILE" ]; then
-  exec_cmd "wget $LISK_NODE_URL -O $LISK_NODE_FILE"
-fi
-if [ ! -f "$LISK_NODE_DIR/$LISK_NODE_OUT" ]; then
-  exec_cmd "rm -rf $LISK_NODE_DIR"
-  exec_cmd "tar -zxvf $LISK_NODE_FILE"
-  cd "$LISK_NODE_DIR" || exit 2
-  apply_patches "node"
-  exec_cmd "./configure --without-npm $LISK_NODE_CONFIG"
-  exec_cmd "make --jobs=$JOBS"
-  cd ../ || exit 2
-fi
-exec_cmd "mkdir -p $BUILD_NAME/nodejs"
-exec_cmd "cp -f $LISK_NODE_DIR/$LISK_NODE_OUT $BUILD_NAME/nodejs/"
-
 echo "Building node..."
 echo "--------------------------------------------------------------------------"
 if [ ! -f "$NODE_FILE" ]; then
@@ -178,11 +161,7 @@ exec_cmd "GZIP=-6 tar -czf ../release/$BUILD_NAME.tar.gz $BUILD_NAME"
 # Create $NOVER_BUILD_NAME.tar.gz
 exec_cmd "mv -f $BUILD_NAME $NOVER_BUILD_NAME"
 exec_cmd "GZIP=-6 tar -czf ../release/$NOVER_BUILD_NAME.tar.gz $NOVER_BUILD_NAME"
-
-# Create lisk-node-$OS-$ARCH.tar.gz
-cd "$NOVER_BUILD_NAME" || exit 2
-exec_cmd "GZIP=-6 tar -czf ../../release/lisk-node-$OS-$ARCH.tar.gz nodejs"
-cd ../ || exit 2
+cd ../"$NOVER_BUILD_NAME" || exit 2
 
 # Create lisk-source.tar.gz
 exec_cmd "mv -f $VERSION lisk-source"
@@ -193,7 +172,6 @@ echo "--------------------------------------------------------------------------
 cd ../release || exit 2
 exec_cmd "$SHA_CMD $BUILD_NAME.tar.gz > $BUILD_NAME.tar.gz.SHA256"
 exec_cmd "$SHA_CMD $NOVER_BUILD_NAME.tar.gz > $NOVER_BUILD_NAME.tar.gz.SHA256"
-exec_cmd "$SHA_CMD lisk-node-$OS-$ARCH.tar.gz > lisk-node-$OS-$ARCH.tar.gz.SHA256"
 exec_cmd "$SHA_CMD lisk-source.tar.gz > lisk-source.tar.gz.SHA256"
 cd ../src || exit 2
 
