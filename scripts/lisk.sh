@@ -235,14 +235,7 @@ stop_redis() {
       echo "√ OS Redis-Server detected, skipping shutdown"
     elif [[ -f "$REDIS_PID" ]]; then
 
-      # Necessary to pass the right password string to redis
-      if [[ "$REDIS_PASSWORD" != null ]]; then
-        "$REDIS_CLI" -p "$REDIS_PORT" "-a $REDIS_PASSWORD" shutdown
-      else
-        "$REDIS_CLI" -p "$REDIS_PORT" shutdown
-      fi
-
-      if [ $? == 0 ]; then
+      if stop_redis_cmd; then
         echo "√ Redis-Server stopped successfully."
       else
         echo "X Failed to stop Redis-Server."
@@ -253,6 +246,15 @@ stop_redis() {
     else
       echo "√ Redis-Server already stopped"
     fi
+  fi
+}
+
+stop_redis_cmd(){
+  # Necessary to pass the right password string to redis
+  if [[ "$REDIS_PASSWORD" != null ]]; then
+    "$REDIS_CLI" -p "$REDIS_PORT" "-a $REDIS_PASSWORD" shutdown
+  else
+    "$REDIS_CLI" -p "$REDIS_PORT" shutdown
   fi
 }
 
