@@ -4,12 +4,6 @@
 # shellcheck disable=SC2155
 # Override declare and assign variables seperately. We dont care about return values for path exports.
 
-if [ ! -z "$1" ]; then
-  echo "Overriding architecture with: $1"
-  echo "--------------------------------------------------------------------------"
-  ARCH="$1"
-fi
-
 VERSION="BUILD_VERSION"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
