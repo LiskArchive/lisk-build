@@ -4,12 +4,6 @@
 # shellcheck disable=SC2155
 # Override declare and assign variables seperately. We dont care about return values for path exports.
 
-if [ ! -z "$1" ]; then
-  echo "Overriding architecture with: $1"
-  echo "--------------------------------------------------------------------------"
-  ARCH="$1"
-fi
-
 VERSION="BUILD_VERSION"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
@@ -69,11 +63,6 @@ if [ "$(uname -s)" == "Darwin" ]; then
   SHA_CMD="shasum -a 256"
 else
   SHA_CMD="sha256sum"
-fi
-
-# Needed to build Redis as 32bit
-if [ "$(uname -m)" == "i686" ]; then
-  REDIS_SERVER_CONFIG="32bit"
 fi
 
 if [ "$TARGET" != "" ]; then
