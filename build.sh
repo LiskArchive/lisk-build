@@ -38,13 +38,6 @@ mkdir -p src
 # Exit 2 in case the directory doesnt exist and preventing messes
 cd src || exit 2
 
-apply_PATCHES() {
-	local PATCHES="../../patches/$OS/$ARCH/$1"
-	if [ -d "$PATCHES" ]; then
-		for i in "$PATCHES"/*.patch; do patch -p1 < "$i"; done
-	fi
-}
-
 ################################################################################
 
 echo "Building libreadline7"
