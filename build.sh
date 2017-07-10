@@ -7,6 +7,27 @@ cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
 # shellcheck source=./config.sh
 . "$(pwd)/config.sh"
 
+parse_option() {
+  OPTIND=2
+  while getopts ":v:n" OPT; do
+    case "$OPT" in
+      v)
+        VERSION="$OPTARG"
+        ;;
+      n)
+        LISK_NETWORK="$OPTARG"
+        ;;
+
+       :) echo 'Missing option argument for -'"$OPTARG" >&2; exit 1;;
+
+       *) echo 'Unimplemented option: -'"$OPTARG" >&2; exit 1;;
+    esac
+  done
+}
+
+# Parse options for network and version
+parse_option
+
 # shellcheck disable=SC2034
 # Ignoring the failure due to shell indirection
 CMDS=("autoconf" "gcc" "g++" "make" "node" "npm" "python" "tar" "wget");
