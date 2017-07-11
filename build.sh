@@ -2,32 +2,32 @@
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
 
-# shellcheck source=./shared.sh
-. "$(pwd)/shared.sh"
-# shellcheck source=./config.sh
-. "$(pwd)/config.sh"
-
 parse_option() {
 	OPTIND=1
 	while getopts "v:n:" OPT; do
 		case "$OPT" in
-			v)
-				VERSION="$OPTARG"
-				;;
-
-			n)
-				LISK_NETWORK="$OPTARG"
-				;;
-
-			:) echo 'Missing option argument for -'"$OPTARG" >&2; exit 1;;
-
-			*) echo 'Unimplemented option: -'"$OPTARG" >&2; exit 1;;
+			v ) export VERSION="$OPTARG";;
+			n ) export LISK_NETWORK="$OPTARG";;
+			: ) echo 'Missing option argument for -'"$OPTARG" >&2; exit 1;;
+			* ) echo 'Unimplemented option: -'"$OPTARG" >&2; exit 1;;
 		esac
 	done
+
+	if [[ $VERSION && $LISK_NETWORK ]]; then
+		echo "All options declared"
+	else
+		echo "Both -n and -v are required. Exiting"
+		exit 1
+	fi
 }
 
 # Parse options for network and version
 parse_option "$@"
+
+# shellcheck source=./shared.sh
+. "$(pwd)/shared.sh"
+# shellcheck source=./config.sh
+. "$(pwd)/config.sh"
 
 # shellcheck disable=SC2034
 # Ignoring the failure due to shell indirection
