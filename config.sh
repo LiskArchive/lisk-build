@@ -4,7 +4,7 @@
 # shellcheck disable=SC2155
 # Override declare and assign variables seperately. We dont care about return values for path exports.
 
-VERSION="BUILD_VERSION"
+VERSION="$VERSION"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
@@ -14,7 +14,7 @@ JOBS="2"
 
 LISK_DIR="$VERSION"
 LISK_FILE="$VERSION.tar.gz"
-LISK_NETWORK="BUILD_NETWORK"
+LISK_NETWORK="$LISK_NETWORK"
 LISK_URL="https://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
 
