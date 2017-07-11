@@ -42,10 +42,10 @@ To build a package, perform the following on a machine matching your target arch
   bash toolchains/install_linux.sh
   ```
 
-5. Build package:
+5. Build package - Replace `NETWORK` with `test` or `main`, replace `VERSION` with specific version.
 
   ```
-  bash build.sh
+  bash build.sh -n NETWORK -v VERSION
   ```
 
 ## Darwin
@@ -74,10 +74,10 @@ To build a package, perform the following on a machine matching your target arch
   bash toolchains/install_darwin.sh
   ```
 
-5. Build package:
+5. Build package - Replace `NETWORK` with `test` or `main`, replace `VERSION` with specific version.
 
   ```
-  bash build.sh
+  bash build.sh -n NETWORK -v VERSION
   ```
 
 ## Authors
