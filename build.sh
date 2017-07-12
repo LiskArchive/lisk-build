@@ -183,7 +183,6 @@ exec_cmd "GZIP=-6 tar -czf ../release/$BUILD_NAME.tar.gz $BUILD_NAME"
 # Create $NOVER_BUILD_NAME.tar.gz
 exec_cmd "mv -f $BUILD_NAME $NOVER_BUILD_NAME"
 exec_cmd "GZIP=-6 tar -czf ../release/$NOVER_BUILD_NAME.tar.gz $NOVER_BUILD_NAME"
-cd ../"$NOVER_BUILD_NAME" || exit 2
 
 # Create lisk-source.tar.gz
 exec_cmd "mv -f $VERSION lisk-source"
