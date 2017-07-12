@@ -186,7 +186,7 @@ start_postgresql() {
 	if pgrep -x "postgres" > /dev/null 2>&1; then
 		echo "√ Postgresql is running."
 	else
-		if pg_ctl -D "$DB_DATA" -l "$DB_LOG_FILE" start >> "$SH_LOG_FILE" 2>&1 && sleep 1; then
+		if ! pg_ctl -D "$DB_DATA" -l "$DB_LOG_FILE" start >> "$SH_LOG_FILE" 2>&1; then
 			echo "X Failed to start Postgresql."
 			exit 1
 		else
