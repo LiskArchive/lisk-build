@@ -2,32 +2,32 @@
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
 
-# shellcheck source=./shared.sh
-. "$(pwd)/shared.sh"
-# shellcheck source=./config.sh
-. "$(pwd)/config.sh"
-
 parse_option() {
 	OPTIND=1
 	while getopts "v:n:" OPT; do
 		case "$OPT" in
-			v)
-				VERSION="$OPTARG"
-				;;
-
-			n)
-				LISK_NETWORK="$OPTARG"
-				;;
-
-			:) echo 'Missing option argument for -'"$OPTARG" >&2; exit 1;;
-
-			*) echo 'Unimplemented option: -'"$OPTARG" >&2; exit 1;;
+			v ) export VERSION="$OPTARG";;
+			n ) export LISK_NETWORK="$OPTARG";;
+			: ) echo 'Missing option argument for -'"$OPTARG" >&2; exit 1;;
+			* ) echo 'Unimplemented option: -'"$OPTARG" >&2; exit 1;;
 		esac
 	done
+
+	if [[ $VERSION && $LISK_NETWORK ]]; then
+		echo "All options declared. Proceeding with build."
+	else
+		echo "Both -n and -v are required. Exiting"
+		exit 1
+	fi
 }
 
 # Parse options for network and version
 parse_option "$@"
+
+# shellcheck source=./shared.sh
+. "$(pwd)/shared.sh"
+# shellcheck source=./config.sh
+. "$(pwd)/config.sh"
 
 # shellcheck disable=SC2034
 # Ignoring the failure due to shell indirection
@@ -61,27 +61,27 @@ if [ ! -f "$POSTGRESQL_FILE" ]; then
 	exec_cmd "wget $POSTGRESQL_URL -O $POSTGRESQL_FILE"
 fi
 if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
-  exec_cmd "rm -rf $POSTGRESQL_DIR"
-  exec_cmd "tar -zxf $POSTGRESQL_FILE"
-  cd "$POSTGRESQL_DIR" || exit 2
+	exec_cmd "rm -rf $POSTGRESQL_DIR"
+	exec_cmd "tar -zxf $POSTGRESQL_FILE"
+	cd "$POSTGRESQL_DIR" || exit 2
 
-  # Configures make for libreadline7 on linux, without for Darwin
-  if [ ! "$(uname -s)" == "Darwin" ]; then
-    exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libs=/usr/local/lib --with-includes=/usr/local/include"
-  else
-    exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT"
-  fi
+	# Configures make for libreadline7 on linux, without for Darwin
+	if [ ! "$(uname -s)" == "Darwin" ]; then
+		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libs=/usr/local/lib --with-includes=/usr/local/include"
+	else
+		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT"
+	fi
 
-  exec_cmd "make --jobs=$JOBS"
-  exec_cmd "make install"
+	exec_cmd "make --jobs=$JOBS"
+	exec_cmd "make install"
 
-  # Compiles the pgcrypto extension
+	# Compiles the pgcrypto extension
 
-  cd "$(pwd)/contrib/pgcrypto" || exit 2
-  exec_cmd "make"
-  exec_cmd "make install"
+	cd "$(pwd)/contrib/pgcrypto" || exit 2
+	exec_cmd "make"
+	exec_cmd "make install"
 
-  cd ../ || exit 2
+	cd ../ || exit 2
 fi
 
 echo "Building Redis-Server"
@@ -120,23 +120,23 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
 
 	# Bundle libreadline6 and create symbolic links
 	if [ ! "$(uname -s)" == "Darwin" ]; then
-		exec_cmd "cp -vf $LIBREADLINE_DIR/shlib/lib*.so.* $BUILD_NAME/lib"
-		exec_cmd "cp -vf $LIBREADLINE_DIR/lib*.a $BUILD_NAME/lib"
-		cd "$(pwd)/$BUILD_NAME/lib" || exit 2
-		exec_cmd "ln -s $LIBREADLINE_OUT libreadline.so.7"
-		exec_cmd "ln -s libreadline.so.7 libreadline.so"
-		exec_cmd "ln -s $LIBREADLINE_HISTORY libhistory.so.7"
-		exec_cmd "ln -s libhistory.so.7 libhistory.so"
-		cd ../../ || exit 2
+	exec_cmd "cp -vf $LIBREADLINE_DIR/shlib/lib*.so.* $BUILD_NAME/lib"
+	exec_cmd "cp -vf $LIBREADLINE_DIR/lib*.a $BUILD_NAME/lib"
+	cd "$(pwd)/$BUILD_NAME/lib" || exit 2
+	exec_cmd "ln -s $LIBREADLINE_OUT libreadline.so.7"
+	exec_cmd "ln -s libreadline.so.7 libreadline.so"
+	exec_cmd "ln -s $LIBREADLINE_HISTORY libhistory.so.7"
+	exec_cmd "ln -s libhistory.so.7 libhistory.so"
+	cd ../../ || exit 2
 	fi
 
 	cd "$BUILD_NAME" || exit 2
 	exec_cmd "npm install --production $LISK_CONFIG"
 
 	if [[ "$(uname)" == "Linux" ]]; then
-		chrpath -d "$(pwd)/node_modules/sodium/deps/libsodium/test/default/.libs/"*
-		chrpath -d "$(pwd)/lib/libreadline.so.7.0"
-		chrpath -d "$(pwd)/lib/libhistory.so.7.0"
+	chrpath -d "$(pwd)/node_modules/sodium/deps/libsodium/test/default/.libs/"*
+	chrpath -d "$(pwd)/lib/libreadline.so.7.0"
+	chrpath -d "$(pwd)/lib/libhistory.so.7.0"
 	fi # Change rpaths on linux
 
 	cd ../ || exit 2
