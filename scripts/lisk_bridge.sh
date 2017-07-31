@@ -29,8 +29,8 @@ parseOption() {
 # installation for use in this program
 
 extractConfig() {
-  PM2_CONFIG="$LISK_HOME/etc/pm2-lisk.json"
-  LISK_CONFIG="$(grep "config" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
+	PM2_CONFIG="$LISK_HOME/etc/pm2-lisk.json"
+	LISK_CONFIG="$(grep "config" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
 	PORT="$(grep "port" "$LISK_CONFIG" | head -1 | cut -d':' -f 2 | cut -d',' -f 1 | tr -d '[:space:]')"
 }
 
@@ -38,7 +38,7 @@ extractConfig() {
 # and extracts the height for evaluation
 
 blockMonitor() {
-  BLOCK_HEIGHT="$(curl -s http://localhost:"$PORT"/api/loader/status/sync | cut -d':' -f 5 | cut -d',' -f 1)"
+	BLOCK_HEIGHT="$(curl -s http://localhost:"$PORT"/api/loader/status/sync | cut -d':' -f 5 | cut -d',' -f 1)"
 }
 
 # This function terminates the lisk client at the assigned blocks
@@ -74,7 +74,7 @@ done
 
 cd "$LISK_HOME" || exit 2
 terminateLisk
-cd "$BRIDGE_HOME"  || exit 2
+cd "$BRIDGE_HOME" || exit 2
 downloadLisk
 migrateLisk
 
