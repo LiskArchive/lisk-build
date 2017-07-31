@@ -50,6 +50,7 @@ terminateLisk() {
 
 # This function downloads the new lisk client
 downloadLisk() {
+	rm -f "$(pwd)/installLisk.sh"
 	wget "https://downloads.lisk.io/lisk/$BRIDGE_NETWORK/installLisk.sh"
 }
 
