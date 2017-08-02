@@ -10,7 +10,7 @@ BRIDGE_HOME="$(pwd)"
 BRIDGE_NETWORK="main"
 LISK_HOME="$HOME/lisk-main"
 
-parseOption
+
 
 # Reads in programatic variables if not the default
 parseOption() {
@@ -24,6 +24,8 @@ parseOption() {
 		 esac
 	 done
 }
+
+parseOption # Call parse option
 
 # This function harvests the configuation data from the source
 # installation for use in this program
