@@ -320,7 +320,7 @@ check_pid() {
 }
 
 lisky() {
-	node lisky
+	node "$(pwd)/bin/lisky"
 }
 
 tail_logs() {
