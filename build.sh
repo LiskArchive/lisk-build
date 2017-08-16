@@ -166,9 +166,16 @@ exec_cmd "cp -vR $NODE_DIR/$NODE_OUT/* $BUILD_NAME/"
 exec_cmd "sed $SED_OPTS \"s%$(head -1 "$NPM_CLI")%#\!.\/bin\/node%g\" $NPM_CLI"
 
 cd "$BUILD_NAME" || exit 2
+
+echo "Installing PM2 and Lisky..."
+echo "--------------------------------------------------------------------------"
 # shellcheck disable=SC1090
 . "$(pwd)/env.sh"
+
 exec_cmd "npm install -g pm2"
+exec_cmd "npm install --global --production lisky"
+# Add symbolic link to lisky from root dir
+exec_cmd "ln -s ./bin/lisky lisky"
 cd ../ || exit 2
 
 echo "Stamping build..."

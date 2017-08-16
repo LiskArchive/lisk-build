@@ -319,6 +319,10 @@ check_pid() {
 	fi
 }
 
+lisky() {
+	node "$(pwd)/bin/lisky"
+}
+
 tail_logs() {
 	tail -f "$LISK_LOGS"
 }
@@ -335,6 +339,7 @@ help() {
 	echo -e "start_db                              Starts the PostgreSQL database"
 	echo -e "stop_db                               Stops the PostgreSQL database"
 	echo -e "coldstart                             Creates the PostgreSQL database and configures config.json for Lisk"
+	echo -e "lisky                                 Launches Lisky"
 	echo -e "logs                                  Displays and tails logs for Lisk"
 	echo -e "status                                Displays the status of the PID associated with Lisk"
 	echo -e "help                                  Displays this message"
@@ -427,13 +432,16 @@ case $1 in
 "logs")
 	tail_logs
 	;;
+"lisky")
+	lisky
+	;;
 "help")
 	help
 	;;
 *)
 	echo "Error: Unrecognized command."
 	echo ""
-	echo "Available commands are: start stop start_node stop_node start_db stop_db reload rebuild coldstart logs status help"
+	echo "Available commands are: start stop start_node stop_node start_db stop_db reload rebuild coldstart logs lisky status help"
 	help
 	;;
 esac
