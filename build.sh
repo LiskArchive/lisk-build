@@ -173,7 +173,7 @@ echo "--------------------------------------------------------------------------
 . "$(pwd)/env.sh"
 
 exec_cmd "npm install -g pm2"
-exec_cmd "npm install -g --production lisky"
+exec_cmd "npm install --global --production lisky"
 # Add symbolic link to lisky from root dir
 exec_cmd "ln -s ./bin/lisky lisky"
 cd ../ || exit 2
