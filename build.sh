@@ -172,7 +172,7 @@ echo "--------------------------------------------------------------------------
 # shellcheck disable=SC1090
 . "$(pwd)/env.sh"
 
-exec_cmd "npm install -g pm2"
+exec_cmd "npm install --global --production pm2"
 exec_cmd "npm install --global --production lisky"
 # Add symbolic link to lisky from root dir
 exec_cmd "ln -s ./bin/lisky lisky"
