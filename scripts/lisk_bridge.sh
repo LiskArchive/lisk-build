@@ -26,7 +26,7 @@ BRIDGE_HOME="$(pwd)"
 BRIDGE_NETWORK="main"
 LISK_HOME="$HOME/lisk-main"
 
-# Reads in programatic variables if not the default
+# Reads in required variables if configured by the user.
 parseOption() {
 	OPTIND=1
 	while getopts :s:b:n:h: OPT; do
@@ -39,32 +39,32 @@ parseOption() {
 	 done
 }
 
-# This function harvests the configuation data from the source
-# installation for an automated cutover.
+# Harvests the configuation data from the source installation
+# for an automated cutover.
 extractConfig() {
   PM2_CONFIG="$LISK_HOME/etc/pm2-lisk.json"
   LISK_CONFIG="$(grep "config" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
 	PORT="$(grep "port" "$LISK_CONFIG" | head -1 | cut -d':' -f 2 | cut -d',' -f 1 | tr -d '[:space:]')"
 }
 
-# This function queries the `/api/loader/status/sync` endpoint
+# Queries the `/api/loader/status/sync` endpoint
 # and extracts the height for evaluation.
 blockMonitor() {
   BLOCK_HEIGHT="$(curl -s http://localhost:"$PORT"/api/loader/status/sync | cut -d':' -f 5 | cut -d',' -f 1)"
 }
 
-# This function terminates the lisk client at the assigned blocks
+# Terminates the lisk client at the assigned blocks
 # preparing the installation for a cutover.
 terminateLisk() {
 	bash "$LISK_HOME/lisk.sh" stop
 }
 
-# Downloads the new lisk client.
+# Downloads the new Lisk client.
 downloadLisk() {
 	wget "https://downloads.lisk.io/lisk/$BRIDGE_NETWORK/installLisk.sh"
 }
 
-# This function executes the migration of the source installation
+# Executes the migration of the source installation
 # and deploys the target installation, minimizing downtime.
 migrateLisk() {
 	bash "$(pwd)/installLisk.sh" upgrade -r "$BRIDGE_NETWORK" -d "$LISK_HOME" -0 no
@@ -76,7 +76,7 @@ parseOption
 extractConfig
 blockMonitor
 
-# This function acts as our eventloop, keeping the process running
+# Acts as the eventloop, keeping the process running
 # in order to monitor the node for upgrade.
 while [[ "$BLOCK_HEIGHT" -lt "$TARGET_HEIGHT" ]] ; do
 	blockMonitor
