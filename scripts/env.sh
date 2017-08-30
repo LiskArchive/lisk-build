@@ -12,4 +12,5 @@ export LD_LIBRARY_PATH="$(pwd)/pgsql/lib:$(pwd)/lib:$(pwd)/node/lib:$LD_LIBRARY_
 # shellcheck disable=SC2155
 export PM2_HOME="$(pwd)/.pm2"
 # Node Path
+# shellcheck disable=SC2155
 export NODE_PATH="$(pwd)/node/lib"
