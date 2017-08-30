@@ -51,7 +51,7 @@ LIBREADLINE_URL="http://git.savannah.gnu.org/cgit/readline.git/snapshot/$LIBREAD
 LIBREADLINE_OUT="libreadline.so.7.0"
 LIBREADLINE_HISTORY="libhistory.so.7.3"
 
-NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
+NPM_CLI="lib/node_modules/npm/bin/npm-cli.js"
 
 if [ "$(uname -s)" == "Darwin" ]; then
 	SED_OPTS="-i ''"
