@@ -59,16 +59,16 @@ fi
 
 echo "Building jq"
 echo "--------------------------------------------------------------------------"
-if [ ! -f "$JQ_FILE" ]; then
-	exec_cmd "wget $JQ_URL -O $JQ_FILE"
+if [ ! -f "$SRC_DIR/$JQ_FILE" ]; then
+	exec_cmd "wget $JQ_URL -O $SRC_DIR/$JQ_FILE"
 fi
-if [ ! -f "$JQ_DIR/$JQ_OUT" ]; then
-	exec_cmd "rm -rf $JQ_DIR"
-	exec_cmd "tar -zxf $JQ_FILE"
-	cd "$JQ_DIR" || exit 2
+if [ ! -f "$SRC_DIR/$JQ_DIR/$JQ_OUT" ]; then
+	exec_cmd "rm -rf $SRC_DIR/$JQ_DIR"
+	exec_cmd "tar -zxf $SRC_DIR/$JQ_FILE"
+	cd "$SRC_DIR/$JQ_DIR" || exit 2
 	exec_cmd "./configure"
 	exec_cmd "make"
-	cd ../ || exit 2
+	cd "$SRC_DIR" || exit 2
 fi
 
 echo "Building postgresql..."
@@ -132,7 +132,7 @@ if [ ! -d "$SRC_DIR/$BUILD_NAME/$LISK_NETWORK'net'/node_modules" ]; then #This p
 	exec_cmd "cp -vf $SRC_DIR/$REDIS_SERVER_DIR/src/$REDIS_SERVER_CLI $SRC_DIR/$BUILD_NAME/redis/$REDIS_SERVER_CLI"
 
 	# Copy jq to binary folder
-	exec_cmd "cp -vf $JQ_DIR/$JQ_OUT $BUILD_NAME/bin/$JQ_OUT"
+	exec_cmd "cp -vf $SRC_DIR/$JQ_DIR/$JQ_OUT $SRC_DIR/$BUILD_NAME/bin/$JQ_OUT"
 
 	# Copy Libpq for use
 	exec_cmd "sudo cp -v $SRC_DIR/$BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
