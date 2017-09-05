@@ -51,6 +51,12 @@ LIBREADLINE_URL="http://git.savannah.gnu.org/cgit/readline.git/snapshot/$LIBREAD
 LIBREADLINE_OUT="libreadline.so.7.0"
 LIBREADLINE_HISTORY="libhistory.so.7.3"
 
+JQ_VERSION="1.5"
+JQ_DIR="jq-$JQ_VERSION"
+JQ_FILE="$JQ_DIR.tar.gz"
+JQ_URL="https://github.com/stedolan/jq/releases/download/jq-$JQ_VERSION/$JQ_FILE"
+JQ_OUT="jq"
+
 NPM_CLI="lib/node_modules/npm/bin/npm-cli.js"
 
 if [ "$(uname -s)" == "Darwin" ]; then
