@@ -42,6 +42,8 @@ check_cmds CMDS[@]
 # Create directories and cleanup failed builds
 exec_cmd "mkdir -p src"
 exec_cmd "rm -rf $SRC_DIR/$BUILD_NAME && mkdir -p $SRC_DIR/$BUILD_NAME"
+exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/bin"
+exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/lib"
 
 # Exit 2 in case the directory doesn't exist and preventing messes
 cd "$SRC_DIR" || exit 2
@@ -138,31 +140,28 @@ fi
 
 echo "Copying scripts..."
 echo "--------------------------------------------------------------------------"
-exec_cmd "cp -f $ROOT_DIR/shared.sh $ROOT_DIR/scripts/* $SRC_DIR/$BUILD_NAME/"
-exec_cmd "cp -fR $ROOT_DIR/etc $SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net/"
+exec_cmd "cp -f $ROOT_DIR/shared.sh $ROOT_DIR/scripts/*.sh $SRC_DIR/$BUILD_NAME/"
+exec_cmd "cp -f $ROOT_DIR/scripts/*.js $SRC_DIR/$BUILD_NAME/bin/"
+exec_cmd "cp -fR $ROOT_DIR/etc $SRC_DIR/$BUILD_NAME/"
 
 echo "Copying binaries into place"
 echo "--------------------------------------------------------------------------"
 cd "$SRC_DIR" || exit 2
 
-# Setup folder structure
-exec_cmd "mkdir $SRC_DIR/$BUILD_NAME/bin"
-exec_cmd "mkdir $SRC_DIR/$BUILD_NAME/lib"
-
 # Copy PostgreSQL to binary root
-exec_cmd "cp -R $SRC_DIR/$POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
+exec_cmd "cp -R $SRC_DIR/$POSTGRESQL_DIR/$POSTGRESQL_OUT $SRC_DIR/$BUILD_NAME/"
 
 # Create redis specific dirs and copy binaries
 exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/redis"
-exec_cmd "cp -vf $SRC_DIR/$REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT $SRC_DIR/$BUILD_NAME/redis/$REDIS_SERVER_OUT"
-exec_cmd "cp -vf $SRC_DIR/$REDIS_SERVER_DIR/src/$REDIS_SERVER_CLI $SRC_DIR/$BUILD_NAME/redis/$REDIS_SERVER_CLI"
+exec_cmd "cp -vf $SRC_DIR/$REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT $SRC_DIR/$BUILD_NAME/bin/$REDIS_SERVER_OUT"
+exec_cmd "cp -vf $SRC_DIR/$REDIS_SERVER_DIR/src/$REDIS_SERVER_CLI $SRC_DIR/$BUILD_NAME/bin/$REDIS_SERVER_CLI"
 
 # Copy jq to binary root
 exec_cmd "cp -vf $SRC_DIR/$JQ_DIR/$JQ_OUT $SRC_DIR/$BUILD_NAME/bin/$JQ_OUT"
 
 # Copy node to binary root
 exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/node"
-exec_cmd "cp -vR $SRC_DIR/$NODE_DIR/$NODE_OUT/* $SRC_DIR/$BUILD_NAME/node"
+exec_cmd "cp -R $SRC_DIR/$NODE_DIR/$NODE_OUT/* $SRC_DIR/$BUILD_NAME/node"
 # exec_cmd "sed $SED_OPTS \"s%$(head -1 "$SRC_DIR/$BUILD_NAME/node/$NPM_CLI")%#\!.\/bin\/node%g\" $SRC_DIR/$BUILD_NAME/node/$NPM_CLI"
 
 # Copy Libpq for use
@@ -172,19 +171,12 @@ exec_cmd "sudo cp -v $SRC_DIR/$BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
 if [ ! "$(uname -s)" == "Darwin" ]; then
 	exec_cmd "cp -vf $SRC_DIR/$LIBREADLINE_DIR/shlib/lib*.so.* $SRC_DIR/$BUILD_NAME/lib"
 	exec_cmd "cp -vf $SRC_DIR/$LIBREADLINE_DIR/lib*.a $SRC_DIR/$BUILD_NAME/lib"
-	cd "$(pwd)/$BUILD_NAME/lib" || exit 2
+	cd "$SRC_DIR/$BUILD_NAME/lib" || exit 2
 	exec_cmd "ln -s $LIBREADLINE_OUT libreadline.so.7"
 	exec_cmd "ln -s libreadline.so.7 libreadline.so"
 	exec_cmd "ln -s $LIBREADLINE_HISTORY libhistory.so.7"
 	exec_cmd "ln -s libhistory.so.7 libhistory.so"
 	cd "$SRC_DIR" || exit 2
-fi
-
-# Change rpaths on linux
-if [[ "$(uname)" == "Linux" ]]; then
-	chrpath -d "$SRC_DIR/$BUILD_NAME/$LISK_NETWORKnet/node_modules/sodium/deps/libsodium/test/default/.libs/"*
-	chrpath -d "$SRC_DIR/$BUILD_NAME/lib/libreadline.so.7.0"
-	chrpath -d "$SRC_DIR/$BUILD_NAME/lib/libhistory.so.7.0"
 fi
 
 echo "Installing PM2 and Lisky..."
@@ -212,21 +204,33 @@ if [ ! -d "$SRC_DIR/$BUILD_NAME/$LISK_NETWORK'net'/node_modules" ]; then #This p
 	exec_cmd "npm install --production $LISK_CONFIG"
 fi
 
+# Change rpaths on linux
+if [[ "$(uname)" == "Linux" ]]; then
+	echo "Fixing rpaths (Linux)"
+	echo "--------------------------------------------------------------------------"
+	chrpath -d "$SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net/node_modules/sodium/deps/libsodium/test/default/.libs/"*
+	chrpath -d "$SRC_DIR/$BUILD_NAME/lib/libreadline.so.7.0"
+	chrpath -d "$SRC_DIR/$BUILD_NAME/lib/libhistory.so.7.0"
+fi
+
 echo "Stamping build..."
 echo "--------------------------------------------------------------------------"
-exec_cmd "echo v$(date '+%H:%M:%S %d/%m/%Y') > $BUILD_NAME/package.build";
+exec_cmd "echo v$(date '+%H:%M:%S %d/%m/%Y') > $SRC_DIR/$BUILD_NAME/package.build";
 
 echo "Creating archives..."
 echo "--------------------------------------------------------------------------"
+# Change dir to SRC_DIR - We proceed here without full paths to finish the packaging
+cd "$SRC_DIR" || exit 2
+
 # Create $BUILD_NAME.tar.gz
 exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$BUILD_NAME.tar.gz $BUILD_NAME"
 
 # Create $NOVER_BUILD_NAME.tar.gz
-exec_cmd "mv -f $BUILD_NAME $NOVER_BUILD_NAME"
+exec_cmd "mv -f $SRC_DIR/$BUILD_NAME $SRC_DIR/$NOVER_BUILD_NAME"
 exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$NOVER_BUILD_NAME.tar.gz $NOVER_BUILD_NAME"
 
 # Create lisk-source.tar.gz
-exec_cmd "mv -f $VERSION lisk-source"
+exec_cmd "mv -f $SRC_DIR/$VERSION $SRC_DIR/lisk-source"
 exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/lisk-source.tar.gz lisk-source"
 
 echo "Checksumming archives..."
@@ -235,8 +239,7 @@ cd "$ROOT_DIR/release" || exit 2
 exec_cmd "$SHA_CMD $BUILD_NAME.tar.gz > $BUILD_NAME.tar.gz.SHA256"
 exec_cmd "$SHA_CMD $NOVER_BUILD_NAME.tar.gz > $NOVER_BUILD_NAME.tar.gz.SHA256"
 exec_cmd "$SHA_CMD lisk-source.tar.gz > lisk-source.tar.gz.SHA256"
-cd "$ROOT_DIR/src" || exit 2
 
 echo "Cleaning up..."
 echo "--------------------------------------------------------------------------"
-exec_cmd "rm -rf $BUILD_NAME $NOVER_BUILD_NAME lisk-source"
+exec_cmd "rm -rf $SRC_DIR/$BUILD_NAME $SRC_DIR/$NOVER_BUILD_NAME $SRC_DIR/lisk-source"
