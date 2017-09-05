@@ -4,7 +4,7 @@ cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
 
 parse_option() {
 	OPTIND=1
-	while getopts "v:n:" OPT; do
+	while getopts "m:t:" OPT; do
 		case "$OPT" in
 			m ) export MAIN_VERSION="$OPTARG";;
 			t ) export TEST_VERSION="$OPTARG";;
