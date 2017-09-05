@@ -8,18 +8,18 @@ OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk"
 BUILD_OUT="lisk-$MAIN_VERSION-$OS-$ARCH"
-NOVER_BUILD_NAME="lisk-$OS-$ARCH"
+NOVER_BUILD_OUT="lisk-$OS-$ARCH"
 TARGET=""
 JOBS="2"
 
 LISK_MAIN_DIR="$MAIN_VERSION"
 LISK_MAIN_FILE="$MAIN_VERSION.tar.gz"
-LISK_MAIN_URL="https://downloads.lisk.io/lisk/main/$MAIN_VERSION/$LISK_FILE"
+LISK_MAIN_URL="https://downloads.lisk.io/lisk/main/$MAIN_VERSION/$LISK_MAIN_FILE"
 LISK_MAIN_CONFIG=""
 
 LISK_TEST_DIR="$TEST_VERSION"
 LISK_TEST_FILE="$TEST_VERSION.tar.gz"
-LISK_TEST_URL="https://downloads.lisk.io/lisk/test/$TEST_VERSION/$LISK_FILE"
+LISK_TEST_URL="https://downloads.lisk.io/lisk/test/$TEST_VERSION/$LISK_TEST_FILE"
 LISK_TEST_CONFIG=""
 
 NODE_DIR="node-v6.11.2"
