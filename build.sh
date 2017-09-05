@@ -196,7 +196,8 @@ if [ ! -f "$SRC_DIR/$LISK_MAIN_FILE" ]; then
 	exec_cmd "wget $LISK_MAIN_URL -O $SRC_DIR/$LISK_MAIN_FILE"
 fi
 if [ ! -d "$SRC_DIR/$BUILD_NAME/mainnet/node_modules" ]; then #This probably wont work
-	exec_cmd "tar -xf $MAIN_VERSION.tar.gz"
+	cd "$SRC_DIR" || exit 2
+	exec_cmd "tar -xf $MAIN_TEST_FILE"
 	exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/mainnet"
 	exec_cmd "cp -Rf $SRC_DIR/$MAIN_VERSION/* $SRC_DIR/$BUILD_NAME/mainnet"
 
@@ -210,7 +211,8 @@ if [ ! -f "$SRC_DIR/$LISK_TEST_FILE" ]; then
 	exec_cmd "wget $LISK_TEST_URL -O $SRC_DIR/$LISK_TEST_FILE"
 fi
 if [ ! -d "$SRC_DIR/$BUILD_NAME/testnet/node_modules" ]; then #This probably wont work
-	exec_cmd "tar -xf $TEST_VERSION.tar.gz"
+	cd "$SRC_DIR" || exit 2
+	exec_cmd "tar -xf $LISK_TEST_FILE"
 	exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/testnet"
 	exec_cmd "cp -Rf $SRC_DIR/$TEST_VERSION/* $SRC_DIR/$BUILD_NAME/testnet"
 
