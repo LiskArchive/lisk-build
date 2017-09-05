@@ -26,17 +26,23 @@ parse_option "$@"
 
 # shellcheck source=./shared.sh
 . "$(pwd)/shared.sh"
+
 # shellcheck source=./config.sh
 . "$(pwd)/config.sh"
+
+# Initialize variables
+ROOT_DIR="$(pwd)"
+SRC_DIR="$(pwd)/src"
 
 # shellcheck disable=SC2034
 # Ignoring the failure due to shell indirection
 CMDS=("autoconf" "gcc" "g++" "make" "node" "npm" "python" "tar" "wget");
 check_cmds CMDS[@]
 
-ROOT_DIR="$(pwd)"
-SRC_DIR="$(pwd)/src"
-mkdir -p src
+# Create directories and cleanup failed builds
+exec_cmd "mkdir -p src"
+exec_cmd "rm -rf $SRC_DIR/$BUILD_NAME && mkdir -p $SRC_DIR/$BUILD_NAME"
+
 # Exit 2 in case the directory doesn't exist and preventing messes
 cd "$SRC_DIR" || exit 2
 
@@ -198,7 +204,6 @@ if [ ! -f "$SRC_DIR/$LISK_FILE" ]; then
 	exec_cmd "wget $LISK_URL -O $SRC_DIR/$LISK_FILE"
 fi
 if [ ! -d "$SRC_DIR/$BUILD_NAME/$LISK_NETWORK'net'/node_modules" ]; then #This probably wont work
-	exec_cmd "rm -rf $SRC_DIR/$BUILD_NAME"
 	exec_cmd "tar -xf $VERSION.tar.gz"
 	exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net"
 	exec_cmd "cp -Rf $SRC_DIR/$VERSION/* $SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net"
