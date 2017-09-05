@@ -65,7 +65,7 @@ if [ ! -f "$JQ_DIR/$JQ_OUT" ]; then
 	exec_cmd "tar -zxf $JQ_FILE"
 	cd "$JQ_DIR" || exit 2
 	exec_cmd "./configure"
-	exec_cmd "make install"
+	exec_cmd "make"
 	cd ../ || exit 2
 fi
 
