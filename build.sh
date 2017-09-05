@@ -6,17 +6,17 @@ parse_option() {
 	OPTIND=1
 	while getopts "v:n:" OPT; do
 		case "$OPT" in
-			v ) export VERSION="$OPTARG";;
-			n ) export LISK_NETWORK="$OPTARG";;
+			m ) export MAIN_VERSION="$OPTARG";;
+			t ) export TEST_VERSION="$OPTARG";;
 			: ) echo 'Missing option argument for -'"$OPTARG" >&2; exit 1;;
 			* ) echo 'Unimplemented option: -'"$OPTARG" >&2; exit 1;;
 		esac
 	done
 
-	if [[ $VERSION && $LISK_NETWORK ]]; then
+	if [[ $MAIN_VERSION && $TEST_VERSION ]]; then
 		echo "All options declared. Proceeding with build."
 	else
-		echo "Both -n and -v are required. Exiting"
+		echo "Both -m and -t are required. Exiting"
 		exit 1
 	fi
 }
@@ -190,17 +190,31 @@ exec_cmd "npm install --global --production pm2"
 exec_cmd "npm install --global --production lisky"
 cd "$SRC_DIR" || exit 2
 
-echo "Building lisk..."
+echo "Building lisk mainnet..."
 echo "--------------------------------------------------------------------------"
-if [ ! -f "$SRC_DIR/$LISK_FILE" ]; then
-	exec_cmd "wget $LISK_URL -O $SRC_DIR/$LISK_FILE"
+if [ ! -f "$SRC_DIR/$LISK_MAIN_FILE" ]; then
+	exec_cmd "wget $LISK_MAIN_URL -O $SRC_DIR/$LISK_MAIN_FILE"
 fi
-if [ ! -d "$SRC_DIR/$BUILD_NAME/$LISK_NETWORK'net'/node_modules" ]; then #This probably wont work
-	exec_cmd "tar -xf $VERSION.tar.gz"
-	exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net"
-	exec_cmd "cp -Rf $SRC_DIR/$VERSION/* $SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net"
+if [ ! -d "$SRC_DIR/$BUILD_NAME/mainnet/node_modules" ]; then #This probably wont work
+	exec_cmd "tar -xf $MAIN_VERSION.tar.gz"
+	exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/mainnet"
+	exec_cmd "cp -Rf $SRC_DIR/$MAIN_VERSION/* $SRC_DIR/$BUILD_NAME/mainnet"
 
-	cd "$SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net" || exit 2
+	cd "$SRC_DIR/$BUILD_NAME/mainnet" || exit 2
+	exec_cmd "npm install --production $LISK_CONFIG"
+fi
+
+echo "Building lisk testnet..."
+echo "--------------------------------------------------------------------------"
+if [ ! -f "$SRC_DIR/$LISK_TEST_FILE" ]; then
+	exec_cmd "wget $LISK_TEST_URL -O $SRC_DIR/$LISK_TEST_FILE"
+fi
+if [ ! -d "$SRC_DIR/$BUILD_NAME/testnet/node_modules" ]; then #This probably wont work
+	exec_cmd "tar -xf $TEST_VERSION.tar.gz"
+	exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/testnet"
+	exec_cmd "cp -Rf $SRC_DIR/$TEST_VERSION/* $SRC_DIR/$BUILD_NAME/testnet"
+
+	cd "$SRC_DIR/$BUILD_NAME/testnet" || exit 2
 	exec_cmd "npm install --production $LISK_CONFIG"
 fi
 
@@ -208,7 +222,8 @@ fi
 if [[ "$(uname)" == "Linux" ]]; then
 	echo "Fixing rpaths (Linux)"
 	echo "--------------------------------------------------------------------------"
-	chrpath -d "$SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net/node_modules/sodium/deps/libsodium/test/default/.libs/"*
+	chrpath -d "$SRC_DIR/$BUILD_NAME/mainnet/node_modules/sodium/deps/libsodium/test/default/.libs/"*
+	chrpath -d "$SRC_DIR/$BUILD_NAME/testnet/node_modules/sodium/deps/libsodium/test/default/.libs/"*
 	chrpath -d "$SRC_DIR/$BUILD_NAME/lib/libreadline.so.7.0"
 	chrpath -d "$SRC_DIR/$BUILD_NAME/lib/libhistory.so.7.0"
 fi
@@ -223,23 +238,27 @@ echo "--------------------------------------------------------------------------
 cd "$SRC_DIR" || exit 2
 
 # Create $BUILD_NAME.tar.gz
-exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$BUILD_NAME.tar.gz $BUILD_NAME"
+exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$BUILD_OUT.tar.gz $BUILD_NAME"
 
 # Create $NOVER_BUILD_NAME.tar.gz
-exec_cmd "mv -f $SRC_DIR/$BUILD_NAME $SRC_DIR/$NOVER_BUILD_NAME"
-exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$NOVER_BUILD_NAME.tar.gz $NOVER_BUILD_NAME"
+exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$NOVER_BUILD_OUT.tar.gz $BUILD_NAME"
 
-# Create lisk-source.tar.gz
-exec_cmd "mv -f $SRC_DIR/$VERSION $SRC_DIR/lisk-source"
-exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/lisk-source.tar.gz lisk-source"
+# Create lisk-source.tar.gz for mainnet
+exec_cmd "mv -f $SRC_DIR/$MAIN_VERSION $SRC_DIR/lisk-source"
+exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/lisk-source-main.tar.gz lisk-source"
+
+# Create lisk-source.tar.gz for testnet
+exec_cmd "mv -f $SRC_DIR/$TEST_VERSION $SRC_DIR/lisk-source"
+exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/lisk-source-test.tar.gz lisk-source"
 
 echo "Checksumming archives..."
 echo "--------------------------------------------------------------------------"
 cd "$ROOT_DIR/release" || exit 2
-exec_cmd "$SHA_CMD $BUILD_NAME.tar.gz > $BUILD_NAME.tar.gz.SHA256"
-exec_cmd "$SHA_CMD $NOVER_BUILD_NAME.tar.gz > $NOVER_BUILD_NAME.tar.gz.SHA256"
-exec_cmd "$SHA_CMD lisk-source.tar.gz > lisk-source.tar.gz.SHA256"
+exec_cmd "$SHA_CMD $BUILD_OUT.tar.gz > $BUILD_OUT.tar.gz.SHA256"
+exec_cmd "$SHA_CMD $NOVER_BUILD_OUT.tar.gz > $NOVER_BUILD_OUT.tar.gz.SHA256"
+exec_cmd "$SHA_CMD lisk-source-main.tar.gz > lisk-source-main.tar.gz.SHA256"
+exec_cmd "$SHA_CMD lisk-source-test.tar.gz > lisk-source-test.tar.gz.SHA256"
 
 echo "Cleaning up..."
 echo "--------------------------------------------------------------------------"
-exec_cmd "rm -rf $SRC_DIR/$BUILD_NAME $SRC_DIR/$NOVER_BUILD_NAME $SRC_DIR/lisk-source"
+exec_cmd "rm -rf $SRC_DIR/$BUILD_OUT $SRC_DIR/$NOVER_BUILD_OUT $SRC_DIR/lisk-source*"
