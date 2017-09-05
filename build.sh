@@ -55,6 +55,20 @@ if [ ! -f "$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" ] && [ ! "$(uname -s)" == "D
 	cd ../ || exit 2
 fi
 
+echo "Building jq"
+echo "--------------------------------------------------------------------------"
+if [ ! -f "$JQ_FILE" ]; then
+	exec_cmd "wget $JQ_URL -O $JQ_FILE"
+fi
+if [ ! -f "$JQ_DIR/$JQ_OUT" ]; then
+	exec_cmd "rm -rf $JQ_DIR"
+	exec_cmd "tar -zxf $JQ_FILE"
+	cd "$JQ_DIR" || exit 2
+	exec_cmd "./configure"
+	exec_cmd "make"
+	cd ../ || exit 2
+fi
+
 echo "Building postgresql..."
 echo "--------------------------------------------------------------------------"
 if [ ! -f "$POSTGRESQL_FILE" ]; then
@@ -114,6 +128,9 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
 	exec_cmd "mkdir $BUILD_NAME/redis"
 	exec_cmd "cp -vf $REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT $BUILD_NAME/bin/$REDIS_SERVER_OUT"
 	exec_cmd "cp -vf $REDIS_SERVER_DIR/src/$REDIS_SERVER_CLI $BUILD_NAME/bin/$REDIS_SERVER_CLI"
+
+	# Copy jq to binary folder
+	exec_cmd "cp -vf $JQ_DIR/$JQ_OUT $BUILD_NAME/bin/$JQ_OUT"
 
 	# Copy Libpq for use
 	exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
