@@ -57,20 +57,6 @@ if [ ! -f "$SRC_DIR/$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" ] && [ ! "$(uname -
 	cd "$SRC_DIR" || exit 2
 fi
 
-echo "Building jq"
-echo "--------------------------------------------------------------------------"
-if [ ! -f "$SRC_DIR/$JQ_FILE" ]; then
-	exec_cmd "wget $JQ_URL -O $SRC_DIR/$JQ_FILE"
-fi
-if [ ! -f "$SRC_DIR/$JQ_DIR/$JQ_OUT" ]; then
-	exec_cmd "rm -rf $SRC_DIR/$JQ_DIR"
-	exec_cmd "tar -zxf $SRC_DIR/$JQ_FILE"
-	cd "$SRC_DIR/$JQ_DIR" || exit 2
-	exec_cmd "./configure"
-	exec_cmd "make"
-	cd "$SRC_DIR" || exit 2
-fi
-
 echo "Building postgresql..."
 echo "--------------------------------------------------------------------------"
 if [ ! -f "$SRC_DIR/$POSTGRESQL_FILE" ]; then
@@ -112,59 +98,19 @@ if [ ! -f "$SRC_DIR/$REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT" ]; then
 	cd "$SRC_DIR" || exit 2
 fi
 
-echo "Building lisk..."
+echo "Building jq"
 echo "--------------------------------------------------------------------------"
-if [ ! -f "$SRC_DIR/$LISK_FILE" ]; then
-	exec_cmd "wget $LISK_URL -O $SRC_DIR/$LISK_FILE"
+if [ ! -f "$SRC_DIR/$JQ_FILE" ]; then
+	exec_cmd "wget $JQ_URL -O $SRC_DIR/$JQ_FILE"
 fi
-if [ ! -d "$SRC_DIR/$BUILD_NAME/$LISK_NETWORK'net'/node_modules" ]; then #This probably wont work
-	exec_cmd "rm -rf $SRC_DIR/$BUILD_NAME"
-	exec_cmd "tar -xf $VERSION.tar.gz"
-	exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net"
-	exec_cmd "cp -Rf $SRC_DIR/$VERSION/* $SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net"
-	exec_cmd "cp -R $SRC_DIR/$POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
-	exec_cmd "mkdir $SRC_DIR/$BUILD_NAME/bin"
-	exec_cmd "mkdir $SRC_DIR/$BUILD_NAME/lib"
-
-	# Create redis specific dirs and copy binaries
-	exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/redis"
-	exec_cmd "cp -vf $SRC_DIR/$REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT $SRC_DIR/$BUILD_NAME/redis/$REDIS_SERVER_OUT"
-	exec_cmd "cp -vf $SRC_DIR/$REDIS_SERVER_DIR/src/$REDIS_SERVER_CLI $SRC_DIR/$BUILD_NAME/redis/$REDIS_SERVER_CLI"
-
-	# Copy jq to binary folder
-	exec_cmd "cp -vf $SRC_DIR/$JQ_DIR/$JQ_OUT $SRC_DIR/$BUILD_NAME/bin/$JQ_OUT"
-
-	# Copy Libpq for use
-	exec_cmd "sudo cp -v $SRC_DIR/$BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
-
-	# Bundle libreadline6 and create symbolic links
-	if [ ! "$(uname -s)" == "Darwin" ]; then
-		exec_cmd "cp -vf $SRC_DIR/$LIBREADLINE_DIR/shlib/lib*.so.* $SRC_DIR/$BUILD_NAME/lib"
-		exec_cmd "cp -vf $SRC_DIR/$LIBREADLINE_DIR/lib*.a $SRC_DIR/$BUILD_NAME/lib"
-		cd "$(pwd)/$BUILD_NAME/lib" || exit 2
-		exec_cmd "ln -s $LIBREADLINE_OUT libreadline.so.7"
-		exec_cmd "ln -s libreadline.so.7 libreadline.so"
-		exec_cmd "ln -s $LIBREADLINE_HISTORY libhistory.so.7"
-		exec_cmd "ln -s libhistory.so.7 libhistory.so"
-		cd "$SRC_DIR" || exit 2
-	fi
-
-	cd "$SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net" || exit 2
-	exec_cmd "npm install --production $LISK_CONFIG"
-
-	if [[ "$(uname)" == "Linux" ]]; then
-		chrpath -d "$(pwd)/node_modules/sodium/deps/libsodium/test/default/.libs/"*
-		chrpath -d "../lib/libreadline.so.7.0"
-		chrpath -d "../lib/libhistory.so.7.0"
-	fi # Change rpaths on linux
-
-	cd "$SRC_DIR/$BUILD_NAME/" || exit 2
+if [ ! -f "$SRC_DIR/$JQ_DIR/$JQ_OUT" ]; then
+	exec_cmd "rm -rf $SRC_DIR/$JQ_DIR"
+	exec_cmd "tar -zxf $SRC_DIR/$JQ_FILE"
+	cd "$SRC_DIR/$JQ_DIR" || exit 2
+	exec_cmd "./configure"
+	exec_cmd "make"
+	cd "$SRC_DIR" || exit 2
 fi
-
-echo "Copying scripts..."
-echo "--------------------------------------------------------------------------"
-exec_cmd "cp -f $ROOT_DIR/shared.sh $ROOT_DIR/scripts/* $SRC_DIR/$BUILD_NAME/"
-exec_cmd "cp -fR $ROOT_DIR/etc $SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net/"
 
 echo "Building node..."
 echo "--------------------------------------------------------------------------"
@@ -184,10 +130,56 @@ if [ ! -f "$NODE_DIR/$NODE_OUT/bin/node" ] || [ ! -f "$NODE_DIR/$NODE_OUT/bin/np
 	cd "$SRC_DIR" || exit 2
 fi
 
+echo "Copying scripts..."
+echo "--------------------------------------------------------------------------"
+exec_cmd "cp -f $ROOT_DIR/shared.sh $ROOT_DIR/scripts/* $SRC_DIR/$BUILD_NAME/"
+exec_cmd "cp -fR $ROOT_DIR/etc $SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net/"
+
+echo "Copying binaries into place"
+echo "--------------------------------------------------------------------------"
 cd "$SRC_DIR" || exit 2
+
+# Setup folder structure
+exec_cmd "mkdir $SRC_DIR/$BUILD_NAME/bin"
+exec_cmd "mkdir $SRC_DIR/$BUILD_NAME/lib"
+
+# Copy PostgreSQL to binary root
+exec_cmd "cp -R $SRC_DIR/$POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
+
+# Create redis specific dirs and copy binaries
+exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/redis"
+exec_cmd "cp -vf $SRC_DIR/$REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT $SRC_DIR/$BUILD_NAME/redis/$REDIS_SERVER_OUT"
+exec_cmd "cp -vf $SRC_DIR/$REDIS_SERVER_DIR/src/$REDIS_SERVER_CLI $SRC_DIR/$BUILD_NAME/redis/$REDIS_SERVER_CLI"
+
+# Copy jq to binary root
+exec_cmd "cp -vf $SRC_DIR/$JQ_DIR/$JQ_OUT $SRC_DIR/$BUILD_NAME/bin/$JQ_OUT"
+
+# Copy node to binary root
 exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/node"
 exec_cmd "cp -vR $SRC_DIR/$NODE_DIR/$NODE_OUT/* $SRC_DIR/$BUILD_NAME/node"
-exec_cmd "sed $SED_OPTS \"s%$(head -1 "$SRC_DIR/$BUILD_NAME/node/$NPM_CLI")%#\!.\/bin\/node%g\" $SRC_DIR/$BUILD_NAME/node/$NPM_CLI"
+# exec_cmd "sed $SED_OPTS \"s%$(head -1 "$SRC_DIR/$BUILD_NAME/node/$NPM_CLI")%#\!.\/bin\/node%g\" $SRC_DIR/$BUILD_NAME/node/$NPM_CLI"
+
+# Copy Libpq for use
+exec_cmd "sudo cp -v $SRC_DIR/$BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
+
+# Copy libreadline7 and create symbolic links
+if [ ! "$(uname -s)" == "Darwin" ]; then
+	exec_cmd "cp -vf $SRC_DIR/$LIBREADLINE_DIR/shlib/lib*.so.* $SRC_DIR/$BUILD_NAME/lib"
+	exec_cmd "cp -vf $SRC_DIR/$LIBREADLINE_DIR/lib*.a $SRC_DIR/$BUILD_NAME/lib"
+	cd "$(pwd)/$BUILD_NAME/lib" || exit 2
+	exec_cmd "ln -s $LIBREADLINE_OUT libreadline.so.7"
+	exec_cmd "ln -s libreadline.so.7 libreadline.so"
+	exec_cmd "ln -s $LIBREADLINE_HISTORY libhistory.so.7"
+	exec_cmd "ln -s libhistory.so.7 libhistory.so"
+	cd "$SRC_DIR" || exit 2
+fi
+
+# Change rpaths on linux
+if [[ "$(uname)" == "Linux" ]]; then
+	chrpath -d "$SRC_DIR/$BUILD_NAME/$LISK_NETWORKnet/node_modules/sodium/deps/libsodium/test/default/.libs/"*
+	chrpath -d "$SRC_DIR/$BUILD_NAME/lib/libreadline.so.7.0"
+	chrpath -d "$SRC_DIR/$BUILD_NAME/lib/libhistory.so.7.0"
+fi
 
 echo "Installing PM2 and Lisky..."
 echo "--------------------------------------------------------------------------"
@@ -199,6 +191,21 @@ cd "$SRC_DIR/$BUILD_NAME" || exit 2
 exec_cmd "npm install --global --production pm2"
 exec_cmd "npm install --global --production lisky"
 cd "$SRC_DIR" || exit 2
+
+echo "Building lisk..."
+echo "--------------------------------------------------------------------------"
+if [ ! -f "$SRC_DIR/$LISK_FILE" ]; then
+	exec_cmd "wget $LISK_URL -O $SRC_DIR/$LISK_FILE"
+fi
+if [ ! -d "$SRC_DIR/$BUILD_NAME/$LISK_NETWORK'net'/node_modules" ]; then #This probably wont work
+	exec_cmd "rm -rf $SRC_DIR/$BUILD_NAME"
+	exec_cmd "tar -xf $VERSION.tar.gz"
+	exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net"
+	exec_cmd "cp -Rf $SRC_DIR/$VERSION/* $SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net"
+
+	cd "$SRC_DIR/$BUILD_NAME/$LISK_NETWORK""net" || exit 2
+	exec_cmd "npm install --production $LISK_CONFIG"
+fi
 
 echo "Stamping build..."
 echo "--------------------------------------------------------------------------"
