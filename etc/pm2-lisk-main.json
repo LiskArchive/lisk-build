@@ -10,6 +10,6 @@
                 "watch": false,
                 "kill_timeout" : 10000,
                 "max_memory_restart": "1024M",
-                "node_args": "--max_old_space_size=1024",
+                "node_args": "--max_old_space_size=1024"
         }]
 }
