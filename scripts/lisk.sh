@@ -21,7 +21,7 @@ REDIS_PID="$(pwd)/redis/redis_6380.pid"
 
 # Declare static config for postgresql
 DB_DATA="$(pwd)/blockchain.db"
-DB_LOG_FILE="$(pwd)/logs/pgsql.log"
+DB_LOG_FILE="$(pwd)/pgsql.log"
 DB_SNAPSHOT="blockchain.db.gz"
 DB_DOWNLOAD=Y
 
@@ -33,18 +33,18 @@ LOGS_DIR="$(pwd)/logs"
 
 config() {
 	# Initalize application specific Postgresql variables
-	DB_NAME="$(jq .db.database -r $LISK_CONFIG)"
-	DB_PORT="$(jq .db.port -r $LISK_CONFIG)"
+	DB_NAME="$(jq .db.database -r "$LISK_CONFIG")"
+	DB_PORT="$(jq .db.port -r "$LISK_CONFIG")"
 	DB_USER="$USER"
-	DB_PASS="$(jq .db.password -r $LISK_CONFIG)"
+	DB_PASS="$(jq .db.password -r "$LISK_CONFIG")"
 
 	# Initialize application specific Redis variables
-	REDIS_ENABLED="$(jq .cacheEnabled -r $LISK_CONFIG)"
-	REDIS_PORT="$(jq .redis.port -r $LISK_CONFIG)"
-	REDIS_PASSWORD="$(jq .redis.port -r $LISK_CONFIG)"
+	REDIS_ENABLED="$(jq .cacheEnabled -r "$LISK_CONFIG")"
+	REDIS_PORT="$(jq .redis.port -r "$LISK_CONFIG")"
+	REDIS_PASSWORD="$(jq .redis.port -r "$LISK_CONFIG")"
 
 	# Initialize Lisk specific variables.
-	PM2_APP="$(jq .apps[].name -r $PM2_CONFIG)"
+	PM2_APP="$(jq .apps[].name -r "$PM2_CONFIG")"
 	LISK_LOGS="$(jq .logFileName -r "$LISK_CONFIG")"
 }
 
