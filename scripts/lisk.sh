@@ -371,29 +371,29 @@ parse_flag() {
 
 # Parses network
 case $2 in
-"mainnet")
-	NETWORK="mainnet"
-	PM2_CONFIG="$PM2_MAIN_CONFIG"
-	LISK_CONFIG="./mainnet/config.json"
-	echo -e 'Lisk configured for '"$NETWORK"' network\n' >> "$SH_LOG_FILE"
-	;;
-"testnet")
-	NETWORK="testnet"
-	PM2_CONFIG="$PM2_TEST_CONFIG"
-	LISK_CONFIG="./testnet/config.json"
-	echo -e 'Lisk configured for '"$NETWORK"' network\n' >> "$SH_LOG_FILE"
-	;;
-"devnet")
-	NETWORK="devnet"
-	PM2_CONFIG="$PM2_DEV_CONFIG"
-	LISK_CONFIG="./devnet/config.json"
-	echo -e 'Lisk configured for '"$NETWORK"' network\n' >> "$SH_LOG_FILE"
-	;;
-	*)
-		echo "No network specified. Please specify a network: mainnet, testnet, devnet"
-		echo "Exiting..."
-		exit 0
-	;;
+	"mainnet")
+		NETWORK="mainnet"
+		PM2_CONFIG="$PM2_MAIN_CONFIG"
+		LISK_CONFIG="./mainnet/config.json"
+		echo -e 'Lisk configured for '"$NETWORK"' network\n' >> "$SH_LOG_FILE"
+		;;
+	"testnet")
+		NETWORK="testnet"
+		PM2_CONFIG="$PM2_TEST_CONFIG"
+		LISK_CONFIG="./testnet/config.json"
+		echo -e 'Lisk configured for '"$NETWORK"' network\n' >> "$SH_LOG_FILE"
+		;;
+	"devnet")
+		NETWORK="devnet"
+		PM2_CONFIG="$PM2_DEV_CONFIG"
+		LISK_CONFIG="./devnet/config.json"
+		echo -e 'Lisk configured for '"$NETWORK"' network\n' >> "$SH_LOG_FILE"
+		;;
+		*)
+			echo "No network specified. Please specify a network: mainnet, testnet, devnet"
+			echo "Exiting..."
+			exit 0
+		;;
 esac
 
 # Calls config function declare mutable variables
@@ -404,62 +404,62 @@ parse_flag "$@"
 
 # Parses command to run with above
 case $1 in
-"coldstart")
-	coldstart_lisk
-	;;
-"start_node")
-	start_lisk
-	;;
-"start")
-	start_postgresql
-	sleep 2
-	start_lisk
-	;;
-"stop_node")
-	stop_lisk
-	;;
-"stop")
-	stop_lisk
-	stop_postgresql
-	;;
-"reload")
-	reload_lisk
-	;;
-"rebuild")
-	stop_lisk
-	sleep 1
-	start_postgresql
-	sleep 1
-	rebuild_lisk
-	start_lisk
-	;;
-"start_db")
-	start_postgresql
-	;;
-"stop_db")
-	stop_postgresql
-	;;
-"cleanup")
-	pm2_cleanup
-	;;
-"status")
-	check_status
-	;;
-"logs")
-	tail_logs
-	;;
-"lisky")
-	lisky
-	;;
-"help")
-	help
-	;;
-*)
-	echo "Error: Unrecognized command."
-	echo ""
-	echo "Available commands are: start stop start_node stop_node start_db stop_db reload rebuild coldstart logs lisky status help"
-	help
-	;;
+	"coldstart")
+		coldstart_lisk
+		;;
+	"start_node")
+		start_lisk
+		;;
+	"start")
+		start_postgresql
+		sleep 2
+		start_lisk
+		;;
+	"stop_node")
+		stop_lisk
+		;;
+	"stop")
+		stop_lisk
+		stop_postgresql
+		;;
+	"reload")
+		reload_lisk
+		;;
+	"rebuild")
+		stop_lisk
+		sleep 1
+		start_postgresql
+		sleep 1
+		rebuild_lisk
+		start_lisk
+		;;
+	"start_db")
+		start_postgresql
+		;;
+	"stop_db")
+		stop_postgresql
+		;;
+	"cleanup")
+		pm2_cleanup
+		;;
+	"status")
+		check_status
+		;;
+	"logs")
+		tail_logs
+		;;
+	"lisky")
+		lisky
+		;;
+	"help")
+		help
+		;;
+	*)
+		echo "Error: Unrecognized command."
+		echo ""
+		echo "Available commands are: start stop start_node stop_node start_db stop_db reload rebuild coldstart logs lisky status help"
+		help
+		;;
 esac
 
 # Required to clean up colour characters that don't translate well from tee
