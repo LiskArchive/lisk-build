@@ -389,10 +389,10 @@ case $2 in
 		LISK_CONFIG="./devnet/config.json"
 		echo -e 'Lisk configured for '"$NETWORK"' network\n' >> "$SH_LOG_FILE"
 		;;
-		*)
-			echo "No network specified. Please specify a network: mainnet, testnet, devnet"
-			echo "Exiting..."
-			exit 0
+	*)
+		echo "No network specified. Please specify a network: mainnet, testnet, devnet"
+		echo "Exiting..."
+		exit 0
 		;;
 esac
 
