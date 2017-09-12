@@ -41,7 +41,7 @@ config() {
 	# Initialize application specific Redis variables
 	REDIS_ENABLED="$(jq .cacheEnabled -r "$LISK_CONFIG")"
 	REDIS_PORT="$(jq .redis.port -r "$LISK_CONFIG")"
-	REDIS_PASSWORD="$(jq .redis.port -r "$LISK_CONFIG")"
+	REDIS_PASSWORD="$(jq .redis.password -r "$LISK_CONFIG")"
 
 	# Initialize Lisk specific variables.
 	PM2_APP="$(jq .apps[].name -r "$PM2_CONFIG")"
