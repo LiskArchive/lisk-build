@@ -162,7 +162,6 @@ exec_cmd "cp -vf $SRC_DIR/$JQ_DIR/$JQ_OUT $SRC_DIR/$BUILD_NAME/bin/$JQ_OUT"
 # Copy node to binary root
 exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/node"
 exec_cmd "cp -R $SRC_DIR/$NODE_DIR/$NODE_OUT/* $SRC_DIR/$BUILD_NAME/node"
-# exec_cmd "sed $SED_OPTS \"s%$(head -1 "$SRC_DIR/$BUILD_NAME/node/$NPM_CLI")%#\!.\/bin\/node%g\" $SRC_DIR/$BUILD_NAME/node/$NPM_CLI"
 
 # Copy Libpq for use
 exec_cmd "sudo cp -v $SRC_DIR/$BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
