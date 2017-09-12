@@ -375,19 +375,16 @@ case $2 in
 		NETWORK="mainnet"
 		PM2_CONFIG="$PM2_MAIN_CONFIG"
 		LISK_CONFIG="./mainnet/config.json"
-		echo -e 'Lisk configured for '"$NETWORK"' network\n' >> "$SH_LOG_FILE"
 		;;
 	"testnet")
 		NETWORK="testnet"
 		PM2_CONFIG="$PM2_TEST_CONFIG"
 		LISK_CONFIG="./testnet/config.json"
-		echo -e 'Lisk configured for '"$NETWORK"' network\n' >> "$SH_LOG_FILE"
 		;;
 	"devnet")
 		NETWORK="devnet"
 		PM2_CONFIG="$PM2_DEV_CONFIG"
 		LISK_CONFIG="./devnet/config.json"
-		echo -e 'Lisk configured for '"$NETWORK"' network\n' >> "$SH_LOG_FILE"
 		;;
 	*)
 		echo "No network specified. Please specify a network: mainnet, testnet, devnet"
@@ -395,6 +392,8 @@ case $2 in
 		exit 0
 		;;
 esac
+
+echo -e 'Lisk configured for '"$NETWORK"' network\n' >> "$SH_LOG_FILE"
 
 # Calls config function declare mutable variables
 config
