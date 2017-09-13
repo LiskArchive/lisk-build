@@ -4,19 +4,23 @@
 # shellcheck disable=SC2155
 # Override declare and assign variables seperately. We dont care about return values for path exports.
 
-VERSION="$VERSION"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
-BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
+BUILD_NAME="lisk"
+BUILD_OUT="lisk-$MAIN_VERSION-$OS-$ARCH"
 NOVER_BUILD_NAME="lisk-$OS-$ARCH"
 TARGET=""
 JOBS="2"
 
-LISK_DIR="$VERSION"
-LISK_FILE="$VERSION.tar.gz"
-LISK_NETWORK="$LISK_NETWORK"
-LISK_URL="https://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
-LISK_CONFIG=""
+LISK_MAIN_DIR="$MAIN_VERSION"
+LISK_MAIN_FILE="$MAIN_VERSION.tar.gz"
+LISK_MAIN_URL="https://downloads.lisk.io/lisk/main/$MAIN_VERSION/$LISK_FILE"
+LISK_MAIN_CONFIG=""
+
+LISK_TEST_DIR="$TEST_VERSION"
+LISK_TEST_FILE="$TEST_VERSION.tar.gz"
+LISK_TEST_URL="https://downloads.lisk.io/lisk/test/$TEST_VERSION/$LISK_FILE"
+LISK_TEST_CONFIG=""
 
 NODE_DIR="node-v6.11.2"
 NODE_FILE="$NODE_DIR.tar.gz"
@@ -57,13 +61,7 @@ JQ_FILE="$JQ_DIR.tar.gz"
 JQ_URL="https://github.com/stedolan/jq/releases/download/jq-$JQ_VERSION/$JQ_FILE"
 JQ_OUT="jq"
 
-NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
-
-if [ "$(uname -s)" == "Darwin" ]; then
-	SED_OPTS="-i ''"
-else
-	SED_OPTS="-i"
-fi
+NPM_CLI="lib/node_modules/npm/bin/npm-cli.js"
 
 if [ "$(uname -s)" == "Darwin" ]; then
 	SHA_CMD="shasum -a 256"
