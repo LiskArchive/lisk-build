@@ -194,11 +194,9 @@ echo "--------------------------------------------------------------------------
 if [ ! -f "$SRC_DIR/$LISK_MAIN_FILE" ]; then
 	exec_cmd "wget $LISK_MAIN_URL -O $SRC_DIR/$LISK_MAIN_FILE"
 fi
-if [ ! -d "$SRC_DIR/$BUILD_NAME/mainnet/node_modules" ]; then #This probably wont work
+if [ ! -d "$SRC_DIR/$BUILD_NAME/mainnet/node_modules" ]; then
 	cd "$SRC_DIR" || exit 2
-	exec_cmd "tar -xf $LISK_MAIN_FILE"
-	exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/mainnet"
-	exec_cmd "cp -Rf $SRC_DIR/$MAIN_VERSION/* $SRC_DIR/$BUILD_NAME/mainnet"
+	exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/mainnet && tar -xf $LISK_MAIN_FILE -C $SRC_DIR/$BUILD_NAME/mainnet --strip-components=1"
 
 	cd "$SRC_DIR/$BUILD_NAME/mainnet" || exit 2
 	exec_cmd "npm install --production $LISK_CONFIG"
@@ -209,11 +207,9 @@ echo "--------------------------------------------------------------------------
 if [ ! -f "$SRC_DIR/$LISK_TEST_FILE" ]; then
 	exec_cmd "wget $LISK_TEST_URL -O $SRC_DIR/$LISK_TEST_FILE"
 fi
-if [ ! -d "$SRC_DIR/$BUILD_NAME/testnet/node_modules" ]; then #This probably wont work
+if [ ! -d "$SRC_DIR/$BUILD_NAME/testnet/node_modules" ]; then
 	cd "$SRC_DIR" || exit 2
-	exec_cmd "tar -xf $LISK_TEST_FILE"
-	exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/testnet"
-	exec_cmd "cp -Rf $SRC_DIR/$TEST_VERSION/* $SRC_DIR/$BUILD_NAME/testnet"
+	exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/testnet && tar -xf $LISK_TEST_FILE -C $SRC_DIR/$BUILD_NAME/testnet --strip-components=1"
 
 	cd "$SRC_DIR/$BUILD_NAME/testnet" || exit 2
 	exec_cmd "npm install --production $LISK_CONFIG"
@@ -238,22 +234,34 @@ echo "--------------------------------------------------------------------------
 # Change dir to SRC_DIR - We proceed here without full paths to finish the packaging
 cd "$SRC_DIR" || exit 2
 
-# Create $BUILD_NAME.tar.gz
+# Create $BUILD_NAME.tar.gz - Full install
 exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$BUILD_OUT.tar.gz $BUILD_NAME"
 
-# Create $NOVER_BUILD_NAME.tar.gz
-exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$NOVER_BUILD_OUT.tar.gz $BUILD_NAME"
+# Create $NOVER_BUILD_NAME.tar.gz - Full install
+exec_cmd "cp $ROOT_DIR/release/$BUILD_OUT.tar.gz $ROOT_DIR/release/$NOVER_BUILD_OUT.tar.gz"
+
+# Set workiong dir to take build precompiled tar files for upgrade
+cd "$SRC_DIR/$BUILD_NAME" || exit 2
+
+# Create lisk-mainnet.tar.gz for mainnet updates
+exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/lisk-mainnet-$ARCH.tar.gz mainnet"
+exec_cmd "cp $ROOT_DIR/release/lisk-mainnet.tar.gz $ROOT_DIR/release/lisk-mainnet-$VERSION-$ARCH.tar.gz"
+
+# Create lisk-testnet.tar.gz for testnet updates
+exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/lisk-testnet-$ARCH.tar.gz testnet"
+exec_cmd "cp $ROOT_DIR/release/lisk-mainnet.tar.gz $ROOT_DIR/release/lisk-mainnet-$VERSION-$ARCH.tar.gz"
 
 # Create lisk-source.tar.gz for mainnet (docker)
+cd "$SRC_DIR" || exit 2 # Reset working dir
 exec_cmd "cp -rf $SRC_DIR/$MAIN_VERSION $SRC_DIR/lisk-source"
-exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/lisk-source-main.tar.gz lisk-source"
+exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/lisk-source-mainnet.tar.gz lisk-source"
 
 # Remove mainnet source temp folder for docker
 exec_cmd "rm -rf $SRC_DIR/lisk-source"
 
 # Create lisk-source.tar.gz for testnet (docker)
 exec_cmd "cp -rf $SRC_DIR/$TEST_VERSION $SRC_DIR/lisk-source"
-exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/lisk-source-test.tar.gz lisk-source"
+exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/lisk-source-testnet.tar.gz lisk-source"
 
 # Create postgresql binaries
 cd "$SRC_DIR/$POSTGRESQL_DIR" || exit 2
@@ -274,8 +282,12 @@ echo "--------------------------------------------------------------------------
 cd "$ROOT_DIR/release" || exit 2
 exec_cmd "$SHA_CMD $BUILD_OUT.tar.gz > $BUILD_OUT.tar.gz.SHA256"
 exec_cmd "$SHA_CMD $NOVER_BUILD_OUT.tar.gz > $NOVER_BUILD_OUT.tar.gz.SHA256"
-exec_cmd "$SHA_CMD lisk-source-main.tar.gz > lisk-source-main.tar.gz.SHA256"
-exec_cmd "$SHA_CMD lisk-source-test.tar.gz > lisk-source-test.tar.gz.SHA256"
+exec_cmd "$SHA_CMD lisk-source-mainnet.tar.gz > lisk-source-mainnet.tar.gz.SHA256"
+exec_cmd "$SHA_CMD lisk-source-testnet.tar.gz > lisk-source-testnet.tar.gz.SHA256"
+exec_cmd "$SHA_CMD lisk-mainnet-$VERSION-$ARCH.tar.gz > lisk-mainnet-$VERSION-$ARCH.tar.gz.SHA256"
+exec_cmd "$SHA_CMD lisk-testnet-$VERSION-$ARCH.tar.gz > lisk-testnet-$VERSION-$ARCH.tar.gz.SHA256"
+exec_cmd "$SHA_CMD lisk-mainnet-$ARCH.tar.gz > lisk-mainnet-$ARCH.tar.gz.SHA256"
+exec_cmd "$SHA_CMD lisk-testnet-$ARCH.tar.gz > lisk-testnet-$ARCH.tar.gz.SHA256"
 
 echo "Cleaning up..."
 echo "--------------------------------------------------------------------------"
