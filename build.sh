@@ -244,13 +244,30 @@ exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$BUILD_OUT.tar.gz $BUILD_NAME"
 # Create $NOVER_BUILD_NAME.tar.gz
 exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$NOVER_BUILD_OUT.tar.gz $BUILD_NAME"
 
-# Create lisk-source.tar.gz for mainnet
-exec_cmd "mv -f $SRC_DIR/$MAIN_VERSION $SRC_DIR/lisk-source"
+# Create lisk-source.tar.gz for mainnet (docker)
+exec_cmd "cp -rf $SRC_DIR/$MAIN_VERSION $SRC_DIR/lisk-source"
 exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/lisk-source-main.tar.gz lisk-source"
 
-# Create lisk-source.tar.gz for testnet
-exec_cmd "mv -f $SRC_DIR/$TEST_VERSION $SRC_DIR/lisk-source"
+# Remove mainnet source temp folder for docker
+exec_cmd "rm -rf $SRC_DIR/lisk-source"
+
+# Create lisk-source.tar.gz for testnet (docker)
+exec_cmd "cp -rf $SRC_DIR/$TEST_VERSION $SRC_DIR/lisk-source"
 exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/lisk-source-test.tar.gz lisk-source"
+
+# Create postgresql binaries
+cd "$SRC_DIR/$POSTGRESQL_DIR/"
+exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$POSTGRESQL_FILE pgsql"
+
+# Create node binaries
+cd "$SRC_DIR/$NODE_DIR"
+exec_cmd "cp -rf $SRC_DIR/$NODE_DIR/compiled/ $SRC_DIR/$NODE_DIR/node"
+exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$NODE_FILE node"
+
+# Create redis binaries
+cd "$SRC_DIR/$REDIS_SERVER_DIR/src"
+exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$REDIS_SERVER_FILE $REDIS_SERVER_CLI $REDIS_SERVER_OUT"
+
 
 echo "Checksumming archives..."
 echo "--------------------------------------------------------------------------"
