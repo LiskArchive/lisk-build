@@ -234,11 +234,8 @@ echo "--------------------------------------------------------------------------
 # Change dir to SRC_DIR - We proceed here without full paths to finish the packaging
 cd "$SRC_DIR" || exit 2
 
-# Create $BUILD_NAME.tar.gz - Full install
-exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$BUILD_OUT.tar.gz $BUILD_NAME"
-
-# Create $NOVER_BUILD_NAME.tar.gz - Full install
-exec_cmd "cp $ROOT_DIR/release/$BUILD_OUT.tar.gz $ROOT_DIR/release/$NOVER_BUILD_OUT.tar.gz"
+# Create $NOVER_BUILD_OUT.tar.gz - Full install
+exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$NOVER_BUILD_OUT.tar.gz $BUILD_NAME"
 
 # Set workiong dir to take build precompiled tar files for upgrade
 cd "$SRC_DIR/$BUILD_NAME" || exit 2
@@ -280,7 +277,6 @@ exec_cmd "GZIP=-6 tar -czf $ROOT_DIR/release/$REDIS_SERVER_FILE $REDIS_SERVER_CL
 echo "Checksumming archives..."
 echo "--------------------------------------------------------------------------"
 cd "$ROOT_DIR/release" || exit 2
-exec_cmd "$SHA_CMD $BUILD_OUT.tar.gz > $BUILD_OUT.tar.gz.SHA256"
 exec_cmd "$SHA_CMD $NOVER_BUILD_OUT.tar.gz > $NOVER_BUILD_OUT.tar.gz.SHA256"
 exec_cmd "$SHA_CMD lisk-source-mainnet.tar.gz > lisk-source-mainnet.tar.gz.SHA256"
 exec_cmd "$SHA_CMD lisk-source-testnet.tar.gz > lisk-source-testnet.tar.gz.SHA256"

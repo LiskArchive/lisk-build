@@ -7,7 +7,6 @@
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk"
-BUILD_OUT="lisk-$MAIN_VERSION-$OS-$ARCH"
 NOVER_BUILD_NAME="lisk-$OS-$ARCH"
 TARGET=""
 JOBS="2"
