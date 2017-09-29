@@ -191,7 +191,7 @@ exec_cmd "npm install --global --production --prefix . pm2"
 
 # Create lisky directory and install there
 exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/lisky"
-cd "$SRC_DIR/$BUILD_NAME/lisky" exit 2
+cd "$SRC_DIR/$BUILD_NAME/lisky" || exit 2
 exec_cmd "npm install --global --production --prefix . lisky"
 cd "$SRC_DIR" || exit 2
 
