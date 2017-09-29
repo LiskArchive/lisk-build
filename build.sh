@@ -296,4 +296,4 @@ exec_cmd "$SHA_CMD lisk-testnet-$TEST_VERSION-$OS-$ARCH.tar.gz > lisk-testnet-$T
 
 echo "Cleaning up..."
 echo "--------------------------------------------------------------------------"
-exec_cmd "rm -rf $SRC_DIR/$BUILD_OUT $SRC_DIR/$NOVER_BUILD_NAME $SRC_DIR/lisk-source*"
+exec_cmd "rm -rf $SRC_DIR/$BUILD_NAME $SRC_DIR/$NOVER_BUILD_NAME $SRC_DIR/lisk-source*"
