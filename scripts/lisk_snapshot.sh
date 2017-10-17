@@ -133,7 +133,7 @@ if [ ! -f "$LOCK_FILE" ]; then
 else
   if [ "$( stat --format=%Y "$LOG_LOCATION" )" -le $(( $(date +%s) - ( STALL_THRESHOLD_PREVIOUS * 60 ) )) ]; then
     echo "√ Previous snapshot is stalled for $STALL_THRESHOLD_PREVIOUS minutes, terminating and continuing with a new snapshot"
-    bash lisk.sh stop_node -p "$SNAPSHOT_CONFIG"
+    bash lisk.sh stop_node -p "$PM2_CONFIG"
     rm -f "$LOCK_FILE" &> /dev/null
   else
     echo "X Previous snapshot is in progress, aborting."
