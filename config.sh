@@ -4,13 +4,7 @@
 # shellcheck disable=SC2155
 # Override declare and assign variables seperately. We dont care about return values for path exports.
 
-if [ ! -z "$1" ]; then
-  echo "Overriding architecture with: $1"
-  echo "--------------------------------------------------------------------------"
-  ARCH="$1"
-fi
-
-VERSION="BUILD_VERSION"
+VERSION="$VERSION"
 OS=$(uname)
 [ ! -z "$ARCH" ] || ARCH=$(uname -m)
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
@@ -20,7 +14,7 @@ JOBS="2"
 
 LISK_DIR="$VERSION"
 LISK_FILE="$VERSION.tar.gz"
-LISK_NETWORK="BUILD_NETWORK"
+LISK_NETWORK="$LISK_NETWORK"
 LISK_URL="https://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
 
@@ -66,32 +60,27 @@ LIBREADLINE_HISTORY="libhistory.so.7.3"
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
 if [ "$(uname -s)" == "Darwin" ]; then
-  SED_OPTS="-i ''"
+	SED_OPTS="-i ''"
 else
-  SED_OPTS="-i"
+	SED_OPTS="-i"
 fi
 
 if [ "$(uname -s)" == "Darwin" ]; then
-  SHA_CMD="shasum -a 256"
+	SHA_CMD="shasum -a 256"
 else
-  SHA_CMD="sha256sum"
-fi
-
-# Needed to build Redis as 32bit
-if [ "$(uname -m)" == "i686" ]; then
-  REDIS_SERVER_CONFIG="32bit"
+	SHA_CMD="sha256sum"
 fi
 
 if [ "$TARGET" != "" ]; then
-  export CC="${TARGET}-gcc"
-  export CXX="${TARGET}-g++"
-  export AR="${TARGET}-ar"
-  export RANLIB="${TARGET}-ranlib"
-  export LD="${TARGET}-ld"
-  export CPP="${TARGET}-gcc -E"
-  export STRIP="${TARGET}-strip"
-  export OBJCOPY="${TARGET}-objcopy"
-  export OBJDUMP="${TARGET}-objdump"
-  export NM="${TARGET}-nm"
-  export AS="${TARGET}-as"
+	export CC="${TARGET}-gcc"
+	export CXX="${TARGET}-g++"
+	export AR="${TARGET}-ar"
+	export RANLIB="${TARGET}-ranlib"
+	export LD="${TARGET}-ld"
+	export CPP="${TARGET}-gcc -E"
+	export STRIP="${TARGET}-strip"
+	export OBJCOPY="${TARGET}-objcopy"
+	export OBJDUMP="${TARGET}-objdump"
+	export NM="${TARGET}-nm"
+	export AS="${TARGET}-as"
 fi
