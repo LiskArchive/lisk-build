@@ -432,23 +432,16 @@ case $1 in
 "logs")
 	tail_logs
 	;;
-<<<<<<< HEAD
-=======
 "lisky")
 	lisky
 	;;
->>>>>>> 183-Add_Lisky
 "help")
 	help
 	;;
 *)
 	echo "Error: Unrecognized command."
 	echo ""
-<<<<<<< HEAD
-	echo "Available commands are: start stop start_node stop_node start_db stop_db reload rebuild coldstart logs status help"
-=======
 	echo "Available commands are: start stop start_node stop_node start_db stop_db reload rebuild coldstart logs lisky status help"
->>>>>>> 183-Add_Lisky
 	help
 	;;
 esac
