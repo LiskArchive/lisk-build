@@ -116,7 +116,6 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
 	exec_cmd "cp -vf $REDIS_SERVER_DIR/src/$REDIS_SERVER_CLI $BUILD_NAME/bin/$REDIS_SERVER_CLI"
 
 	# Copy Libpq for use
-	exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
 
 	# Bundle libreadline6 and create symbolic links
 	if [ ! "$(uname -s)" == "Darwin" ]; then
