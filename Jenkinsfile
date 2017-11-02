@@ -8,7 +8,7 @@ node('lisk-explorer-01'){
     try {
       sh '''#!/bin/bash -xe
       # shellcheck
-      shopt -s globstar; /opt/shellcheck/shellcheck **/*.sh
+      shopt -s globstar; shellcheck **/*.sh
       '''
       deleteDir()
     } catch (err) {
