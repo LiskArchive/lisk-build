@@ -1,11 +1,11 @@
 node('shellcheck'){
-  stage ("Checkout lisk-build") {
+  stage ("checkout") {
     steps {
       checkout scm
     }
   }
 
-  stage ('Shellcheck') {
+  stage ('shellcheck') {
     steps {
       sh '''#!/bin/bash -xe
       shopt -s globstar; shellcheck **/*.sh
