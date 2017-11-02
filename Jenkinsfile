@@ -1,5 +1,5 @@
 pipeline {
-  agent { node { label 'lisk-build' } }
+  agent { node { label 'shellcheck' } }
   stages {
     stage ('shellcheck') {
       steps {
