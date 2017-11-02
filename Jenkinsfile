@@ -1,5 +1,5 @@
 node('shellcheck'){
-  stage ("checkout") {
+  stage ('checkout') {
     steps {
       checkout scm
     }
