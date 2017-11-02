@@ -1,19 +1,15 @@
-node('lisk-explorer-01'){
-  stage ('Prepare Workspace') {
-    deleteDir()
-    checkout scm
+node('shellcheck'){
+  stage ("Checkout lisk-build") {
+    steps {
+      checkout scm
+    }
   }
 
   stage ('Shellcheck') {
-    try {
+    steps {
       sh '''#!/bin/bash -xe
-      # shellcheck
       shopt -s globstar; shellcheck **/*.sh
       '''
-      deleteDir()
-    } catch (err) {
-      echo "Error: ${err}"
-      error('Shellcheck validation failed')
     }
   }
 }
