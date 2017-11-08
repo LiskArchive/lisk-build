@@ -353,7 +353,7 @@ parse_option() {
 			p)
 				if [ -f "$OPTARG" ]; then
 					PM2_CONFIG="$OPTARG"
-					PM2_APP="$(grep "name" "$PM2_CONFIG" | cut -d'"' -f4)"
+					PM2_APP="$( jq .apps[0].name -r "$PM2_CONFIG" )"
 					LISK_CONFIG="$(grep ".json" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
 					# Resets all of the variables
 					config
