@@ -44,7 +44,7 @@ config() {
 
 	# Initialize Lisk specific variables.
 	PM2_APP="$(jq .apps[].name -r "$PM2_CONFIG")"
-	LISK_LOGS="$(jq .logFileName -r "$LISK_CONFIG")"
+	LISK_LOGS="./$NETWORK/$(jq .logFileName -r "$LISK_CONFIG")"
 }
 
 # Declares shell script log file
