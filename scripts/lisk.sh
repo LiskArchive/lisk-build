@@ -1,13 +1,7 @@
 #!/bin/bash
 
 # shellcheck disable=SC2129
-
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
-
-if [ ! -f "$(pwd)/app.js" ]; then
-	echo "Error: Lisk installation was not found. Exiting."
-	exit 1
-fi
 
 if [ "$USER" == "root" ]; then
 	echo "Error: Lisk should not be run be as root. Exiting."
@@ -19,39 +13,43 @@ fi
 # shellcheck disable=SC1090
 . "$(pwd)/env.sh"
 
-
-PM2_CONFIG="$(pwd)/etc/pm2-lisk.json"
-PM2_APP="$(grep "name" "$PM2_CONFIG" | cut -d'"' -f4)" >> /dev/null
-LISK_CONFIG="$(grep "config" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
-LISK_LOGS="$(grep "logFileName" "$LISK_CONFIG" | cut -f 4 -d'"')"
-
-LOGS_DIR="$(pwd)/logs"
-
-# Allocates variables for use later, reusable for changing pm2 config.
-config() {
-DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
-DB_PORT="$(grep "port" "$LISK_CONFIG" -m2 | tail -n1 |cut -f 1 -d ',' | cut -f 2 -d ':')"
-DB_USER="$USER"
-DB_PASS="password"
-DB_DATA="$(pwd)/pgsql/data"
-DB_LOG_FILE="$LOGS_DIR/pgsql.log"
-DB_SNAPSHOT="blockchain.db.gz"
-DB_DOWNLOAD=Y
-
+# Declare static config for redis
 REDIS_CONFIG="$(pwd)/etc/redis.conf"
 REDIS_BIN="$(pwd)/bin/redis-server"
 REDIS_CLI="$(pwd)/bin/redis-cli"
-REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 2 -d ':' |  sed 's: ::g' | cut -f 1 -d ',')"
-REDIS_PORT="$(grep "port" "$LISK_CONFIG" -m3 | sed -n 3p | cut -f 2 -d':' | sed 's: ::g' | cut -f 1 -d ',')"
-REDIS_PASSWORD="$(grep "password" "$LISK_CONFIG" -m2 | sed -n 2p | cut -f 2 -d ":" | cut -f 1 -d ',' | sed 's: ::g')"
 REDIS_PID="$(pwd)/redis/redis_6380.pid"
+
+# Declare static config for postgresql
+DB_DATA="$(pwd)/blockchain.db"
+DB_LOG_FILE="$(pwd)/pgsql.log"
+DB_SNAPSHOT="blockchain.db.gz"
+DB_DOWNLOAD=Y
+
+PM2_MAIN_CONFIG="$(pwd)/etc/pm2-lisk-main.json"
+PM2_TEST_CONFIG="$(pwd)/etc/pm2-lisk-test.json"
+PM2_DEV_CONFIG="$(pwd)/etc/pm2-lisk-dev.json"
+
+LOGS_DIR="$(pwd)/logs"
+
+config() {
+	# Initalize application specific Postgresql variables
+	DB_NAME="$(jq .db.database -r "$LISK_CONFIG")"
+	DB_PORT="$(jq .db.port -r "$LISK_CONFIG")"
+	DB_USER="$USER"
+	DB_PASS="$(jq .db.password -r "$LISK_CONFIG")"
+
+	# Initialize application specific Redis variables
+	REDIS_ENABLED="$(jq .cacheEnabled -r "$LISK_CONFIG")"
+	REDIS_PORT="$(jq .redis.port -r "$LISK_CONFIG")"
+	REDIS_PASSWORD="$(jq .redis.password -r "$LISK_CONFIG")"
+
+	# Initialize Lisk specific variables.
+	PM2_APP="$(jq .apps[].name -r "$PM2_CONFIG")"
+	LISK_LOGS="$(jq .logFileName -r "$LISK_CONFIG")"
 }
 
-#sets all of the variables
-config
-
+# Declares shell script log file
 SH_LOG_FILE="$LOGS_DIR/lisk.out"
-
 
 # Setup logging
 exec > >(tee -ia "$SH_LOG_FILE")
@@ -63,18 +61,6 @@ blockheight() {
 	DB_HEIGHT="$(psql -d "$DB_NAME" -t -p "$DB_PORT" -c 'select height from blocks order by height desc limit 1;')"
 	HEIGHT="${DB_HEIGHT:- Unavailable}"
 	echo -e "Current Block Height:" "$HEIGHT"
-}
-
-network() {
-	# shellcheck disable=SC2143
-	if [ "$(grep "da3ed6a45429278bac2666961289ca17ad86595d33b31037615d4b8e8f158bba" "$LISK_CONFIG" )" ];then
-		NETWORK="test"
-	elif [ "$(grep "ed14889723f24ecc54871d058d98ce91ff2f973192075c0155ba2b7b70ad2511" "$LISK_CONFIG")" ];then
-		NETWORK="main"
-	else
-		NETWORK="local"
-	fi
-	echo -e 'Lisk configured for '"$NETWORK"' network\n' >> "$SH_LOG_FILE" 2>&1
 }
 
 create_user() {
@@ -102,7 +88,6 @@ create_database() {
 }
 
 populate_database() {
-
 	if psql -ltAq | grep -q "^$DB_NAME|" >> "$SH_LOG_FILE" 2>&1; then
 		download_blockchain
 		restore_blockchain
@@ -345,8 +330,8 @@ help() {
 	echo -e "help                                  Displays this message"
 }
 
-
-parse_option() {
+# Parses flags for instance
+parse_flag() {
 	OPTIND=2
 	while getopts ":p:f:u:l:0" OPT; do
 		case "$OPT" in
@@ -384,66 +369,96 @@ parse_option() {
 	done
 }
 
-parse_option "$@"
-network
+# Parses network
+case $2 in
+	"mainnet")
+		NETWORK="mainnet"
+		PM2_CONFIG="$PM2_MAIN_CONFIG"
+		LISK_CONFIG="./mainnet/config.json"
+		;;
+	"testnet")
+		NETWORK="testnet"
+		PM2_CONFIG="$PM2_TEST_CONFIG"
+		LISK_CONFIG="./testnet/config.json"
+		;;
+	"devnet")
+		NETWORK="devnet"
+		PM2_CONFIG="$PM2_DEV_CONFIG"
+		LISK_CONFIG="./devnet/config.json"
+		;;
+	*)
+		echo "No network specified. Please specify a network: mainnet, testnet, devnet"
+		echo "Exiting..."
+		exit 0
+		;;
+esac
 
+echo -e 'Lisk configured for '"$NETWORK"' network\n' >> "$SH_LOG_FILE"
+
+# Calls config function declare mutable variables
+config
+
+# Parsing flags after setting network
+parse_flag "$@"
+
+# Parses command to run with above
 case $1 in
-"coldstart")
-	coldstart_lisk
-	;;
-"start_node")
-	start_lisk
-	;;
-"start")
-	start_postgresql
-	sleep 2
-	start_lisk
-	;;
-"stop_node")
-	stop_lisk
-	;;
-"stop")
-	stop_lisk
-	stop_postgresql
-	;;
-"reload")
-	reload_lisk
-	;;
-"rebuild")
-	stop_lisk
-	sleep 1
-	start_postgresql
-	sleep 1
-	rebuild_lisk
-	start_lisk
-	;;
-"start_db")
-	start_postgresql
-	;;
-"stop_db")
-	stop_postgresql
-	;;
-"cleanup")
-	pm2_cleanup
-	;;
-"status")
-	check_status
-	;;
-"logs")
-	tail_logs
-	;;
-"lisky")
-	lisky
-	;;
-"help")
-	help
-	;;
-*)
-	echo "Error: Unrecognized command."
-	echo ""
-	echo "Available commands are: start stop start_node stop_node start_db stop_db reload rebuild coldstart logs lisky status help"
-	help
-	;;
+	"coldstart")
+		coldstart_lisk
+		;;
+	"start_node")
+		start_lisk
+		;;
+	"start")
+		start_postgresql
+		sleep 2
+		start_lisk
+		;;
+	"stop_node")
+		stop_lisk
+		;;
+	"stop")
+		stop_lisk
+		stop_postgresql
+		;;
+	"reload")
+		reload_lisk
+		;;
+	"rebuild")
+		stop_lisk
+		sleep 1
+		start_postgresql
+		sleep 1
+		rebuild_lisk
+		start_lisk
+		;;
+	"start_db")
+		start_postgresql
+		;;
+	"stop_db")
+		stop_postgresql
+		;;
+	"cleanup")
+		pm2_cleanup
+		;;
+	"status")
+		check_status
+		;;
+	"logs")
+		tail_logs
+		;;
+	"lisky")
+		lisky
+		;;
+	"help")
+		help
+		;;
+	*)
+		echo "Error: Unrecognized command."
+		echo ""
+		echo "Available commands are: start stop start_node stop_node start_db stop_db reload rebuild coldstart logs lisky status help"
+		help
+		;;
 esac
 
 # Required to clean up colour characters that don't translate well from tee
