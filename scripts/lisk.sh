@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# shellcheck disable=SC2129
-
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
 
 if [ ! -f "$(pwd)/app.js" ]; then
@@ -21,30 +19,30 @@ fi
 
 
 PM2_CONFIG="$(pwd)/etc/pm2-lisk.json"
-PM2_APP="$(grep "name" "$PM2_CONFIG" | cut -d'"' -f4)" >> /dev/null
-LISK_CONFIG="$(grep "config" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
-LISK_LOGS="$(grep "logFileName" "$LISK_CONFIG" | cut -f 4 -d'"')"
+PM2_APP="$( jq .apps[0].name -r "$PM2_CONFIG" )"
+LISK_CONFIG="$( jq .apps[0].args -r "$PM2_CONFIG" |cut -d' ' -f2 )"
+LISK_LOGS="$( jq .logFileName -r "$LISK_CONFIG" )"
 
 LOGS_DIR="$(pwd)/logs"
 
 # Allocates variables for use later, reusable for changing pm2 config.
 config() {
-DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
-DB_PORT="$(grep "port" "$LISK_CONFIG" -m2 | tail -n1 |cut -f 1 -d ',' | cut -f 2 -d ':')"
-DB_USER="$USER"
-DB_PASS="password"
-DB_DATA="$(pwd)/pgsql/data"
-DB_LOG_FILE="$LOGS_DIR/pgsql.log"
-DB_SNAPSHOT="blockchain.db.gz"
-DB_DOWNLOAD=Y
+	DB_NAME="$( jq .db.database -r "$LISK_CONFIG" )"
+	DB_PORT="$( jq .db.port -r "$LISK_CONFIG" )"
+	DB_USER="$USER"
+	DB_PASS="password"
+	DB_DATA="$(pwd)/pgsql/data"
+	DB_LOG_FILE="$LOGS_DIR/pgsql.log"
+	DB_SNAPSHOT="blockchain.db.gz"
+	DB_DOWNLOAD=Y
 
-REDIS_CONFIG="$(pwd)/etc/redis.conf"
-REDIS_BIN="$(pwd)/bin/redis-server"
-REDIS_CLI="$(pwd)/bin/redis-cli"
-REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 2 -d ':' |  sed 's: ::g' | cut -f 1 -d ',')"
-REDIS_PORT="$(grep "port" "$LISK_CONFIG" -m3 | sed -n 3p | cut -f 2 -d':' | sed 's: ::g' | cut -f 1 -d ',')"
-REDIS_PASSWORD="$(grep "password" "$LISK_CONFIG" -m2 | sed -n 2p | cut -f 2 -d ":" | cut -f 1 -d ',' | sed 's: ::g')"
-REDIS_PID="$(pwd)/redis/redis_6380.pid"
+	REDIS_CONFIG="$(pwd)/etc/redis.conf"
+	REDIS_BIN="$(pwd)/bin/redis-server"
+	REDIS_CLI="$(pwd)/bin/redis-cli"
+	REDIS_ENABLED="$( jq .cacheEnabled -r "$LISK_CONFIG" )"
+	REDIS_PORT="$( jq .redis.port -r "$LISK_CONFIG" )"
+	REDIS_PASSWORD="$( jq .redis.password -r "$LISK_CONFIG" )"
+	REDIS_PID="$(pwd)/redis/redis_6380.pid"
 }
 
 #sets all of the variables
@@ -66,10 +64,10 @@ blockheight() {
 }
 
 network() {
-	# shellcheck disable=SC2143
-	if [ "$(grep "da3ed6a45429278bac2666961289ca17ad86595d33b31037615d4b8e8f158bba" "$LISK_CONFIG" )" ];then
+	NETHASH="$( jq .nethash -r "$LISK_CONFIG" )"
+	if [ "$NETHASH" = "da3ed6a45429278bac2666961289ca17ad86595d33b31037615d4b8e8f158bba" ]; then
 		NETWORK="test"
-	elif [ "$(grep "ed14889723f24ecc54871d058d98ce91ff2f973192075c0155ba2b7b70ad2511" "$LISK_CONFIG")" ];then
+	elif [ "$NETHASH" = "ed14889723f24ecc54871d058d98ce91ff2f973192075c0155ba2b7b70ad2511" ]; then
 		NETWORK="main"
 	else
 		NETWORK="local"
@@ -78,7 +76,6 @@ network() {
 }
 
 create_user() {
-	# shellcheck disable=SC2129
 	dropuser --if-exists "$DB_USER" >> "$SH_LOG_FILE" 2>&1
 	createuser --createdb "$DB_USER" >> "$SH_LOG_FILE" 2>&1
 	if ! psql -qd postgres -c "ALTER USER $DB_USER WITH PASSWORD '$DB_PASS';" >> "$SH_LOG_FILE" 2>&1; then
@@ -90,7 +87,6 @@ create_user() {
 }
 
 create_database() {
-	# shellcheck disable=SC2129
 	dropdb --if-exists "$DB_NAME" >> "$SH_LOG_FILE" 2>&1
 
 	if ! createdb "$DB_NAME" >> "$SH_LOG_FILE" 2>&1; then
@@ -293,7 +289,7 @@ pm2_cleanup() {
 }
 
 check_status() {
-	PM2_PID="$(pm2 describe "$PM2_APP" | grep "pid path" | cut -d' ' -f14)" >> "$SH_LOG_FILE" 2>&1> /dev/null
+	PM2_PID="$( pm2 jlist |jq ".[] | select(.name == \"$PM2_APP\").pm2_env.pm_pid_path" )"
 
 	pm2 describe "$PM2_APP" >> "$SH_LOG_FILE"
 
@@ -354,7 +350,7 @@ parse_option() {
 				if [ -f "$OPTARG" ]; then
 					PM2_CONFIG="$OPTARG"
 					PM2_APP="$( jq .apps[0].name -r "$PM2_CONFIG" )"
-					LISK_CONFIG="$(grep ".json" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
+					LISK_CONFIG="$( jq .apps[0].args -r "$PM2_CONFIG" |cut -d' ' -f2 )"
 					# Resets all of the variables
 					config
 				else
