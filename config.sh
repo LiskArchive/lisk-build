@@ -62,11 +62,13 @@ JQ_DIR="jq-$JQ_VERSION"
 JQ_FILE="$JQ_DIR.tar.gz"
 JQ_URL="https://github.com/stedolan/jq/releases/download/jq-$JQ_VERSION/$JQ_FILE"
 JQ_OUT="jq"
+JQ_CONFIG=""
 
 NPM_CLI="lib/node_modules/npm/bin/npm-cli.js"
 
 if [ "$(uname -s)" == "Darwin" ]; then
 	SHA_CMD="shasum -a 256"
+	JQ_CONFIG='LDFLAGS="-L/usr/local/opt/bison/lib" --disable-maintainer-mode'
 else
 	SHA_CMD="sha256sum"
 fi
