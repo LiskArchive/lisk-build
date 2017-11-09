@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# shellcheck disable=SC2129
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
 
 if [ "$USER" == "root" ]; then
@@ -64,7 +63,6 @@ blockheight() {
 }
 
 create_user() {
-	# shellcheck disable=SC2129
 	dropuser --if-exists "$DB_USER" >> "$SH_LOG_FILE" 2>&1
 	createuser --createdb "$DB_USER" >> "$SH_LOG_FILE" 2>&1
 	if ! psql -qd postgres -c "ALTER USER $DB_USER WITH PASSWORD '$DB_PASS';" >> "$SH_LOG_FILE" 2>&1; then
@@ -76,7 +74,6 @@ create_user() {
 }
 
 create_database() {
-	# shellcheck disable=SC2129
 	dropdb --if-exists "$DB_NAME" >> "$SH_LOG_FILE" 2>&1
 
 	if ! createdb "$DB_NAME" >> "$SH_LOG_FILE" 2>&1; then
@@ -278,7 +275,7 @@ pm2_cleanup() {
 }
 
 check_status() {
-	PM2_PID="$(pm2 describe "$PM2_APP" | grep "pid path" | cut -d' ' -f14)" >> "$SH_LOG_FILE" 2>&1> /dev/null
+	PM2_PID="$( pm2 jlist |jq ".[] | select(.name == \"$PM2_APP\").pm2_env.pm_pid_path" )"
 
 	pm2 describe "$PM2_APP" >> "$SH_LOG_FILE"
 
@@ -338,8 +335,8 @@ parse_flag() {
 			p)
 				if [ -f "$OPTARG" ]; then
 					PM2_CONFIG="$OPTARG"
-					PM2_APP="$(grep "name" "$PM2_CONFIG" | cut -d'"' -f4)"
-					LISK_CONFIG="$(grep ".json" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
+					PM2_APP="$( jq .apps[0].name -r "$PM2_CONFIG" )"
+					LISK_CONFIG="$( jq .apps[0].args -r "$PM2_CONFIG" |cut -d' ' -f2 )"
 					# Resets all of the variables
 					config
 				else
