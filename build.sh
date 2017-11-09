@@ -108,16 +108,16 @@ fi
 
 echo "Building jq"
 echo "--------------------------------------------------------------------------"
-  if [ ! -f "$SRC_DIR/$JQ_FILE" ]; then                                                                                                                                                                                                                                           
-          exec_cmd "wget $JQ_URL -O $SRC_DIR/$JQ_FILE"                                                                                                                                                                                                                            
-  fi                                                                                                                                                                                                                                                                              
-  if [ ! -f "$SRC_DIR/$JQ_DIR/$JQ_OUT" ]; then                                                                                                                                                                                                                                    
-          exec_cmd "rm -rf $SRC_DIR/$JQ_DIR"                                                                                                                                                                                                                                      
-          exec_cmd "tar -zxf $SRC_DIR/$JQ_FILE"                                                                                                                                                                                                                                   
-          cd "$SRC_DIR/$JQ_DIR" || exit 2                                                                                                                                                                                                                                         
-          exec_cmd "./configure"                                                                                                                                                                                                                                                  
-          exec_cmd "make"                                                                                                                                                                                                                                                         
-          cd "$SRC_DIR" || exit 2  
+  if [ ! -f "$SRC_DIR/$JQ_FILE" ]; then
+          exec_cmd "wget $JQ_URL -O $SRC_DIR/$JQ_FILE"
+  fi
+  if [ ! -f "$SRC_DIR/$JQ_DIR/$JQ_OUT" ]; then
+          exec_cmd "rm -rf $SRC_DIR/$JQ_DIR"
+          exec_cmd "tar -zxf $SRC_DIR/$JQ_FILE"
+          cd "$SRC_DIR/$JQ_DIR" || exit 2
+          exec_cmd "./configure"
+          exec_cmd "make"
+          cd "$SRC_DIR" || exit 2
   fi
 
 echo "Building node..."
@@ -183,6 +183,9 @@ echo "--------------------------------------------------------------------------
 cd "$SRC_DIR/$BUILD_NAME" || exit 2
 # shellcheck disable=SC1090
 . "$(pwd)/env.sh"
+
+# Required to build sodium 
+exec_cmd "npm install -g npm@5.3.0"
 
 # Create PM2 directory and install there
 exec_cmd "mkdir -p $SRC_DIR/$BUILD_NAME/pm2"
