@@ -1,0 +1,14 @@
+[Unit]
+Description=Lisk Blockchain Application Platfom
+After=network.target
+
+[Service]
+Type=forking
+User=lisk
+WorkingDirectory=/home/lisk/lisk-Linux-x86_64/
+ExecStart=/home/lisk/lisk-Linux-x86_64/lisk.sh start
+Restart=/home/lisk/lisk-Linux-x86_64/lisk.sh reload
+ExecStop=/home/lisk/lisk-Linux-x86_64/lisk.sh stop
+
+[Install]
+WantedBy=multi-user.target
