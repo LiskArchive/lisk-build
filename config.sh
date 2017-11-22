@@ -20,7 +20,7 @@ LISK_CONFIG=""
 
 NODE_DIR="node-v6.11.2"
 NODE_FILE="$NODE_DIR.tar.gz"
-NODE_URL="https://nodejs.org/download/release/$NODE_VERSION/$NODE_FILE"
+NODE_URL="https://nodejs.org/download/release/v6.11.2/$NODE_FILE"
 NODE_OUT="compiled"
 NODE_CONFIG=""
 
