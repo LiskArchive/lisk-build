@@ -29,22 +29,22 @@ LOGS_DIR="$(pwd)/logs"
 
 # Allocates variables for use later, reusable for changing pm2 config.
 config() {
-DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
-DB_PORT="$(grep "port" "$LISK_CONFIG" -m2 | tail -n1 |cut -f 1 -d ',' | cut -f 2 -d ':')"
-DB_USER="$USER"
-DB_PASS="password"
-DB_DATA="$(pwd)/pgsql/data"
-DB_LOG_FILE="$LOGS_DIR/pgsql.log"
-DB_SNAPSHOT="blockchain.db.gz"
-DB_DOWNLOAD=Y
+	DB_NAME="$(grep "database" "$LISK_CONFIG" | cut -f 4 -d '"')"
+	DB_PORT="$(grep "port" "$LISK_CONFIG" -m2 | tail -n1 |cut -f 1 -d ',' | cut -f 2 -d ':')"
+	DB_USER="$USER"
+	DB_PASS="password"
+	DB_DATA="$(pwd)/pgsql/data"
+	DB_LOG_FILE="$LOGS_DIR/pgsql.log"
+	DB_SNAPSHOT="blockchain.db.gz"
+	DB_DOWNLOAD=Y
 
-REDIS_CONFIG="$(pwd)/etc/redis.conf"
-REDIS_BIN="$(pwd)/bin/redis-server"
-REDIS_CLI="$(pwd)/bin/redis-cli"
-REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 2 -d ':' |  sed 's: ::g' | cut -f 1 -d ',')"
-REDIS_PORT="$(grep "port" "$LISK_CONFIG" -m3 | sed -n 3p | cut -f 2 -d':' | sed 's: ::g' | cut -f 1 -d ',')"
-REDIS_PASSWORD="$(grep "password" "$LISK_CONFIG" -m2 | sed -n 2p | cut -f 2 -d ":" | cut -f 1 -d ',' | sed 's: ::g')"
-REDIS_PID="$(pwd)/redis/redis_6380.pid"
+	REDIS_CONFIG="$(pwd)/etc/redis.conf"
+	REDIS_BIN="$(pwd)/bin/redis-server"
+	REDIS_CLI="$(pwd)/bin/redis-cli"
+	REDIS_ENABLED="$(grep "cacheEnabled" "$LISK_CONFIG" | cut -f 2 -d ':' |  sed 's: ::g' | cut -f 1 -d ',')"
+	REDIS_PORT="$(grep "port" "$LISK_CONFIG" -m3 | sed -n 3p | cut -f 2 -d':' | sed 's: ::g' | cut -f 1 -d ',')"
+	REDIS_PASSWORD="$(grep "password" "$LISK_CONFIG" -m2 | sed -n 2p | cut -f 2 -d ":" | cut -f 1 -d ',' | sed 's: ::g')"
+	REDIS_PID="$(pwd)/redis/redis_6380.pid"
 }
 
 #sets all of the variables
