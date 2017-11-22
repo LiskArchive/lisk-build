@@ -50,10 +50,8 @@ config() {
 # Sets all of the variables
 config
 
-SH_LOG_FILE="$LOGS_DIR/lisk.out"
-
-
 # Setup logging
+SH_LOG_FILE="$LOGS_DIR/lisk.out"
 exec > >(tee -ia "$SH_LOG_FILE")
 exec 2>&1
 
