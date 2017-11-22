@@ -47,7 +47,7 @@ config() {
 	REDIS_PID="$(pwd)/redis/redis_6380.pid"
 }
 
-#sets all of the variables
+# Sets all of the variables
 config
 
 SH_LOG_FILE="$LOGS_DIR/lisk.out"
