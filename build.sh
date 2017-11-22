@@ -16,7 +16,7 @@ parse_option() {
 	if [[ $VERSION && $LISK_NETWORK ]]; then
 		echo "All options declared. Proceeding with build."
 	else
-		echo "Both -n and -v are required. Exiting"
+		echo "Both -n and -v are required. Exiting."
 		exit 1
 	fi
 }
