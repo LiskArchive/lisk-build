@@ -90,7 +90,6 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
 	exec_cmd "make install"
 
 	# Compiles the pgcrypto extension
-
 	cd "$(pwd)/contrib/pgcrypto" || exit 2
 	exec_cmd "make"
 	exec_cmd "make install"

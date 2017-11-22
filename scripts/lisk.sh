@@ -98,7 +98,6 @@ create_database() {
 }
 
 populate_database() {
-
 	if psql -ltAq | grep -q "^$DB_NAME|" >> "$SH_LOG_FILE" 2>&1; then
 		download_blockchain
 		restore_blockchain
@@ -340,7 +339,6 @@ help() {
 	echo -e "status                                Displays the status of the PID associated with Lisk"
 	echo -e "help                                  Displays this message"
 }
-
 
 parse_option() {
 	OPTIND=2
