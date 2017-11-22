@@ -24,9 +24,9 @@ NODE_URL="https://nodejs.org/download/release/v8.9.1/$NODE_FILE"
 NODE_OUT="compiled"
 NODE_CONFIG=""
 
-POSTGRESQL_DIR="postgresql-9.6.4"
+POSTGRESQL_DIR="postgresql-10.0"
 POSTGRESQL_FILE="$POSTGRESQL_DIR.tar.gz"
-POSTGRESQL_URL="https://ftp.postgresql.org/pub/source/v9.6.4/$POSTGRESQL_FILE"
+POSTGRESQL_URL="https://ftp.postgresql.org/pub/source/v10.0/$POSTGRESQL_FILE"
 POSTGRESQL_OUT="pgsql"
 
 SODIUM_DIR="libsodium-1.0.11"
