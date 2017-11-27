@@ -94,7 +94,7 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
 	exec_cmd "make"
 	exec_cmd "make install"
 
-	cd ../ || exit 2
+	cd ../../.. || exit 2
 fi
 
 echo "Building Redis-Server"
