@@ -11,7 +11,6 @@
  * LICENSE file.
  *
  * Removal or modification of this copyright notice is prohibited.
- *
  */
 
 var program = require('commander');
