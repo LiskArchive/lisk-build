@@ -91,7 +91,7 @@ passphraseMigration() {
 	jq ".forging.defaultKey += \"$master_password\"" "$LISK_CONFIG" > new_config.json
 	for i in $(seq 0 ${#secrets[@]}); do
 		temp=$(echo "${secrets[$i]}" | tr -d '\n' | openssl enc -aes-256-cbc -k "$master_password" -nosalt | od -A n -t x1)
-		temp=$(echo "$temp" | sed 's/ //g')
+		temp=${temp// /}
 		temp=$(echo "$temp" | tr -d '\n')
 		if [[ "${#secrets[$i]}" -eq 0 ]]; then
 			continue;
