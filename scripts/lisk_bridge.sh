@@ -45,6 +45,8 @@ extractConfig() {
   PM2_CONFIG="$LISK_HOME/etc/pm2-lisk.json"
   LISK_CONFIG="$(grep "config" "$PM2_CONFIG" | cut -d'"' -f4 | cut -d' ' -f2)" >> /dev/null
 	PORT="$(grep "port" "$LISK_CONFIG" | head -1 | cut -d':' -f 2 | cut -d',' -f 1 | tr -d '[:space:]')"
+
+  readarray secrets < <(jq -r '.forging.secret | .[]' $LISK_CONFIG)
 }
 
 # Queries the `/api/loader/status/sync` endpoint
@@ -70,9 +72,32 @@ migrateLisk() {
 	bash "$(pwd)/installLisk.sh" upgrade -r "$BRIDGE_NETWORK" -d "$LISK_HOME" -0 no
 }
 
+passphraseMigration() {
+	echo -e "This next step will migrate the secrets in config.json to an encrypted format\nYou will be prompted for a master password\n"
+        read -r -p "$(echo -e "Press Enter to continue\n\b")" stuff
+	read -r -p "$(echo -e "Please enter the master password\n\b")" master_password
+	read -r -p "$(echo -e "Please enter the master password again\n\b")" master_password2
+
+	if [[ $master_password != $master_password2 ]]; then
+		echo "passwords don't match. exiting...."
+		exit 1
+	fi
+
+	jq ".forging.defaultKey += \"$master_password\"" $LISK_CONFIG > new_config.json
+	for i in `seq 0 ${#secrets[@]}`; do
+		echo "secret: ${secrets[$i]}" | tr -d '\n' ; echo
+		temp=$(echo ${secrets[$i]} | tr -d '\n' | openssl enc -aes-256-cbc -k "$master_password" -nosalt | od -A n -t x1)
+		temp=$(echo $temp | sed 's/ //g')
+		echo $temp
+
+		jq '.forging.secret += [{ "encryptedSecret": "'$temp'"}]' new_config.json > new_config2.json
+		mv new_config2.json new_config.json
+	done
+}
+
 # Sets up initial configuration and first call to the application
 # to establish baseline statistics.
-parseOption
+parseOption "$@"
 extractConfig
 blockMonitor
 
@@ -87,6 +112,7 @@ done
 cd "$LISK_HOME" || exit 2
 terminateLisk
 cd "$BRIDGE_HOME"  || exit 2
+passphraseMigration
 downloadLisk
 migrateLisk
 
