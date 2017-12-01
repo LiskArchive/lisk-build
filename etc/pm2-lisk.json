@@ -11,6 +11,8 @@
                 "kill_timeout" : 10000,
                 "max_memory_restart": "1024M",
                 "node_args": "--max_old_space_size=1024",
-                "args": "-c config.json"
+                "args": "-c config.json",
+                "min_uptime": 3000,
+                "max_restarts": 10
         }]
 }
