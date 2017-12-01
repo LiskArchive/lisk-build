@@ -77,6 +77,8 @@ migrateLisk() {
 	bash "$(pwd)/installLisk.sh" upgrade -r "$BRIDGE_NETWORK" -s "$LISK_HOME" -d "$BRIDGE_HOME" -c "$BRIDGE_HOME/new_config.json" -0 no
 }
 
+# Migrates the secrets in config.json to an encrypted format,
+# prompting user for a master password.
 passphraseMigration() {
 	echo -e "This next step will migrate the secrets in config.json to an encrypted format\nYou will be prompted for a master password\n"
 	read -r -p "$(echo -e "Press Enter to continue\n\b")"
