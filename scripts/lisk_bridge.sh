@@ -86,7 +86,7 @@ passphraseMigration() {
 	read -r -p "$(echo -e "Please enter the master password again\n\b")" master_password2
 
 	if [[ "$master_password" != "$master_password2" ]]; then
-		echo "passwords don't match. exiting...."
+		echo "Passwords don't match. Exiting..."
 		exit 1
 	fi
 
