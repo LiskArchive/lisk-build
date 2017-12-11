@@ -33,4 +33,4 @@ check_cmds CMDS[@]
 
 exec_cmd "curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash"
 exec_cmd "nvm install v6.10.1"
-exec_cmd "sudo apt-get install -y autoconf automake build-essential curl chrpath git libreadline6-dev libtool zlib1g-dev libssl-dev libpq-dev nodejs python wget"
+exec_cmd "sudo apt-get install -y autoconf automake build-essential curl chrpath git libreadline6-dev libtool zlib1g-dev libssl-dev libpq-dev nodejs python wget libncurses5-dev"
