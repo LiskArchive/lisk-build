@@ -25,13 +25,16 @@ TARGET_HEIGHT="3513100"
 BRIDGE_HOME="$(pwd)"
 BRIDGE_NETWORK="main"
 LISK_HOME="$HOME/lisk-main"
+JQ="$LISK_HOME/bin/jq"
+
 
 # Reads in required variables if configured by the user.
 parseOption() {
 	OPTIND=1
 	while getopts ":s:b:n:h:" OPT; do
 		case "$OPT" in
-			 s) LISK_HOME="$OPTARG" ;; # Where lisk is installed
+			 s) LISK_HOME="$OPTARG" ;
+			    JQ="$LISK_HOME/bin/jq" ;; # Where lisk is installed
 			 b) BRIDGE_HOME="$OPTARG" ;; # Where the bridge is located
 			 n) BRIDGE_NETWORK="$OPTARG" ;; # Which network is being bridged
 			 h) TARGET_HEIGHT="$OPTARG" ;; # What height to cut over at
@@ -48,7 +51,7 @@ extractConfig() {
 	export PORT
 	PORT="$(grep "port" "$LISK_CONFIG" | head -1 | cut -d':' -f 2 | cut -d',' -f 1 | tr -d '[:space:]')"
 
-	readarray secrets < <(jq -r '.forging.secret | .[]' "$LISK_CONFIG")
+	readarray secrets < <($JQ -r '.forging.secret | .[]' "$LISK_CONFIG")
 	for i in $(seq 0 ${#secrets[@]}); do
 		secrets[$i]=$(echo "${secrets[$i]}" | tr -d '\n')
 	done
@@ -57,7 +60,7 @@ extractConfig() {
 # Queries the `/api/loader/status/sync` endpoint
 # and extracts the height for evaluation.
 blockMonitor() {
-  BLOCK_HEIGHT="$(curl -s http://localhost:"$PORT"/api/loader/status/sync | cut -d':' -f 5 | cut -d',' -f 1)"
+	BLOCK_HEIGHT="$(curl -s http://localhost:"$PORT"/api/loader/status/sync | cut -d':' -f 5 | cut -d',' -f 1)"
 }
 
 # Terminates the lisk client at the assigned blocks
@@ -90,7 +93,7 @@ passphraseMigration() {
 		exit 1
 	fi
 
-	jq ".forging.defaultKey += \"$master_password\"" "$LISK_CONFIG" > new_config.json
+	$JQ ".forging.defaultKey += \"$master_password\"" "$LISK_CONFIG" > new_config.json
 	for i in $(seq 0 ${#secrets[@]}); do
 		temp=$(echo "${secrets[$i]}" | tr -d '\n' | openssl enc -aes-256-cbc -k "$master_password" -nosalt | od -A n -t x1)
 		temp=${temp// /}
@@ -98,7 +101,7 @@ passphraseMigration() {
 		if [[ "${#secrets[$i]}" -eq 0 ]]; then
 			continue;
 		fi
-		jq '.forging.secret += [{ "encryptedSecret": "'"$temp"'"}]' new_config.json > new_config2.json
+		$JQ '.forging.secret += [{ "encryptedSecret": "'"$temp"'"}]' new_config.json > new_config2.json
 		mv new_config2.json new_config.json
 	done
 }
