@@ -82,7 +82,7 @@ To build a package, perform the following on a machine matching your target arch
 
 ## Authors
 
-- Isabella Dell <isabella@lightcurve.io>
+- Isabella Dell <dell.isabella@gmail.com>
 - Oliver Beddows <oliver@lightcurve.io>
 
 ## License
