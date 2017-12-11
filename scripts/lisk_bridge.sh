@@ -51,7 +51,7 @@ extractConfig() {
 	export PORT
 	PORT="$(grep "port" "$LISK_CONFIG" | head -1 | cut -d':' -f 2 | cut -d',' -f 1 | tr -d '[:space:]')"
 
-	readarray secrets < <($JQ -r '.forging.secret | .[]' "$LISK_CONFIG")
+	readarray secrets < <("$JQ" -r '.forging.secret | .[]' "$LISK_CONFIG")
 	for i in $(seq 0 ${#secrets[@]}); do
 		secrets[$i]=$(echo "${secrets[$i]}" | tr -d '\n')
 	done
@@ -93,7 +93,7 @@ passphraseMigration() {
 		exit 1
 	fi
 
-	$JQ ".forging.defaultKey += \"$master_password\"" "$LISK_CONFIG" > new_config.json
+	"$JQ" ".forging.defaultKey += \"$master_password\"" "$LISK_CONFIG" > new_config.json
 	for i in $(seq 0 ${#secrets[@]}); do
 		temp=$(echo "${secrets[$i]}" | tr -d '\n' | openssl enc -aes-256-cbc -k "$master_password" -nosalt | od -A n -t x1)
 		temp=${temp// /}
@@ -101,7 +101,7 @@ passphraseMigration() {
 		if [[ "${#secrets[$i]}" -eq 0 ]]; then
 			continue;
 		fi
-		$JQ '.forging.secret += [{ "encryptedSecret": "'"$temp"'"}]' new_config.json > new_config2.json
+		"$JQ" '.forging.secret += [{ "encryptedSecret": "'"$temp"'"}]' new_config.json > new_config2.json
 		mv new_config2.json new_config.json
 	done
 }
