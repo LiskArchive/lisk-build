@@ -27,7 +27,6 @@ BRIDGE_NETWORK="main"
 LISK_HOME="$HOME/lisk-main"
 JQ="$LISK_HOME/bin/jq"
 
-
 # Reads in required variables if configured by the user.
 parseOption() {
 	OPTIND=1
