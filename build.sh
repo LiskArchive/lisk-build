@@ -175,10 +175,11 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
 	cd ../ || exit 2
 fi
 
-echo "Copying scripts..."
+echo "Installing lisk-scripts..."
 echo "--------------------------------------------------------------------------"
-exec_cmd "cp -f ../shared.sh ../scripts/* $BUILD_NAME/"
-exec_cmd "cp -fR ../etc $BUILD_NAME/"
+exec_cmd "wget $LISK_SCRIPTS_URL -O $LISK_SCRIPTS_FILE"
+exec_cmd "tar -zxvf $LISK_SCRIPTS_FILE"
+exec_cmd "cp -vf $LISK_SCRIPTS_DIR/packaged/* $BUILD_NAME"
 
 echo "Building node..."
 echo "--------------------------------------------------------------------------"
