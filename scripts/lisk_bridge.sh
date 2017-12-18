@@ -93,6 +93,8 @@ passphraseMigration() {
 	fi
 
 	"$JQ" ".forging.defaultKey += \"$master_password\"" "$LISK_CONFIG" > new_config.json
+	"$JQ" "del(.forging.secret)" new_config.json > new_config2.json
+	mv new_config2.json new_config.json
 	for i in $(seq 0 ${#secrets[@]}); do
 		temp=$(echo "${secrets[$i]}" | tr -d '\n' | openssl enc -aes-256-cbc -k "$master_password" -nosalt | od -A n -t x1)
 		temp=${temp// /}
