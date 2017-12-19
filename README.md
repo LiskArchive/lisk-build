@@ -2,7 +2,7 @@
 
 A binary package building tool for [Lisk](https://lisk.io/). Allows automated compilation of binary packages, with support for multiple posix-based operating systems.
 
-Please read [Installing Lisk (from Binaries)](https://github.com/LiskHQ/lisk-docs/blob/master/BinaryInstall.md) if you are merely looking to install Lisk onto an already supported operating system / architecture.
+Please read [how to install Lisk (from Binaries)](https://docs.lisk.io/docs/core-pre-installation-binary) if you are merely looking to install Lisk onto an already supported operating system / architecture.
 
 [![Build Status](https://travis-ci.org/LiskHQ/lisk-build.svg?branch=development)](https://travis-ci.org/LiskHQ/lisk-build)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
