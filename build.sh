@@ -135,8 +135,8 @@ fi
 if [ ! -d "$BUILD_NAME/node_modules" ]; then
 	exec_cmd "rm -rf $BUILD_NAME"
 	exec_cmd "tar -xf $VERSION.tar.gz"
-	exec_cmd "cp -Rf $VERSION $BUILD_NAME"
-	exec_cmd "cp -R $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
+	exec_cmd "cp -vRf $VERSION $BUILD_NAME"
+	exec_cmd "cp -vRf $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
 	exec_cmd "mkdir $BUILD_NAME/bin"
 	exec_cmd "mkdir $BUILD_NAME/lib"
 
@@ -196,7 +196,7 @@ if [ ! -f "$NODE_DIR/$NODE_OUT/bin/node" ] || [ ! -f "$NODE_DIR/$NODE_OUT/bin/np
 	exec_cmd "make install"
 	cd ../ || exit 2
 fi
-exec_cmd "cp -vR $NODE_DIR/$NODE_OUT/* $BUILD_NAME/"
+exec_cmd "cp -vRf $NODE_DIR/$NODE_OUT/* $BUILD_NAME/"
 exec_cmd "sed $SED_OPTS \"s%$(head -1 "$NPM_CLI")%#\!.\/bin\/node%g\" $NPM_CLI"
 
 cd "$BUILD_NAME" || exit 2
