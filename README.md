@@ -80,10 +80,10 @@ To build a package, perform the following on a machine matching your target arch
   bash build.sh -n NETWORK -v VERSION
   ```
 
-## Authors
+## Contributors
 
-- Isabella Dell <isabella@lightcurve.io>
-- Oliver Beddows <oliver@lightcurve.io>
+https://github.com/LiskHQ/lisk-build/graphs/contributors
+
 
 ## License
 
