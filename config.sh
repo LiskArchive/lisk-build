@@ -36,9 +36,13 @@ LISK_NETWORK="$LISK_NETWORK"
 LISK_URL="https://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
 
-NODE_DIR="node-v6.12.0"
+LISK_SCRIPTS_DIR="lisk-scripts-master"
+LISK_SCRIPTS_FILE="$LISK_SCRIPTS_DIR.tar.gz"
+LISK_SCRIPTS_URL="https://github.com/LiskHQ/lisk-scripts/archive/master.tar.gz"
+
+NODE_DIR="node-v6.12.2"
 NODE_FILE="$NODE_DIR.tar.gz"
-NODE_URL="https://nodejs.org/download/release/v6.12.0/$NODE_FILE"
+NODE_URL="https://nodejs.org/download/release/v6.12.2/$NODE_FILE"
 NODE_OUT="compiled"
 NODE_CONFIG=""
 
