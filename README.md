@@ -4,7 +4,7 @@ A binary package building tool for [Lisk](https://lisk.io/). Allows automated co
 
 Please read [how to install Lisk (from Binaries)](https://docs.lisk.io/docs/core-pre-installation-binary) if you are merely looking to install Lisk onto an already supported operating system / architecture.
 
-[![Build Status](https://travis-ci.org/LiskHQ/lisk-build.svg?branch=development)](https://travis-ci.org/LiskHQ/lisk-build)
+[![Build Status](https://jenkins.lisk.io/buildStatus/icon?job=lisk-build/development)](https://jenkins.lisk.io/job/lisk-build/job/development)
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 
 ## Platforms
