@@ -179,7 +179,7 @@ echo "Installing lisk-scripts..."
 echo "--------------------------------------------------------------------------"
 exec_cmd "wget $LISK_SCRIPTS_URL -O $LISK_SCRIPTS_FILE"
 exec_cmd "tar -zxvf $LISK_SCRIPTS_FILE"
-exec_cmd "cp -vf $LISK_SCRIPTS_DIR/packaged/* $BUILD_NAME"
+exec_cmd "cp -vRf $LISK_SCRIPTS_DIR/packaged/* $BUILD_NAME"
 
 echo "Building node..."
 echo "--------------------------------------------------------------------------"
