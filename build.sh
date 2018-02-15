@@ -134,7 +134,7 @@ if [ ! -f "$LISK_FILE" ]; then
 fi
 if [ ! -d "$BUILD_NAME/node_modules" ]; then
 	exec_cmd "rm -rf $BUILD_NAME"
-	exec_cmd "tar -xf lisk-$VERSION.tar.gz"
+	exec_cmd "tar -xf lisk-$VERSION.tgz"
 	exec_cmd "mv package $VERSION"
 	exec_cmd "cp -vRf $VERSION $BUILD_NAME"
 	exec_cmd "cp -vRf $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
