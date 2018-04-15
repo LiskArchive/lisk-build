@@ -40,7 +40,7 @@ LISK_SCRIPTS_DIR="lisk-scripts-master"
 LISK_SCRIPTS_FILE="$LISK_SCRIPTS_DIR.tar.gz"
 LISK_SCRIPTS_URL="https://github.com/LiskHQ/lisk-scripts/archive/master.tar.gz"
 
-NODE_VERSION="6.14.0"
+NODE_VERSION="6.14.1"
 NODE_DIR="node-v$NODE_VERSION"
 NODE_FILE="$NODE_DIR.tar.gz"
 NODE_URL="https://nodejs.org/download/release/v$NODE_VERSION/$NODE_FILE"
