@@ -151,9 +151,6 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
 	# Copy jq to binary folder
 	exec_cmd "cp -vf $JQ_DIR/$JQ_OUT $BUILD_NAME/bin/$JQ_OUT"
 
-	# Copy Libpq for use
-	exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
-
 	# Bundle libreadline6 and create symbolic links
 	if [ ! "$(uname -s)" == "Darwin" ]; then
 	exec_cmd "cp -vf $LIBREADLINE_DIR/shlib/lib*.so.* $BUILD_NAME/lib"
