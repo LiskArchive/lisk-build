@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#
 # LiskHQ/lisk-build
 # Copyright (C) 2017 Lisk Foundation
 #
@@ -133,9 +133,11 @@ if [ ! -f "$LISK_FILE" ]; then
 	exec_cmd "wget $LISK_URL -O $LISK_FILE"
 fi
 if [ ! -d "$BUILD_NAME/node_modules" ]; then
-	exec_cmd "rm -rf $BUILD_NAME"
-	exec_cmd "tar -xf $VERSION.tar.gz"
-	exec_cmd "cp -vRf $VERSION $BUILD_NAME"
+ 	if [ -d "$BUILD_NAME/node_modules" ]; then
+					exec_cmd "rm -rf $BUILD_NAME"
+	fi
+	exec_cmd "mkdir $BUILD_NAME"
+	exec_cmd "tar -xf $LISK_FILE --directory $BUILD_NAME"
 	exec_cmd "cp -vRf $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
 	exec_cmd "mkdir $BUILD_NAME/bin"
 	exec_cmd "mkdir $BUILD_NAME/lib"

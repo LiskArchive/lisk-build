@@ -1,5 +1,5 @@
 #!/bin/bash
-# 
+#
 # LiskHQ/lisk-build
 # Copyright (C) 2017 Lisk Foundation
 #
@@ -31,7 +31,7 @@ TARGET=""
 JOBS="2"
 
 LISK_DIR="$VERSION"
-LISK_FILE="$VERSION.tar.gz"
+LISK_FILE="${LISK_FILE:=$VERSION.tar.gz}"
 LISK_NETWORK="$LISK_NETWORK"
 LISK_URL="https://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
