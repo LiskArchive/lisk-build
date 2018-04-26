@@ -151,7 +151,6 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
 	# Copy jq to binary folder
 	exec_cmd "cp -vf $JQ_DIR/$JQ_OUT $BUILD_NAME/bin/$JQ_OUT"
 
-	# Bundle libreadline6 and create symbolic links
 	if [ ! "$(uname -s)" == "Darwin" ]; then
 	exec_cmd "cp -vf $LIBREADLINE_DIR/out/lib/* $BUILD_NAME/lib"
 	fi
