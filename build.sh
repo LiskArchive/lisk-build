@@ -189,7 +189,7 @@ if [ ! -f "$NODE_DIR/$NODE_OUT/bin/node" ] || [ ! -f "$NODE_DIR/$NODE_OUT/bin/np
 	cd ../ || exit 2
 fi
 exec_cmd "cp -vRf $NODE_DIR/$NODE_OUT/* $BUILD_NAME/"
-exec_cmd "sed $SED_OPTS \"s%$(head -1 "$NPM_CLI")%#\!.\/bin\/node%g\" $NPM_CLI"
+exec_cmd "sed $SED_OPTS \"s%$(head -1 "$NPM_CLI")%#\\!.\\/bin\\/node%g\" $NPM_CLI"
 
 cd "$BUILD_NAME" || exit 2
 
