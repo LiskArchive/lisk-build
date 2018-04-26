@@ -66,9 +66,9 @@ if [ ! -f "$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" ] && [ ! "$(uname -s)" == "D
 	exec_cmd "rm -rf $LIBREADLINE_DIR"
 	exec_cmd "tar -zxf $LIBREADLINE_FILE"
 	cd "$LIBREADLINE_DIR" || exit 2
-	exec_cmd "./configure"
+	exec_cmd "./configure --prefix=$(pwd)/out"
 	exec_cmd "make --jobs=$JOBS SHLIB_LIBS=-lcurses"
-	exec_cmd "sudo make install"
+	exec_cmd "make install"
 	cd ../ || exit 2
 fi
 
@@ -98,7 +98,7 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
 
 	# Configures make for libreadline7 on linux, without for Darwin
 	if [ ! "$(uname -s)" == "Darwin" ]; then
-		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libs=/usr/local/lib --with-includes=/usr/local/include"
+		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libs=../$LIBREADLINE_DIR/out/lib --with-includes=../$LIBREADLINE_DIR/out/include"
 	else
 		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT"
 	fi
@@ -151,16 +151,8 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
 	# Copy jq to binary folder
 	exec_cmd "cp -vf $JQ_DIR/$JQ_OUT $BUILD_NAME/bin/$JQ_OUT"
 
-	# Bundle libreadline6 and create symbolic links
 	if [ ! "$(uname -s)" == "Darwin" ]; then
-	exec_cmd "cp -vf $LIBREADLINE_DIR/shlib/lib*.so.* $BUILD_NAME/lib"
-	exec_cmd "cp -vf $LIBREADLINE_DIR/lib*.a $BUILD_NAME/lib"
-	cd "$(pwd)/$BUILD_NAME/lib" || exit 2
-	exec_cmd "ln -s $LIBREADLINE_OUT libreadline.so.7"
-	exec_cmd "ln -s libreadline.so.7 libreadline.so"
-	exec_cmd "ln -s $LIBREADLINE_HISTORY libhistory.so.7"
-	exec_cmd "ln -s libhistory.so.7 libhistory.so"
-	cd ../../ || exit 2
+	exec_cmd "cp -vf $LIBREADLINE_DIR/out/lib/* $BUILD_NAME/lib"
 	fi
 
 	cd "$BUILD_NAME" || exit 2
