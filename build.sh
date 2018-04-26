@@ -151,7 +151,6 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
 	# Copy Libpq for use
 	exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
 
-	# Bundle libreadline6 and create symbolic links
 	if [ ! "$(uname -s)" == "Darwin" ]; then
 	exec_cmd "cp -vf $LIBREADLINE_DIR/out/lib/* $BUILD_NAME/lib"
 	fi
