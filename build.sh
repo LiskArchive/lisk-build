@@ -149,14 +149,20 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
 	exec_cmd "cp -vf $JQ_DIR/$JQ_OUT $BUILD_NAME/bin/$JQ_OUT"
 
 	# Copy Libpq for use
-	exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
+	if [ "$(uname -s)" == "Darwin" ]; then
+		exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
+	fi
 
 	if [ ! "$(uname -s)" == "Darwin" ]; then
 	exec_cmd "cp -vf $LIBREADLINE_DIR/out/lib/* $BUILD_NAME/lib"
 	fi
 
 	cd "$BUILD_NAME" || exit 2
-	exec_cmd "npm install --production $LISK_CONFIG"
+	if [ "$(uname -s)" == "Darwin" ]; then
+		exec_cmd "npm install --production $LISK_CONFIG"
+	else
+		exec_cmd "LD_PRELOAD=$(pwd)/../$POSTGRESQL_DIR/$POSTGRESQL_OUT/lib/libpq.so PATH=$PATH:$(pwd)/../$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin npm install --production $LISK_CONFIG"
+	fi
 
 	if [[ "$(uname)" == "Linux" ]]; then
 	chrpath -d "$(pwd)/node_modules/sodium/deps/libsodium/test/default/.libs/"*

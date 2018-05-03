@@ -36,4 +36,4 @@ export NVM_DIR="/home/$USER/.nvm"
 # shellcheck source=/dev/null
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" # This loads nvm
 nvm install v6.12.2
-exec_cmd "sudo apt-get install -y autoconf automake build-essential curl chrpath git libreadline6-dev libtool zlib1g-dev libssl-dev libpq-dev nodejs python wget libncurses5-dev"
+exec_cmd "sudo apt-get install -y autoconf automake build-essential curl chrpath git libreadline6-dev libtool zlib1g-dev libssl-dev nodejs python wget libncurses5-dev"
