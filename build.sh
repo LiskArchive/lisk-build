@@ -98,12 +98,12 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
 
 	# Configures make for libreadline7 on linux, without for Darwin
 	if [ ! "$(uname -s)" == "Darwin" ]; then
-		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libs=../$LIBREADLINE_DIR/out/lib --with-includes=../$LIBREADLINE_DIR/out/include"
+		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libraries=../$LIBREADLINE_DIR/out/lib --with-includes=../$LIBREADLINE_DIR/out/include"
+		exec_cmd "LIBRARY_PATH=$PWD/../readline-master/out/lib/ make"
 	else
 		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT"
 	fi
 
-	exec_cmd "make --jobs=$JOBS"
 	exec_cmd "make install"
 
 	# Compiles the pgcrypto extension
