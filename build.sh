@@ -181,6 +181,7 @@ exec_cmd "jq .wsPort=9001 $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/
 exec_cmd "jq '.version=\"9.9.9\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
 exec_cmd "jq '.minVersion=\"9.9.9\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
 exec_cmd "jq '.logFileName=\"logs/lisk_snapshot.log\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "jq '.fileLogLevel=\"info\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
 exec_cmd "jq '.db.database=\"lisk_snapshot\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
 exec_cmd "jq .peers.list=[] $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
 exec_cmd "jq .loading.loadPerIteration=101 $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
