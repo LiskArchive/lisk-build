@@ -173,6 +173,18 @@ exec_cmd "wget $LISK_SCRIPTS_URL -O $LISK_SCRIPTS_FILE"
 exec_cmd "tar -zxvf $LISK_SCRIPTS_FILE"
 exec_cmd "cp -vRf $LISK_SCRIPTS_DIR/packaged/* $BUILD_NAME"
 
+echo "Creating $BUILD_NAME/etc/snapshot.json..."
+echo "--------------------------------------------------------------------------"
+exec_cmd "cp $BUILD_NAME/config.json $BUILD_NAME/etc/snapshot.json"
+exec_cmd "jq .httpPort=9000 $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "jq .wsPort=9001 $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "jq '.version=\"9.9.9\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "jq '.minVersion=\"9.9.9\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "jq '.logFileName=\"logs/lisk_snapshot.log\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "jq '.db.database=\"lisk_snapshot\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "jq .peers.list=[] $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "jq .loading.loadPerIteration=101 $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+
 echo "Building node..."
 echo "--------------------------------------------------------------------------"
 if [ ! -f "$NODE_FILE" ]; then
