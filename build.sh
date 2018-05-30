@@ -98,7 +98,8 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
 
 	# Configures make for libreadline7 on linux, without for Darwin
 	if [ ! "$(uname -s)" == "Darwin" ]; then
-		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libs=../$LIBREADLINE_DIR/out/lib --with-includes=../$LIBREADLINE_DIR/out/include"
+		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libraries=$(pwd)/../$LIBREADLINE_DIR/out/lib --with-includes=$(pwd)/../$LIBREADLINE_DIR/out/include"
+		exec_cmd "make"
 	else
 		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT"
 	fi
