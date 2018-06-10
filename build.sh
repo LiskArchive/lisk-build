@@ -104,7 +104,6 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
 		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT"
 	fi
 
-	exec_cmd "make --jobs=$JOBS"
 	exec_cmd "make install"
 
 	# Compiles the pgcrypto extension
