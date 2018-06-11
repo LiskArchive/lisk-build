@@ -16,33 +16,37 @@ Please read [how to install Lisk (from Binaries)](https://docs.lisk.io/docs/core
 
 ## Linux
 
+### Prerequisites
+
+The following packages must be installed to build releases with lisk-build:
+
+autoconf build-essential git curl wget libtool libncurses5-dev moreutils python libssl-dev zlib1g-dev
+
+nvm or some other node version manager must be used to build with the right version of node, which is currently v6.14.2
+
+This can be done with this one-liner:
+
+```
+sudo apt-get -y install curl; curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.0/install.sh | bash ; . ~/.bashrc ; nvm install v6.14.2 ; sudo apt-get install -y autoconf build-essential git wget libtool libncurses5-dev moreutils python libssl-dev zlib1g-dev
+```
+
+### How-To
+
 To build a package, perform the following on a machine matching your target architecture (e.g x86_64 or i686), that has a Debian/Ubuntu based operating system installed.
 
-1. Install `git` and `sudo`:
-
-  ```
-  sudo apt-get install git sudo
-  ```
-
-2. Clone repository:
+1. Clone repository:
 
   ```
   git clone https://github.com/LiskHQ/lisk-build.git
   ```
 
-3. Change into `lisk-build` directory:
+2. Change into `lisk-build` directory:
 
   ```
   cd lisk-build
   ```
 
-4. Install build toolchain:
-
-  ```
-  bash toolchains/install_linux.sh
-  ```
-
-5. Build package - Replace `NETWORK` with `test` or `main`, replace `VERSION` with specific version.
+3. Build package - Replace `NETWORK` with `test` or `main`, replace `VERSION` with specific version.
 
   ```
   bash build.sh -n NETWORK -v VERSION
