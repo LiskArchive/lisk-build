@@ -16,33 +16,41 @@ Please read [how to install Lisk (from Binaries)](https://docs.lisk.io/docs/core
 
 ## Linux
 
-To build a package, perform the following on a machine matching your target architecture (e.g x86_64 or i686), that has a Debian/Ubuntu based operating system installed.
+A Ubuntu Linux 14.04 LTS machine is assumed which should have `curl` and `sudo` preinstalled.
 
-1. Install `git` and `sudo`:
+### Prerequisites
 
-  ```
-  sudo apt-get install git sudo
-  ```
+The following packages must be installed to build releases with lisk-build:
 
-2. Clone repository:
+```
+sudo apt-get install autoconf automake build-essential chrpath git libncurses5-dev \
+                     libpq-dev libssl-dev libtool moreutils python wget zlib1g-dev
+```
+
+Additionally nodejs 6 must be installed:
+
+```
+curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -
+echo "deb https://deb.nodesource.com/node_6.x $(lsb_release -s -c) main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+sudo apt-get update
+sudo apt-get install nodejs
+```
+
+### How-To
+
+1. Clone repository:
 
   ```
   git clone https://github.com/LiskHQ/lisk-build.git
   ```
 
-3. Change into `lisk-build` directory:
+2. Change into `lisk-build` directory:
 
   ```
   cd lisk-build
   ```
 
-4. Install build toolchain:
-
-  ```
-  bash toolchains/install_linux.sh
-  ```
-
-5. Build package - Replace `NETWORK` with `test` or `main`, replace `VERSION` with specific version.
+3. Build package - Replace `NETWORK` with `test` or `main`, replace `VERSION` with specific version.
 
   ```
   bash build.sh -n NETWORK -v VERSION
