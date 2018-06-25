@@ -215,9 +215,9 @@ echo "--------------------------------------------------------------------------
 . "$(pwd)/env.sh"
 
 exec_cmd "npm install --global --production pm2"
-exec_cmd "npm install --global --production lisky"
+exec_cmd "npm install --global --production lisk-commander@beta"
 # Add symbolic link to lisky from root dir
-exec_cmd "ln -s ./bin/lisky lisky"
+exec_cmd "ln -s ./bin/lisk-commander lisk-commander"
 cd ../ || exit 2
 
 echo "Stamping build..."
