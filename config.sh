@@ -38,7 +38,7 @@ LISK_CONFIG=""
 
 LISK_SCRIPTS_DIR="lisk-scripts-0.2.0"
 LISK_SCRIPTS_FILE="$LISK_SCRIPTS_DIR.tar.gz"
-LISK_SCRIPTS_URL="https://github.com/LiskHQ/lisk-scripts/archive/0.2.0.tar.gz"
+LISK_SCRIPTS_URL="https://github.com/LiskHQ/lisk-scripts/archive/v0.2.0.tar.gz"
 
 NODE_VERSION="6.14.1"
 NODE_DIR="node-v$NODE_VERSION"
