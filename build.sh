@@ -173,6 +173,10 @@ exec_cmd "wget $LISK_SCRIPTS_URL -O $LISK_SCRIPTS_FILE"
 exec_cmd "tar -zxvf $LISK_SCRIPTS_FILE"
 exec_cmd "cp -vRf $LISK_SCRIPTS_DIR/packaged/* $BUILD_NAME"
 
+echo "Setting LISK_NETWORK in $BUILD_NAME/env.sh..."
+echo "--------------------------------------------------------------------------"
+exec_cmd "echo export LISK_NETWORK=$LISK_NETWORK >>$BUILD_NAME/env.sh"
+
 echo "Setting database user in $BUILD_NAME/config.json..."
 echo "--------------------------------------------------------------------------"
 exec_cmd "$BUILD_NAME/bin/$JQ_OUT '.db.user=\"lisk\"' $BUILD_NAME/config.json |sponge $BUILD_NAME/config.json"
