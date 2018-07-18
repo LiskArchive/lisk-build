@@ -175,7 +175,7 @@ exec_cmd "cp -vRf $LISK_SCRIPTS_DIR/packaged/* $BUILD_NAME"
 
 echo "Setting LISK_NETWORK in $BUILD_NAME/env.sh..."
 echo "--------------------------------------------------------------------------"
-exec_cmd "echo export LISK_NETWORK=$LISK_NETWORK >>$BUILD_NAME/env.sh"
+exec_cmd "echo 'export LISK_NETWORK=${LISK_NETWORK}net' >>$BUILD_NAME/env.sh"
 
 echo "Setting database user in $BUILD_NAME/config.json..."
 echo "--------------------------------------------------------------------------"
