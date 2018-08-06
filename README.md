@@ -36,7 +36,22 @@ sudo apt-get update
 sudo apt-get install nodejs
 ```
 
-### How-To
+## Darwin
+
+### Prerequisites
+
+[Xcode](https://developer.apple.com/xcode/) developer tools.
+[Homebrew](https://docs.brew.sh/installation/).
+
+The following packages must be installed to build releases with lisk-build:
+
+```
+brew install autoconf automake bison git libtool moreutils node@6 wget
+brew link --force bison
+brew link --force node@6
+```
+
+## How-To
 
 1. Clone repository:
 
@@ -51,38 +66,6 @@ sudo apt-get install nodejs
   ```
 
 3. Build package - Replace `NETWORK` with `test` or `main`, replace `VERSION` with specific version.
-
-  ```
-  bash build.sh -n NETWORK -v VERSION
-  ```
-
-## Darwin
-
-1. Install [Xcode](https://developer.apple.com/xcode/) developer tools:
-
-  ```
-  https://developer.apple.com/xcode/
-  ```
-
-2. Clone repository:
-
-  ```
-  git clone https://github.com/LiskHQ/lisk-build.git
-  ```
-
-3. Change into `lisk-build` directory:
-
-  ```
-  cd lisk-build
-  ```
-
-4. Install build toolchain:
-
-  ```
-  bash toolchains/install_darwin.sh
-  ```
-
-5. Build package - Replace `NETWORK` with `test` or `main`, replace `VERSION` with specific version.
 
   ```
   bash build.sh -n NETWORK -v VERSION
