@@ -10,7 +10,6 @@ Please read [how to install Lisk (from Binaries)](https://docs.lisk.io/docs/core
 ## Platforms
 
 - [Linux (native)](#linux)
-- [Darwin (native)](#darwin)
 
 **NOTE:** For each platform, the resulting packages are placed within the `src` directory, using the following naming convention: `lisk-{version}-{os}-{architecture}.tar.gz`.
 
@@ -51,38 +50,6 @@ sudo apt-get install nodejs
   ```
 
 3. Build package - Replace `NETWORK` with `test` or `main`, replace `VERSION` with specific version.
-
-  ```
-  bash build.sh -n NETWORK -v VERSION
-  ```
-
-## Darwin
-
-1. Install [Xcode](https://developer.apple.com/xcode/) developer tools:
-
-  ```
-  https://developer.apple.com/xcode/
-  ```
-
-2. Clone repository:
-
-  ```
-  git clone https://github.com/LiskHQ/lisk-build.git
-  ```
-
-3. Change into `lisk-build` directory:
-
-  ```
-  cd lisk-build
-  ```
-
-4. Install build toolchain:
-
-  ```
-  bash toolchains/install_darwin.sh
-  ```
-
-5. Build package - Replace `NETWORK` with `test` or `main`, replace `VERSION` with specific version.
 
   ```
   bash build.sh -n NETWORK -v VERSION
