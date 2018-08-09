@@ -59,10 +59,10 @@ cd src || exit 2
 
 echo "Building libreadline7"
 echo "--------------------------------------------------------------------------"
-if [ ! -f "$LIBREADLINE_FILE" ] && [ ! "$(uname -s)" == "Darwin" ]; then
+if [ ! -f "$LIBREADLINE_FILE" ]; then
 	exec_cmd "wget $LIBREADLINE_URL -O $LIBREADLINE_FILE"
 fi
-if [ ! -f "$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" ] && [ ! "$(uname -s)" == "Darwin" ]; then
+if [ ! -f "$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" ]; then
 	exec_cmd "rm -rf $LIBREADLINE_DIR"
 	exec_cmd "tar -zxf $LIBREADLINE_FILE"
 	cd "$LIBREADLINE_DIR" || exit 2
@@ -96,14 +96,7 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
 	exec_cmd "tar -zxf $POSTGRESQL_FILE"
 	cd "$POSTGRESQL_DIR" || exit 2
 
-	# Configures make for libreadline7 on linux, without for Darwin
-	if [ ! "$(uname -s)" == "Darwin" ]; then
-		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libraries=$(pwd)/../$LIBREADLINE_DIR/out/lib --with-includes=$(pwd)/../$LIBREADLINE_DIR/out/include"
-		exec_cmd "make"
-	else
-		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT"
-	fi
-
+	exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libraries=$(pwd)/../$LIBREADLINE_DIR/out/lib --with-includes=$(pwd)/../$LIBREADLINE_DIR/out/include"
 	exec_cmd "make install"
 
 	# Compiles the pgcrypto extension
@@ -151,9 +144,7 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
 	# Copy jq to binary folder
 	exec_cmd "cp -vf $JQ_DIR/$JQ_OUT $BUILD_NAME/bin/$JQ_OUT"
 
-	if [ ! "$(uname -s)" == "Darwin" ]; then
 	exec_cmd "cp -vf $LIBREADLINE_DIR/out/lib/* $BUILD_NAME/lib"
-	fi
 
 	cd "$BUILD_NAME" || exit 2
 	exec_cmd "npm install --production $LISK_CONFIG"
@@ -209,7 +200,7 @@ if [ ! -f "$NODE_DIR/$NODE_OUT/bin/node" ] || [ ! -f "$NODE_DIR/$NODE_OUT/bin/np
 	cd ../ || exit 2
 fi
 exec_cmd "cp -vRf $NODE_DIR/$NODE_OUT/* $BUILD_NAME/"
-exec_cmd "sed $SED_OPTS \"s%$(head -1 "$NPM_CLI")%#\\!.\\/bin\\/node%g\" $NPM_CLI"
+exec_cmd "sed -i \"s%$(head -1 "$NPM_CLI")%#\\!.\\/bin\\/node%g\" $NPM_CLI"
 
 cd "$BUILD_NAME" || exit 2
 
@@ -242,9 +233,9 @@ exec_cmd "GZIP=-6 tar -czf ../release/lisk-source.tar.gz lisk-source"
 echo "Checksumming archives..."
 echo "--------------------------------------------------------------------------"
 cd ../release || exit 2
-exec_cmd "$SHA_CMD $BUILD_NAME.tar.gz > $BUILD_NAME.tar.gz.SHA256"
-exec_cmd "$SHA_CMD $NOVER_BUILD_NAME.tar.gz > $NOVER_BUILD_NAME.tar.gz.SHA256"
-exec_cmd "$SHA_CMD lisk-source.tar.gz > lisk-source.tar.gz.SHA256"
+exec_cmd "sha256sum $BUILD_NAME.tar.gz > $BUILD_NAME.tar.gz.SHA256"
+exec_cmd "sha256sum $NOVER_BUILD_NAME.tar.gz > $NOVER_BUILD_NAME.tar.gz.SHA256"
+exec_cmd "sha256sum lisk-source.tar.gz > lisk-source.tar.gz.SHA256"
 cd ../src || exit 2
 
 echo "Cleaning up..."
