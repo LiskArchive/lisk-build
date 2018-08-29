@@ -59,10 +59,10 @@ cd src || exit 2
 
 echo "Building libreadline7"
 echo "--------------------------------------------------------------------------"
-if [ ! -f "$LIBREADLINE_FILE" ] && [ ! "$(uname -s)" == "Darwin" ]; then
+if [ ! -f "$LIBREADLINE_FILE" ]; then
 	exec_cmd "wget $LIBREADLINE_URL -O $LIBREADLINE_FILE"
 fi
-if [ ! -f "$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" ] && [ ! "$(uname -s)" == "Darwin" ]; then
+if [ ! -f "$LIBREADLINE_DIR/shlib/$LIBREADLINE_OUT" ]; then
 	exec_cmd "rm -rf $LIBREADLINE_DIR"
 	exec_cmd "tar -zxf $LIBREADLINE_FILE"
 	cd "$LIBREADLINE_DIR" || exit 2
@@ -96,14 +96,7 @@ if [ ! -f "$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin/psql" ]; then
 	exec_cmd "tar -zxf $POSTGRESQL_FILE"
 	cd "$POSTGRESQL_DIR" || exit 2
 
-	# Configures make for libreadline7 on linux, without for Darwin
-	if [ ! "$(uname -s)" == "Darwin" ]; then
-		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libraries=$(pwd)/../$LIBREADLINE_DIR/out/lib --with-includes=$(pwd)/../$LIBREADLINE_DIR/out/include"
-		exec_cmd "make"
-	else
-		exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT"
-	fi
-
+	exec_cmd "./configure --prefix=$(pwd)/$POSTGRESQL_OUT --with-libraries=$(pwd)/../$LIBREADLINE_DIR/out/lib --with-includes=$(pwd)/../$LIBREADLINE_DIR/out/include"
 	exec_cmd "make install"
 
 	# Compiles the pgcrypto extension
@@ -134,7 +127,10 @@ if [ ! -f "$LISK_FILE" ]; then
 fi
 if [ ! -d "$BUILD_NAME/node_modules" ]; then
 	exec_cmd "rm -rf $BUILD_NAME"
-	exec_cmd "tar -xf $VERSION.tar.gz"
+	exec_cmd "tar -xf lisk-$VERSION.tgz"
+	exec_cmd "mkdir package/logs"
+	exec_cmd "mkdir package/pids"
+	exec_cmd "mv package $VERSION"
 	exec_cmd "cp -vRf $VERSION $BUILD_NAME"
 	exec_cmd "cp -vRf $POSTGRESQL_DIR/$POSTGRESQL_OUT $BUILD_NAME/"
 	exec_cmd "mkdir $BUILD_NAME/bin"
@@ -148,21 +144,10 @@ if [ ! -d "$BUILD_NAME/node_modules" ]; then
 	# Copy jq to binary folder
 	exec_cmd "cp -vf $JQ_DIR/$JQ_OUT $BUILD_NAME/bin/$JQ_OUT"
 
-	# Copy Libpq for use
-	if [ "$(uname -s)" == "Darwin" ]; then
-		exec_cmd "sudo cp -v $BUILD_NAME/pgsql/lib/libpq.* /usr/lib"
-	fi
-
-	if [ ! "$(uname -s)" == "Darwin" ]; then
 	exec_cmd "cp -vf $LIBREADLINE_DIR/out/lib/* $BUILD_NAME/lib"
-	fi
 
 	cd "$BUILD_NAME" || exit 2
-	if [ "$(uname -s)" == "Darwin" ]; then
-		exec_cmd "npm install --production $LISK_CONFIG"
-	else
-		exec_cmd "LD_PRELOAD=$(pwd)/../$POSTGRESQL_DIR/$POSTGRESQL_OUT/lib/libpq.so PATH=$PATH:$(pwd)/../$POSTGRESQL_DIR/$POSTGRESQL_OUT/bin npm install --production $LISK_CONFIG"
-	fi
+	exec_cmd "npm install --production $LISK_CONFIG"
 
 	if [[ "$(uname)" == "Linux" ]]; then
 	chrpath -d "$(pwd)/node_modules/sodium/deps/libsodium/test/default/.libs/"*
@@ -178,6 +163,22 @@ echo "--------------------------------------------------------------------------
 exec_cmd "wget $LISK_SCRIPTS_URL -O $LISK_SCRIPTS_FILE"
 exec_cmd "tar -zxvf $LISK_SCRIPTS_FILE"
 exec_cmd "cp -vRf $LISK_SCRIPTS_DIR/packaged/* $BUILD_NAME"
+
+echo "Setting database user in $BUILD_NAME/config.json..."
+echo "--------------------------------------------------------------------------"
+exec_cmd "$BUILD_NAME/bin/$JQ_OUT '.db.user=\"lisk\"' $BUILD_NAME/config.json |sponge $BUILD_NAME/config.json"
+echo "Creating $BUILD_NAME/etc/snapshot.json..."
+echo "--------------------------------------------------------------------------"
+exec_cmd "cp $BUILD_NAME/config.json $BUILD_NAME/etc/snapshot.json"
+exec_cmd "$BUILD_NAME/bin/$JQ_OUT .httpPort=9000 $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "$BUILD_NAME/bin/$JQ_OUT .wsPort=9001 $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "$BUILD_NAME/bin/$JQ_OUT '.version=\"9.9.9\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "$BUILD_NAME/bin/$JQ_OUT '.minVersion=\"9.9.9\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "$BUILD_NAME/bin/$JQ_OUT '.logFileName=\"logs/lisk_snapshot.log\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "$BUILD_NAME/bin/$JQ_OUT '.fileLogLevel=\"info\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "$BUILD_NAME/bin/$JQ_OUT '.db.database=\"lisk_snapshot\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "$BUILD_NAME/bin/$JQ_OUT .peers.list=[] $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
+exec_cmd "$BUILD_NAME/bin/$JQ_OUT .loading.loadPerIteration=101 $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
 
 echo "Building node..."
 echo "--------------------------------------------------------------------------"
@@ -195,7 +196,7 @@ if [ ! -f "$NODE_DIR/$NODE_OUT/bin/node" ] || [ ! -f "$NODE_DIR/$NODE_OUT/bin/np
 	cd ../ || exit 2
 fi
 exec_cmd "cp -vRf $NODE_DIR/$NODE_OUT/* $BUILD_NAME/"
-exec_cmd "sed $SED_OPTS \"s%$(head -1 "$NPM_CLI")%#\\!.\\/bin\\/node%g\" $NPM_CLI"
+exec_cmd "sed -i \"s%$(head -1 "$NPM_CLI")%#\\!.\\/bin\\/node%g\" $NPM_CLI"
 
 cd "$BUILD_NAME" || exit 2
 
@@ -205,9 +206,7 @@ echo "--------------------------------------------------------------------------
 . "$(pwd)/env.sh"
 
 exec_cmd "npm install --global --production pm2"
-exec_cmd "npm install --global --production lisky"
-# Add symbolic link to lisky from root dir
-exec_cmd "ln -s ./bin/lisky lisky"
+exec_cmd "npm install --global --production lisk-commander@1.0.0-rc.0"
 cd ../ || exit 2
 
 echo "Stamping build..."
@@ -230,9 +229,9 @@ exec_cmd "GZIP=-6 tar -czf ../release/lisk-source.tar.gz lisk-source"
 echo "Checksumming archives..."
 echo "--------------------------------------------------------------------------"
 cd ../release || exit 2
-exec_cmd "$SHA_CMD $BUILD_NAME.tar.gz > $BUILD_NAME.tar.gz.SHA256"
-exec_cmd "$SHA_CMD $NOVER_BUILD_NAME.tar.gz > $NOVER_BUILD_NAME.tar.gz.SHA256"
-exec_cmd "$SHA_CMD lisk-source.tar.gz > lisk-source.tar.gz.SHA256"
+exec_cmd "sha256sum $BUILD_NAME.tar.gz > $BUILD_NAME.tar.gz.SHA256"
+exec_cmd "sha256sum $NOVER_BUILD_NAME.tar.gz > $NOVER_BUILD_NAME.tar.gz.SHA256"
+exec_cmd "sha256sum lisk-source.tar.gz > lisk-source.tar.gz.SHA256"
 cd ../src || exit 2
 
 echo "Cleaning up..."

@@ -31,24 +31,26 @@ TARGET=""
 JOBS="2"
 
 LISK_DIR="$VERSION"
-LISK_FILE="$VERSION.tar.gz"
+LISK_FILE="lisk-$VERSION.tgz"
 LISK_NETWORK="$LISK_NETWORK"
 LISK_URL="https://downloads.lisk.io/lisk/$LISK_NETWORK/$VERSION/$LISK_FILE"
 LISK_CONFIG=""
 
-LISK_SCRIPTS_DIR="lisk-scripts-master"
+LISK_SCRIPTS_DIR="lisk-scripts-0.2.4"
 LISK_SCRIPTS_FILE="$LISK_SCRIPTS_DIR.tar.gz"
-LISK_SCRIPTS_URL="https://github.com/LiskHQ/lisk-scripts/archive/master.tar.gz"
+LISK_SCRIPTS_URL="https://github.com/LiskHQ/lisk-scripts/archive/v0.2.4.tar.gz"
 
-NODE_DIR="node-v6.12.3"
+NODE_VERSION="6.14.1"
+NODE_DIR="node-v$NODE_VERSION"
 NODE_FILE="$NODE_DIR.tar.gz"
-NODE_URL="https://nodejs.org/download/release/v6.12.3/$NODE_FILE"
+NODE_URL="https://nodejs.org/download/release/v$NODE_VERSION/$NODE_FILE"
 NODE_OUT="compiled"
 NODE_CONFIG=""
 
-POSTGRESQL_DIR="postgresql-9.6.8"
+POSTGRESQL_VERSION="9.6.10"
+POSTGRESQL_DIR="postgresql-$POSTGRESQL_VERSION"
 POSTGRESQL_FILE="$POSTGRESQL_DIR.tar.gz"
-POSTGRESQL_URL="https://ftp.postgresql.org/pub/source/v9.6.8/$POSTGRESQL_FILE"
+POSTGRESQL_URL="https://ftp.postgresql.org/pub/source/v$POSTGRESQL_VERSION/$POSTGRESQL_FILE"
 POSTGRESQL_OUT="pgsql"
 
 SODIUM_DIR="libsodium-1.0.11"
@@ -78,22 +80,8 @@ JQ_DIR="jq-$JQ_VERSION"
 JQ_FILE="$JQ_DIR.tar.gz"
 JQ_URL="https://github.com/stedolan/jq/releases/download/jq-$JQ_VERSION/$JQ_FILE"
 JQ_OUT="jq"
-JQ_CONFIG=""
 
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
-
-if [ "$(uname -s)" == "Darwin" ]; then
-	SED_OPTS="-i ''"
-else
-	SED_OPTS="-i"
-fi
-
-if [ "$(uname -s)" == "Darwin" ]; then
-	SHA_CMD="shasum -a 256"
-	JQ_CONFIG='LDFLAGS="-L/usr/local/opt/bison/lib" --disable-maintainer-mode'
-else
-	SHA_CMD="sha256sum"
-fi
 
 if [ "$TARGET" != "" ]; then
 	export CC="${TARGET}-gcc"
