@@ -176,8 +176,6 @@ echo "--------------------------------------------------------------------------
 exec_cmd "cp $BUILD_NAME/config.json $BUILD_NAME/etc/snapshot.json"
 exec_cmd "$BUILD_NAME/bin/$JQ_OUT .httpPort=9000 $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
 exec_cmd "$BUILD_NAME/bin/$JQ_OUT .wsPort=9001 $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
-exec_cmd "$BUILD_NAME/bin/$JQ_OUT '.version=\"9.9.9\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
-exec_cmd "$BUILD_NAME/bin/$JQ_OUT '.minVersion=\"9.9.9\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
 exec_cmd "$BUILD_NAME/bin/$JQ_OUT '.logFileName=\"logs/lisk_snapshot.log\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
 exec_cmd "$BUILD_NAME/bin/$JQ_OUT '.fileLogLevel=\"info\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
 exec_cmd "$BUILD_NAME/bin/$JQ_OUT '.db.database=\"lisk_snapshot\"' $BUILD_NAME/etc/snapshot.json |sponge $BUILD_NAME/etc/snapshot.json"
