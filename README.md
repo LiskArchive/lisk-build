@@ -15,24 +15,19 @@ Please read [how to install Lisk (from Binaries)](https://docs.lisk.io/docs/core
 
 ## Linux
 
-A Ubuntu Linux 14.04 LTS machine is assumed which should have `curl` and `sudo` preinstalled.
+A Ubuntu Linux 14.04.5 LTS (base install) machine is assumed.
 
 ### Prerequisites
 
 The following packages must be installed to build releases with lisk-build:
 
 ```
-sudo apt-get install autoconf automake build-essential chrpath git libncurses5-dev \
-                     libpq-dev libssl-dev libtool moreutils python wget zlib1g-dev
+sudo apt-get install build-essential autoconf libtool zlib1g-dev tcl8.5 moreutils
 ```
 
-Additionally nodejs 6 must be installed:
-
+Additionally git is required to clone this repository:
 ```
-curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add -
-echo "deb https://deb.nodesource.com/node_6.x $(lsb_release -s -c) main" | sudo tee /etc/apt/sources.list.d/nodesource.list
-sudo apt-get update
-sudo apt-get install nodejs
+sudo apt-get install git
 ```
 
 ### How-To
