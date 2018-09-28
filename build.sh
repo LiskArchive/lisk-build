@@ -21,13 +21,15 @@ IFS=$'\n\t'
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
 
+CLEAN=false
 OPTIND=1
-while getopts "v:n:" OPT; do
+while getopts "cn:v:" OPT; do
 	case "$OPT" in
-		v ) export VERSION="$OPTARG";;
-		n ) export LISK_NETWORK="$OPTARG";;
-		: ) echo 'Missing option argument for -'"$OPTARG" >&2; exit 1;;
-		* ) echo 'Unimplemented option: -'"$OPTARG" >&2; exit 1;;
+		c) CLEAN=true;;
+		n) LISK_NETWORK="$OPTARG";;
+		v) VERSION="$OPTARG";;
+		:) echo 'Missing option argument for -'"$OPTARG" >&2; exit 1;;
+		*) echo 'Unimplemented option: -'"$OPTARG" >&2; exit 1;;
 	esac
 done
 
@@ -38,10 +40,13 @@ else
 	exit 1
 fi
 
-# shellcheck source=./shared.sh
-. "$(pwd)/shared.sh"
 # shellcheck source=./config.sh
 . "$(pwd)/config.sh"
+
+if [[ "$CLEAN" == true ]]; then
+	echo "Cleaning build."
+	rm -rf "src/$BUILD_NAME"
+fi
 
 ################################################################################
 
