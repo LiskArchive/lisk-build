@@ -57,7 +57,8 @@ if [ ! -f "$LISK_FILE" ]; then
 	exit 2
 fi
 
-echo "Building jq"
+echo
+echo "Downloading and building jq..."
 echo "--------------------------------------------------------------------------"
 [[ -f "$JQ_FILE" ]] || wget -nv "$JQ_URL" --output-document="$JQ_FILE"
 echo "$JQ_SHA256SUM  $JQ_FILE" |sha256sum -c
@@ -75,7 +76,8 @@ if [ ! -f "$JQ_DIR/finished" ]; then
 	popd
 fi
 
-echo "Building Redis-Server"
+echo
+echo "Downloading and building redis..."
 echo "--------------------------------------------------------------------------"
 [[ -f "$REDIS_SERVER_FILE" ]] || wget -nv "$REDIS_SERVER_URL" --output-document="$REDIS_SERVER_FILE"
 echo "$REDIS_SHA256SUM  $REDIS_SERVER_FILE" |sha256sum -c
@@ -89,7 +91,8 @@ if [ ! -f "$REDIS_SERVER_DIR/finished" ]; then
 	popd
 fi
 
-echo "Building postgresql..."
+echo
+echo "Downloading and building postgresql..."
 echo "--------------------------------------------------------------------------"
 [[ -f "$POSTGRESQL_FILE" ]] || wget -nv "$POSTGRESQL_URL" --output-document="$POSTGRESQL_FILE"
 echo "$POSTGRESQL_SHA256SUM  $POSTGRESQL_FILE" |sha256sum -c
@@ -109,23 +112,13 @@ if [ ! -f "$POSTGRESQL_DIR/finished" ]; then
 	popd
 fi
 
-echo "Building node..."
+echo
+echo "Downloading node..."
 echo "--------------------------------------------------------------------------"
-[[ -f "$NODE_FILE" ]] || wget -nv "$NODE_URL" --output-document="$NODE_FILE"
+[[ -f "$NODE_FILE" ]] || wget -nv "$NODE_BIN_URL" --output-document="$NODE_FILE"
 echo "$NODE_SHA256SUM  $NODE_FILE" |sha256sum -c
-if [ ! -f "$NODE_DIR/finished" ]; then
-	rm -rf $NODE_DIR
-	tar xf $NODE_FILE
-	pushd "$NODE_DIR"
-	./configure --prefix="$(pwd)/compiled"
-	make install
-	# https://github.com/nodejs/node/issues/6408
-	#make check
-	rm -rf "$NODE_OUT/"{include,share}
-	touch finished
-	popd
-fi
 
+echo
 echo "Installing lisk-scripts..."
 echo "--------------------------------------------------------------------------"
 [[ -f "$LISK_SCRIPTS_FILE" ]] || wget -nv "$LISK_SCRIPTS_URL" --output-document="$LISK_SCRIPTS_FILE"
@@ -136,6 +129,7 @@ if [ ! -f "$LISK_SCRIPTS_DIR/finished" ]; then
 	touch "$LISK_SCRIPTS_DIR/finished"
 fi
 
+echo
 echo "Building lisk..."
 echo "--------------------------------------------------------------------------"
 if [ ! -f "$BUILD_NAME/finished" ]; then
@@ -157,8 +151,8 @@ if [ ! -f "$BUILD_NAME/finished" ]; then
 	# copy lisk "packaged" scripts
 	cp -vrf "$LISK_SCRIPTS_DIR/packaged/"* "$BUILD_NAME"
 
-	# copy nodejs files
-	cp -rf "$NODE_DIR/$NODE_OUT/"* "$BUILD_NAME"
+	# extract nodejs
+	tar xf "$NODE_FILE" --strip-components=1 --directory="$BUILD_NAME"
 
 	pushd "$BUILD_NAME"
 
@@ -195,15 +189,21 @@ if [ ! -f "$BUILD_NAME/finished" ]; then
 	popd
 fi
 
-echo "Creating tabralls..."
+echo
+echo "Creating tarballs..."
 echo "--------------------------------------------------------------------------"
-[[ -f "../release/$BUILD_NAME.tar.gz" ]] || tar czf "../release/$BUILD_NAME.tar.gz" "$BUILD_NAME"
-[[ -d "$NOVER_BUILD_NAME" ]] || cp -rl "$BUILD_NAME" "$NOVER_BUILD_NAME"
-[[ -f "../release/$NOVER_BUILD_NAME.tar.gz" ]] || tar czf "../release/$NOVER_BUILD_NAME.tar.gz" "$NOVER_BUILD_NAME"
-echo "Checksumming tarballs..."
+rm -rf ../release/*
+tar czf "../release/$BUILD_NAME.tar.gz" "$BUILD_NAME"
+# TODO: will fail on xenial (coreutils 8.25) if there are dangling symlinks
+cp -rl "$BUILD_NAME" "$NOVER_BUILD_NAME"
+tar czf "../release/$NOVER_BUILD_NAME.tar.gz" "$NOVER_BUILD_NAME"
+rm -rf "$NOVER_BUILD_NAME"
+
+echo
+echo "Creating checksums of tarballs..."
 echo "--------------------------------------------------------------------------"
 pushd ../release
-[[ -f "$BUILD_NAME.tar.gz.SHA256" ]] || sha256sum "$BUILD_NAME.tar.gz" >"$BUILD_NAME.tar.gz.SHA256"
-[[ -f "$NOVER_BUILD_NAME.tar.gz.SHA256" ]] || sha256sum "$NOVER_BUILD_NAME.tar.gz" >"$NOVER_BUILD_NAME.tar.gz.SHA256"
+sha256sum "$BUILD_NAME.tar.gz" >"$BUILD_NAME.tar.gz.SHA256"
+sha256sum "$NOVER_BUILD_NAME.tar.gz" >"$NOVER_BUILD_NAME.tar.gz.SHA256"
 popd
 popd
