@@ -92,25 +92,10 @@ if [ ! -f "$REDIS_SERVER_DIR/finished" ]; then
 fi
 
 echo
-echo "Downloading and building postgresql..."
+echo "Downloading postgresql..."
 echo "--------------------------------------------------------------------------"
-[[ -f "$POSTGRESQL_FILE" ]] || wget -nv "$POSTGRESQL_URL" --output-document="$POSTGRESQL_FILE"
+[[ -f "$POSTGRESQL_FILE" ]] || wget -nv "$POSTGRESQL_BIN_URL" --output-document="$POSTGRESQL_FILE"
 echo "$POSTGRESQL_SHA256SUM  $POSTGRESQL_FILE" |sha256sum -c
-if [ ! -f "$POSTGRESQL_DIR/finished" ]; then
-	rm -rf "$POSTGRESQL_DIR"
-	tar xf "$POSTGRESQL_FILE"
-	pushd "$POSTGRESQL_DIR"
-	./configure --prefix="$(pwd)/$POSTGRESQL_OUT" --without-readline
-	make install
-	make check
-	# Compiles the pgcrypto extension
-	pushd contrib/pgcrypto
-	make install
-	make check
-	popd
-	touch finished
-	popd
-fi
 
 echo
 echo "Downloading node..."
@@ -138,8 +123,9 @@ if [ ! -f "$BUILD_NAME/finished" ]; then
 	mv package "$BUILD_NAME"
 	mkdir -p "$BUILD_NAME"/{bin,lib,logs,pids}
 
-	# copy postgresql files
-	cp -rf "$POSTGRESQL_DIR/$POSTGRESQL_OUT" "$BUILD_NAME/"
+	# extract postgresql
+	tar xf "$POSTGRESQL_FILE" --directory="$BUILD_NAME" \
+	    --exclude=doc --exclude=include --exclude="pgAdmin 4" --exclude=stackbuilder
 
 	# copy redis binaries
 	cp -f "$REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT" "$BUILD_NAME/bin/$REDIS_SERVER_OUT"
@@ -175,17 +161,20 @@ if [ ! -f "$BUILD_NAME/finished" ]; then
 	"./bin/$JQ_OUT" '.peers.list=[]' etc/snapshot.json |sponge etc/snapshot.json
 	"./bin/$JQ_OUT" '.loading.loadPerIteration=101' etc/snapshot.json |sponge etc/snapshot.json
 
-	echo "Installing PM2 and Lisky..."
+	echo "Installing lisk..."
 	echo "--------------------------------------------------------------------------"
 	set +u
 	# shellcheck disable=SC1090
 	. "$(pwd)/env.sh"
 	set -u
 	npm install --production
+
+	echo "Installing pm2 and lisk-commander..."
+	echo "--------------------------------------------------------------------------"
 	npm install --production --global "pm2@$PM2_VERSION"
 	npm install --production --global "lisk-commander@$LISK_COMMANDER_VERSION"
 
-	touch finished
+	date >finished
 	popd
 fi
 
