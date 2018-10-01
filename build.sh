@@ -52,8 +52,9 @@ fi
 
 # Requirements for Ubuntu 14.04.5 LTS base install:
 # apt-get install build-essential autoconf libtool zlib1g-dev \
-#     tcl8.5 \  # redis tests
-#     moreutils  # used below
+#     valgrind \  # jq tests
+#     tcl8.5 \    # redis tests
+#     moreutils   # used below
 
 pushd src
 
@@ -71,11 +72,12 @@ if [ ! -f "$JQ_DIR/finished" ]; then
 	rm -rf $JQ_DIR
 	tar xf $JQ_FILE
 	pushd "$JQ_DIR"
-	# TODO: ensure oniguruma is not installed
 	./configure --disable-docs
+	# ensure oniguruma is not used
+	grep --quiet 'ac_cv_header_oniguruma_h=no' config.log
 	make
 	# https://github.com/stedolan/jq/issues/1091
-	sed --in-place '/ tests\/onigtest/d' Makefile
+	sed --in-place 's# tests/onigtest##' Makefile
 	make check
 	touch finished
 	popd
