@@ -21,13 +21,15 @@ IFS=$'\n\t'
 
 cd "$(cd -P -- "$(dirname -- "$0")" && pwd -P)" || exit 2
 
+CLEAN=false
 OPTIND=1
-while getopts "v:n:" OPT; do
+while getopts "cn:v:" OPT; do
 	case "$OPT" in
-		v ) export VERSION="$OPTARG";;
-		n ) export LISK_NETWORK="$OPTARG";;
-		: ) echo 'Missing option argument for -'"$OPTARG" >&2; exit 1;;
-		* ) echo 'Unimplemented option: -'"$OPTARG" >&2; exit 1;;
+		c) CLEAN=true;;
+		n) LISK_NETWORK="$OPTARG";;
+		v) VERSION="$OPTARG";;
+		:) echo 'Missing option argument for -'"$OPTARG" >&2; exit 1;;
+		*) echo 'Unimplemented option: -'"$OPTARG" >&2; exit 1;;
 	esac
 done
 
@@ -38,17 +40,21 @@ else
 	exit 1
 fi
 
-# shellcheck source=./shared.sh
-. "$(pwd)/shared.sh"
 # shellcheck source=./config.sh
 . "$(pwd)/config.sh"
+
+if [[ "$CLEAN" == true ]]; then
+	echo "Cleaning build."
+	rm -rf "src/$BUILD_NAME"
+fi
 
 ################################################################################
 
 # Requirements for Ubuntu 14.04.5 LTS base install:
 # apt-get install build-essential autoconf libtool zlib1g-dev \
-#     tcl8.5 \  # redis tests
-#     moreutils  # used below
+#     valgrind \  # jq tests
+#     tcl8.5 \    # redis tests
+#     moreutils   # used below
 
 pushd src
 
@@ -57,7 +63,8 @@ if [ ! -f "$LISK_FILE" ]; then
 	exit 2
 fi
 
-echo "Building jq"
+echo
+echo "Downloading and building jq..."
 echo "--------------------------------------------------------------------------"
 [[ -f "$JQ_FILE" ]] || wget -nv "$JQ_URL" --output-document="$JQ_FILE"
 echo "$JQ_SHA256SUM  $JQ_FILE" |sha256sum -c
@@ -65,17 +72,19 @@ if [ ! -f "$JQ_DIR/finished" ]; then
 	rm -rf $JQ_DIR
 	tar xf $JQ_FILE
 	pushd "$JQ_DIR"
-	# TODO: ensure oniguruma is not installed
 	./configure --disable-docs
+	# ensure oniguruma is not used
+	grep --quiet 'ac_cv_header_oniguruma_h=no' config.log
 	make
 	# https://github.com/stedolan/jq/issues/1091
-	sed --in-place '/ tests\/onigtest/d' Makefile
+	sed --in-place 's# tests/onigtest##' Makefile
 	make check
 	touch finished
 	popd
 fi
 
-echo "Building Redis-Server"
+echo
+echo "Downloading and building redis..."
 echo "--------------------------------------------------------------------------"
 [[ -f "$REDIS_SERVER_FILE" ]] || wget -nv "$REDIS_SERVER_URL" --output-document="$REDIS_SERVER_FILE"
 echo "$REDIS_SHA256SUM  $REDIS_SERVER_FILE" |sha256sum -c
@@ -89,43 +98,19 @@ if [ ! -f "$REDIS_SERVER_DIR/finished" ]; then
 	popd
 fi
 
-echo "Building postgresql..."
+echo
+echo "Downloading postgresql..."
 echo "--------------------------------------------------------------------------"
-[[ -f "$POSTGRESQL_FILE" ]] || wget -nv "$POSTGRESQL_URL" --output-document="$POSTGRESQL_FILE"
+[[ -f "$POSTGRESQL_FILE" ]] || wget -nv "$POSTGRESQL_BIN_URL" --output-document="$POSTGRESQL_FILE"
 echo "$POSTGRESQL_SHA256SUM  $POSTGRESQL_FILE" |sha256sum -c
-if [ ! -f "$POSTGRESQL_DIR/finished" ]; then
-	rm -rf "$POSTGRESQL_DIR"
-	tar xf "$POSTGRESQL_FILE"
-	pushd "$POSTGRESQL_DIR"
-	./configure --prefix="$(pwd)/$POSTGRESQL_OUT" --without-readline
-	make install
-	make check
-	# Compiles the pgcrypto extension
-	pushd contrib/pgcrypto
-	make install
-	make check
-	popd
-	touch finished
-	popd
-fi
 
-echo "Building node..."
+echo
+echo "Downloading node..."
 echo "--------------------------------------------------------------------------"
-[[ -f "$NODE_FILE" ]] || wget -nv "$NODE_URL" --output-document="$NODE_FILE"
+[[ -f "$NODE_FILE" ]] || wget -nv "$NODE_BIN_URL" --output-document="$NODE_FILE"
 echo "$NODE_SHA256SUM  $NODE_FILE" |sha256sum -c
-if [ ! -f "$NODE_DIR/finished" ]; then
-	rm -rf $NODE_DIR
-	tar xf $NODE_FILE
-	pushd "$NODE_DIR"
-	./configure --prefix="$(pwd)/compiled"
-	make install
-	# https://github.com/nodejs/node/issues/6408
-	#make check
-	rm -rf "$NODE_OUT/"{include,share}
-	touch finished
-	popd
-fi
 
+echo
 echo "Installing lisk-scripts..."
 echo "--------------------------------------------------------------------------"
 [[ -f "$LISK_SCRIPTS_FILE" ]] || wget -nv "$LISK_SCRIPTS_URL" --output-document="$LISK_SCRIPTS_FILE"
@@ -136,6 +121,7 @@ if [ ! -f "$LISK_SCRIPTS_DIR/finished" ]; then
 	touch "$LISK_SCRIPTS_DIR/finished"
 fi
 
+echo
 echo "Building lisk..."
 echo "--------------------------------------------------------------------------"
 if [ ! -f "$BUILD_NAME/finished" ]; then
@@ -144,8 +130,9 @@ if [ ! -f "$BUILD_NAME/finished" ]; then
 	mv package "$BUILD_NAME"
 	mkdir -p "$BUILD_NAME"/{bin,lib,logs,pids}
 
-	# copy postgresql files
-	cp -rf "$POSTGRESQL_DIR/$POSTGRESQL_OUT" "$BUILD_NAME/"
+	# extract postgresql
+	tar xf "$POSTGRESQL_FILE" --directory="$BUILD_NAME" \
+	    --exclude=doc --exclude=include --exclude="pgAdmin 4" --exclude=stackbuilder
 
 	# copy redis binaries
 	cp -f "$REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT" "$BUILD_NAME/bin/$REDIS_SERVER_OUT"
@@ -157,8 +144,8 @@ if [ ! -f "$BUILD_NAME/finished" ]; then
 	# copy lisk "packaged" scripts
 	cp -vrf "$LISK_SCRIPTS_DIR/packaged/"* "$BUILD_NAME"
 
-	# copy nodejs files
-	cp -rf "$NODE_DIR/$NODE_OUT/"* "$BUILD_NAME"
+	# extract nodejs
+	tar xf "$NODE_FILE" --strip-components=1 --directory="$BUILD_NAME"
 
 	pushd "$BUILD_NAME"
 
@@ -181,29 +168,38 @@ if [ ! -f "$BUILD_NAME/finished" ]; then
 	"./bin/$JQ_OUT" '.peers.list=[]' etc/snapshot.json |sponge etc/snapshot.json
 	"./bin/$JQ_OUT" '.loading.loadPerIteration=101' etc/snapshot.json |sponge etc/snapshot.json
 
-	echo "Installing PM2 and Lisky..."
+	echo "Installing lisk..."
 	echo "--------------------------------------------------------------------------"
 	set +u
 	# shellcheck disable=SC1090
 	. "$(pwd)/env.sh"
 	set -u
 	npm install --production
+
+	echo "Installing pm2 and lisk-commander..."
+	echo "--------------------------------------------------------------------------"
 	npm install --production --global "pm2@$PM2_VERSION"
 	npm install --production --global "lisk-commander@$LISK_COMMANDER_VERSION"
 
-	touch finished
+	date >finished
 	popd
 fi
 
-echo "Creating tabralls..."
+echo
+echo "Creating tarballs..."
 echo "--------------------------------------------------------------------------"
-[[ -f "../release/$BUILD_NAME.tar.gz" ]] || tar czf "../release/$BUILD_NAME.tar.gz" "$BUILD_NAME"
-[[ -d "$NOVER_BUILD_NAME" ]] || cp -rl "$BUILD_NAME" "$NOVER_BUILD_NAME"
-[[ -f "../release/$NOVER_BUILD_NAME.tar.gz" ]] || tar czf "../release/$NOVER_BUILD_NAME.tar.gz" "$NOVER_BUILD_NAME"
-echo "Checksumming tarballs..."
+rm -rf ../release/*
+tar czf "../release/$BUILD_NAME.tar.gz" "$BUILD_NAME"
+# TODO: will fail on xenial (coreutils 8.25) if there are dangling symlinks
+cp -rl "$BUILD_NAME" "$NOVER_BUILD_NAME"
+tar czf "../release/$NOVER_BUILD_NAME.tar.gz" "$NOVER_BUILD_NAME"
+rm -rf "$NOVER_BUILD_NAME"
+
+echo
+echo "Creating checksums of tarballs..."
 echo "--------------------------------------------------------------------------"
 pushd ../release
-[[ -f "$BUILD_NAME.tar.gz.SHA256" ]] || sha256sum "$BUILD_NAME.tar.gz" >"$BUILD_NAME.tar.gz.SHA256"
-[[ -f "$NOVER_BUILD_NAME.tar.gz.SHA256" ]] || sha256sum "$NOVER_BUILD_NAME.tar.gz" >"$NOVER_BUILD_NAME.tar.gz.SHA256"
+sha256sum "$BUILD_NAME.tar.gz" >"$BUILD_NAME.tar.gz.SHA256"
+sha256sum "$NOVER_BUILD_NAME.tar.gz" >"$NOVER_BUILD_NAME.tar.gz.SHA256"
 popd
 popd
