@@ -33,7 +33,7 @@ while getopts "cn:v:" OPT; do
 	esac
 done
 
-if [[ $VERSION && $LISK_NETWORK ]]; then
+if [[ ${VERSION:-} && ${LISK_NETWORK:-} ]]; then
 	echo "Building version $VERSION for ${LISK_NETWORK}net."
 else
 	echo "Both -n and -v are required. Exiting."
