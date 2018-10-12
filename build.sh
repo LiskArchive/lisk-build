@@ -137,6 +137,7 @@ if [ ! -f "$BUILD_NAME/finished" ]; then
 	# copy redis binaries
 	cp -f "$REDIS_SERVER_DIR/src/$REDIS_SERVER_OUT" "$BUILD_NAME/bin/$REDIS_SERVER_OUT"
 	cp -f "$REDIS_SERVER_DIR/src/$REDIS_SERVER_CLI" "$BUILD_NAME/bin/$REDIS_SERVER_CLI"
+	strip "$BUILD_NAME/bin/$REDIS_SERVER_OUT" "$BUILD_NAME/bin/$REDIS_SERVER_CLI"
 	# create redis workding directory
 	mkdir -p "$BUILD_NAME/redis"
 
