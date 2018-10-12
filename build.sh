@@ -64,24 +64,10 @@ if [ ! -f "$LISK_FILE" ]; then
 fi
 
 echo
-echo "Downloading and building jq..."
+echo "Downloading jq..."
 echo "--------------------------------------------------------------------------"
-[[ -f "$JQ_FILE" ]] || wget -nv "$JQ_URL" --output-document="$JQ_FILE"
+[[ -f "$JQ_FILE" ]] || wget -nv "$JQ_BIN_URL" --output-document="$JQ_FILE"
 echo "$JQ_SHA256SUM  $JQ_FILE" |sha256sum -c
-if [ ! -f "$JQ_DIR/finished" ]; then
-	rm -rf $JQ_DIR
-	tar xf $JQ_FILE
-	pushd "$JQ_DIR"
-	./configure --disable-docs
-	# ensure oniguruma is not used
-	grep --quiet 'ac_cv_header_oniguruma_h=no' config.log
-	make
-	# https://github.com/stedolan/jq/issues/1091
-	sed --in-place 's# tests/onigtest##' Makefile
-	make check
-	touch finished
-	popd
-fi
 
 echo
 echo "Downloading and building redis..."
@@ -142,7 +128,9 @@ if [ ! -f "$BUILD_NAME/finished" ]; then
 	mkdir -p "$BUILD_NAME/redis"
 
 	# copy jq binary
-	cp -f "$JQ_DIR/$JQ_OUT" "$BUILD_NAME/bin/$JQ_OUT"
+	cp -f "$JQ_FILE" "$BUILD_NAME/bin/$JQ_FILE"
+	strip "$BUILD_NAME/bin/$JQ_FILE"
+	chmod +x "$BUILD_NAME/bin/$JQ_FILE"
 
 	# copy lisk "packaged" scripts
 	cp -vrf "$LISK_SCRIPTS_DIR/packaged/"* "$BUILD_NAME"
@@ -163,13 +151,13 @@ if [ ! -f "$BUILD_NAME/finished" ]; then
 	echo "Creating etc/snapshot.json..."
 	echo "--------------------------------------------------------------------------"
 	cp config.json etc/snapshot.json
-	"./bin/$JQ_OUT" '.httpPort=9000' etc/snapshot.json |sponge etc/snapshot.json
-	"./bin/$JQ_OUT" '.wsPort=9001' etc/snapshot.json |sponge etc/snapshot.json
-	"./bin/$JQ_OUT" '.logFileName="logs/lisk_snapshot.log"' etc/snapshot.json |sponge etc/snapshot.json
-	"./bin/$JQ_OUT" '.fileLogLevel="info"' etc/snapshot.json |sponge etc/snapshot.json
-	"./bin/$JQ_OUT" '.db.database="lisk_snapshot"' etc/snapshot.json |sponge etc/snapshot.json
-	"./bin/$JQ_OUT" '.peers.list=[]' etc/snapshot.json |sponge etc/snapshot.json
-	"./bin/$JQ_OUT" '.loading.loadPerIteration=101' etc/snapshot.json |sponge etc/snapshot.json
+	"./bin/$JQ_FILE" '.httpPort=9000' etc/snapshot.json |sponge etc/snapshot.json
+	"./bin/$JQ_FILE" '.wsPort=9001' etc/snapshot.json |sponge etc/snapshot.json
+	"./bin/$JQ_FILE" '.logFileName="logs/lisk_snapshot.log"' etc/snapshot.json |sponge etc/snapshot.json
+	"./bin/$JQ_FILE" '.fileLogLevel="info"' etc/snapshot.json |sponge etc/snapshot.json
+	"./bin/$JQ_FILE" '.db.database="lisk_snapshot"' etc/snapshot.json |sponge etc/snapshot.json
+	"./bin/$JQ_FILE" '.peers.list=[]' etc/snapshot.json |sponge etc/snapshot.json
+	"./bin/$JQ_FILE" '.loading.loadPerIteration=101' etc/snapshot.json |sponge etc/snapshot.json
 
 	echo "Installing lisk..."
 	echo "--------------------------------------------------------------------------"

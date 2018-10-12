@@ -65,11 +65,9 @@ REDIS_SERVER_OUT="redis-server"
 REDIS_SERVER_CLI="redis-cli"
 
 JQ_VERSION="1.5"
-JQ_SHA256SUM="c4d2bfec6436341113419debf479d833692cc5cdab7eb0326b5a4d4fbe9f493c"
-JQ_DIR="jq-$JQ_VERSION"
-JQ_FILE="$JQ_DIR.tar.gz"
-JQ_URL="https://github.com/stedolan/jq/releases/download/jq-$JQ_VERSION/$JQ_FILE"
-JQ_OUT="jq"
+JQ_SHA256SUM="c6b3a7d7d3e7b70c6f51b706a3b90bd01833846c54d32ca32f0027f00226ff6d"
+JQ_BIN_URL="https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64"
+JQ_FILE="jq"
 
 NPM_CLI="$BUILD_NAME/lib/node_modules/npm/bin/npm-cli.js"
 
