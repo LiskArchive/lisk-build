@@ -177,20 +177,15 @@ if [ ! -f "$BUILD_NAME/finished" ]; then
 fi
 
 echo
-echo "Creating tarballs..."
+echo "Creating tarball..."
 echo "--------------------------------------------------------------------------"
 rm -rf ../release/*
 tar czf "../release/$BUILD_NAME.tar.gz" "$BUILD_NAME"
-# TODO: will fail on xenial (coreutils 8.25) if there are dangling symlinks
-cp -rl "$BUILD_NAME" "$NOVER_BUILD_NAME"
-tar czf "../release/$NOVER_BUILD_NAME.tar.gz" "$NOVER_BUILD_NAME"
-rm -rf "$NOVER_BUILD_NAME"
 
 echo
-echo "Creating checksums of tarballs..."
+echo "Creating checksums of tarball..."
 echo "--------------------------------------------------------------------------"
 pushd ../release
 sha256sum "$BUILD_NAME.tar.gz" >"$BUILD_NAME.tar.gz.SHA256"
-sha256sum "$NOVER_BUILD_NAME.tar.gz" >"$NOVER_BUILD_NAME.tar.gz.SHA256"
 popd
 popd
