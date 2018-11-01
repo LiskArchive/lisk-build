@@ -23,7 +23,6 @@ VERSION="$VERSION"
 OS=$(uname)
 ARCH="${ARCH:-$( uname -m )}"
 BUILD_NAME="lisk-$VERSION-$OS-$ARCH"
-NOVER_BUILD_NAME="lisk-$OS-$ARCH"
 TARGET=""
 
 ncpu=$( grep -c processor /proc/cpuinfo )
